@@ -35,7 +35,7 @@ void fill_symtab( symtab stab, node *n )
 	if( n->ntype == REGDEF || n->ntype == REGCLDEF ||
 			n->ntype == INSTRDEF )
 	{
-		node* c ;
+		node *c ;
 		FOREACH_CHILD( n, c ){
 			if( c->ntype == ID ){
 				insert_node( stab, c->data, n, c->linenr ) ;
