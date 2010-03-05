@@ -1,0 +1,51 @@
+Reg eax{code=2},ebx{code=3},eck{code=45} ;
+Reg bla{code=100},ikl{code=101} ;
+Reg hallo{} ;
+
+#Reg bldium{code=56} ;
+
+RegClass
+	intregs{
+		bits=32,
+		regs=[eax,b,c,d,e,f]
+},
+fpregs{
+		bits=64,
+		regs=[r0,r1,r2,r3,r4]
+},
+	statusregs{
+		bits=32,
+		regs=[f0,f4,f6]
+} ;
+RegClass blub{
+		bits=24,
+		regs=[w,e,r]
+} ;
+#RegClass
+#hallo{
+#	bits=32,
+#	regs=[i,e,r]
+#} ;
+%%
+
+Instr store{
+input = [int bla, fpregs hallo, int args],
+output = [],
+immediate = [int brav, int zugs]
+},
+load{
+input = [int hallo],
+output = [],
+immediate = [tum hallo]
+},
+add{
+input = [hass jo],
+output = [int bla],
+immediate = [blub tra]	
+} ;
+
+Instr sub{
+input = [int bla],
+output = [int ha],
+immediate = [int k]
+} ;
