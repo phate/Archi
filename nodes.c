@@ -37,7 +37,7 @@ instrprop* create_instrprop()
 
 node* create_node( nodetype ntype, char* dtype, void* data, unsigned int linenr )
 {
-	node* n = malloc( sizeof(node) ) ;
+	node *n = malloc( sizeof(node) ) ;
 
 	n->ntype = ntype ;
 	n->dtype = dtype ;
