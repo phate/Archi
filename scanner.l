@@ -25,11 +25,13 @@ whitespace [ \t]+
 "output"		{ return INSTR_OUTPUT; }
 "immediate"	{ return INSTR_IMM; }
 
-"int"				{ return INT; }
+"Int"				{ return TINT; }
+"Bool"			{ return TBOOL; }
+"Bits"			{ return TBITS; }
 
 {number}	{ return NUM; }
 {identifier}	{ return IDENT; }
-{comment} 	{ /* skip comments */ }
+{comment} 	{ linenr++ ; }
 {whitespace}	{ /* skip whitespace */ }
 {newline}	{ linenr++ ;  }
 

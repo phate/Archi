@@ -24,7 +24,7 @@ int main()
 	ast = parse() ;
 	if( ast == NULL ) exit( EXIT_FAILURE ) ;
 	
-	trim_tree( ast ) ;
+	//trim_tree( ast ) ;
 	view_tree( ast ) ;
 /*
 	fill_symtab( stab, ast ) ;

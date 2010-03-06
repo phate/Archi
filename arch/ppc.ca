@@ -1,6 +1,6 @@
 Reg eax{code=2},ebx{code=3},eck{code=45} ;
 Reg bla{code=100},ikl{code=101} ;
-Reg hallo{} ;
+Reg hallo{code=45} ;
 
 #Reg bldium{code=56} ;
 
@@ -49,3 +49,8 @@ input = [int bla],
 output = [int ha],
 immediate = [int k]
 } ;
+
+%%
+
+Bool fkt () =
+Int fkt2 ( Bool b, Int i, Bits bi ) =

@@ -18,7 +18,8 @@
 typedef enum{	ARCHDEF,
 							REGSECT,
 							INSTRSECT,					
-		
+							AUXSECT,
+	
 							REGDEF,
 							CODE,
 	
@@ -30,6 +31,9 @@ typedef enum{	ARCHDEF,
 							INPUT,
 							OUTPUT,
 							IMMEDIATE,
+
+							FKTDEF,
+							ARGS,
 						
 							ID
 						 } nodetype ;

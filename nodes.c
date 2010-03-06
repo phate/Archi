@@ -78,6 +78,7 @@ static struct ntname { nodetype type; const char* name; } ntnames[] =
 	{ARCHDEF, "ArchDef"},
 	{REGSECT, "RegSect"},
 	{INSTRSECT, "InstrSect"},
+	{AUXSECT, "AuxSect"},
 	{REGDEF, "RegDef"},
 	{CODE, "Code"},
 	{REGCLDEF, "RegClDef"},
@@ -87,6 +88,8 @@ static struct ntname { nodetype type; const char* name; } ntnames[] =
 	{INPUT, "Input"},
 	{OUTPUT, "Output"},
 	{IMMEDIATE, "Immediate"},
+	{FKTDEF, "FktDef"},
+	{ARGS, "Args"},
 	{ID, "ID"}
 } ;
 
