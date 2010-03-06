@@ -3,8 +3,11 @@
 #include <stdio.h>
 
 unsigned int linenr = 1 ;
+
+extern int yyerror( char* message ) ;
 %}
 
+bitstr \"(0|1)*\"
 digit [0-9]+
 number {digit}+
 letter [a-zA-Z]
@@ -28,13 +31,28 @@ whitespace [ \t]+
 "Int"				{ return TINT; }
 "Bool"			{ return TBOOL; }
 "Bits"			{ return TBITS; }
+"true"			{ return TRUE; }
+"false"			{ return FALSE; }
 
-{number}	{ return NUM; }
+{bitstr}		{ return BITSTR; }
+{number}		{ return NUM; }
 {identifier}	{ return IDENT; }
 {comment} 	{ linenr++ ; }
 {whitespace}	{ /* skip whitespace */ }
 {newline}	{ linenr++ ;  }
 
+"!="	{ return NEQ; }
+"=="	{ return EQ; }
+"++"	{ return CONCAT; }
+"||"	{ return LOR; }
+"&&"	{ return LAND; }
+">>"	{ return SHIFTR; }
+"<<"	{ return SHIFTL; }
+">="	{ return GTEQ; }
+"<="	{ return LTEQ; }
+
+">"		{ return('>'); }
+"<"		{ return('<'); }
 "="		{ return('='); }
 ","		{ return(','); }
 "("		{ return('('); }
@@ -46,12 +64,5 @@ whitespace [ \t]+
 ";"		{ return(';'); }
 "%"		{ return('%'); }
 "%%"	{ return SECTSEP; }
-. 		{ printf("Error\n"); }
+. 		{ yyerror("syntax error") ; exit( EXIT_FAILURE ) ; }
 %%
-/*
-int main()
-{
-	yylex() ;
-	return 0 ;
-}
-*/

@@ -90,6 +90,28 @@ static struct ntname { nodetype type; const char* name; } ntnames[] =
 	{IMMEDIATE, "Immediate"},
 	{FKTDEF, "FktDef"},
 	{ARGS, "Args"},
+	{IFTHENELSE, "ITE"},
+	{LOGICALOR, "||"},
+	{LOGICALAND, "&&"},
+	{NOTEQUAL, "!="},
+	{EQUAL, "=="},
+	{LESSTHAN, "<"},
+	{GREATERTHAN, ">"},
+	{LESSTHANEQUAL, "<="},
+	{GREATERTHANEQUAL, ">="},
+	{SHIFTRIGHT, ">>"},
+	{SHIFTLEFT, "<<"},
+	{PLUS, "+"},
+	{MINUS, "-"},
+	{TIMES, "*"},
+	{DIVIDE, "/"},
+	{MOD, "%"},
+	{CONCATENATION, "++"},
+	{BITSLICE, "[ ]"},
+	{PROPSELECTION, "."},
+	{FKTCALL, "FktCall()"},
+	{NUMBER, "Number"},
+	{BITSTRING, "Bitstring"},
 	{ID, "ID"}
 } ;
 
@@ -117,6 +139,11 @@ static void node2string( FILE* f, node* n )
 			sprintf( str, "%ld", *((long*)n->data) ) ; break ;
 		case ID:
 			sprintf( str, "%s", (const char*)n->data ) ; break ;
+		case NUMBER:
+			sprintf( str, "%s", (const char*)n->data ) ; break ;
+		case BITSTRING:{
+			size_t l = strlen( (const char *)n->data ) ;
+			sprintf( str, "%s", strncat( str, ((const char*)n->data)+1, l-2) ) ; break ;}
 		default:
 			sprintf( str, "%s", "" ) ; break ;
 	}

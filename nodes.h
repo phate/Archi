@@ -34,7 +34,29 @@ typedef enum{	ARCHDEF,
 
 							FKTDEF,
 							ARGS,
-						
+							IFTHENELSE,
+							LOGICALOR,
+							LOGICALAND,
+							NOTEQUAL,
+							EQUAL,
+							LESSTHAN,
+							GREATERTHAN,
+							LESSTHANEQUAL,
+							GREATERTHANEQUAL,
+							SHIFTRIGHT,
+							SHIFTLEFT,
+							PLUS,
+							MINUS,
+							TIMES,
+							DIVIDE,
+							MOD,
+							CONCATENATION,
+							BITSLICE,
+							PROPSELECTION,
+							FKTCALL,
+							NUMBER,
+							BITSTRING,
+
 							ID
 						 } nodetype ;
 

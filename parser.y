@@ -28,10 +28,20 @@ void add_children( node *p, node *fc )
 	}
 }
 
+node* create_expression( nodetype ntype, node *e1, node *e2 )
+{
+	node *n = create_node( ntype, NULL, NULL, linenr ) ;
+	ARE_SIBLINGS( e1, e2 ) ;
+	add_children( n, e1 ) ;
+
+	return n ;	
+}
+
 %}
 
 %token REG REGCL REG_CODE REGCL_BITS REGCL_REGS INSTR INSTR_INPUT INSTR_OUTPUT INSTR_IMM
-%token IDENT NUM TINT TBOOL TBITS SECTSEP
+%token IDENT NUM TRUE FALSE BITSTR TINT TBOOL TBITS SECTSEP
+%token IF THEN ELSE SHIFTL SHIFTR LTEQ GTEQ LAND LOR CONCAT EQ NEQ 
 
 %%
 ArchDesc			:	Sections												{ ast = create_node( ARCHDEF, NULL, NULL, linenr ) ;
@@ -148,15 +158,63 @@ FktDef				: TId Args '=' Exp									{ $$ = create_node( FKTDEF, NULL, NULL, lin
 							;
 Args					: '(' ETIdList ')'									{ $$ = create_node( ARGS, NULL, NULL, linenr ) ; add_children( $$, $2 ) ;}
 							;
-/*
-Exp						: IF Exp1 THEN Exp ELSE Exp					{}
-							| Exp1															{} 
+Exp						: IF Exp1 THEN Exp ELSE Exp					{ $$ = create_node( IFTHENELSE, NULL, NULL, linenr ) ;
+																										ARE_SIBLINGS( $2, $4 ) ; ARE_SIBLINGS( $4, $6 ) ; add_children( $$, $2 ) ;}
+							| Exp1															{ $$ = $1 ; } 
 							;
-Exp1					: Exp1 OR Exp2											{}
-							| Exp2															{}
+Exp1					: Exp1 LOR Exp2											{ $$ = create_expression( LOGICALOR, $1, $3 ) ; }
+							| Exp2															{ $$ = $1 ; }
 							;
-Exp2					: 
-*/
+Exp2					:	Exp2 LAND Exp3										{ $$ = create_expression( LOGICALAND, $1, $3 ) ; }
+							| Exp3															{ $$ = $1 ; }
+							;
+Exp3					: Exp3 NEQ Exp4											{ $$ = create_expression( NOTEQUAL, $1, $3 ) ; }
+							| Exp3 EQ Exp4											{ $$ = create_expression( EQUAL, $1, $3 ) ; }
+							| Exp4															{ $$ = $1 ; }
+							;
+Exp4					: Exp4 '<' Exp5											{ $$ = create_expression( LESSTHAN, $1, $3 ) ; }
+							|	Exp4 '>' Exp5											{ $$ = create_expression( GREATERTHAN, $1, $3 ) ; }
+							| Exp4 LTEQ Exp5										{ $$ = create_expression( LESSTHANEQUAL, $1, $3 ) ; }
+							| Exp4 GTEQ Exp5										{ $$ = create_expression( GREATERTHANEQUAL, $1, $3 ) ; }
+							| Exp5															{ $$ = $1 ; }
+							;
+Exp5					: Exp5 SHIFTR Exp6									{ $$ = create_expression( SHIFTRIGHT, $1, $3 ) ; }
+							| Exp5 SHIFTL Exp6									{ $$ = create_expression( SHIFTLEFT, $1, $3 ) ; }
+							| Exp6															{ $$ = $1 ; }
+							;
+Exp6					: Exp6 '+' Exp7											{ $$ = create_expression( PLUS, $1, $3 ) ; }
+							| Exp6 '-' Exp7											{ $$ = create_expression( MINUS, $1, $3 ) ; }
+							| Exp7															{ $$ = $1 ; }
+							;
+Exp7					: Exp7 '*' Exp8											{ $$ = create_expression( TIMES, $1, $3 ) ; }
+							| Exp7 '/' Exp8											{ $$ = create_expression( DIVIDE, $1, $3 ) ; }
+							| Exp7 '%' Exp8											{ $$ = create_expression( MOD, $1, $3 ) ; }
+							| Exp8															{ $$ = $1 ; }
+							;
+Exp8					: Exp8 CONCAT Exp9									{ $$ = create_expression( CONCATENATION, $1, $3 ) ; }
+							| Exp9															{ $$ = $1 ; }
+							;
+Exp9					: Exp10 '[' Exp ':' Exp ']'					{ $$ = create_node( BITSLICE, NULL, NULL, linenr ) ;
+																										ARE_SIBLINGS( $1, $3 ) ; ARE_SIBLINGS( $3, $5 ) ;
+																										add_children( $$, $1 ) ;}
+							| Exp10															{ $$ = $1 ; }
+							;
+Exp10					: Id '.' Id													{ $$ = create_expression( PROPSELECTION, $1, $3 ) ; }
+							| Exp11															{ $$ = $1 ; }
+							;
+Exp11					: Id '(' ExpList ')'								{ $$ = create_expression( FKTCALL, $1, $3 ) ; }
+							| Exp12															{ $$ = $1 ; }
+							;
+Exp12					: Id																{ $$ = $1 ; }
+							| NUM																{ $$ = create_node( NUMBER, strdup("Int"), strdup(yytext), linenr ) ; }
+							| BITSTR														{ $$ = create_node( BITSTRING, strdup("Bits"), strdup(yytext), linenr ) ; }
+							| TRUE															{ $$ = create_node( ID, strdup("Bool"), strdup("true"), linenr ) ; }
+							| FALSE															{ $$ = create_node( ID, strdup("Bool"), strdup("false"), linenr ) ; }
+							| '(' Exp ')'												{ $$ = $2 ; }
+							;
+ExpList				: Exp ',' ExpList										{ ARE_SIBLINGS( $1, $3 ) ; $$ = $1 ; }								
+							| Exp																{ $$ = $1 ; }
+							;
 %%
 
 node* parse()
