@@ -35,6 +35,15 @@ instrprop* create_instrprop()
 	return p ;
 }
 
+fctprop* create_fctprop()
+{
+	fctprop *p = (fctprop*)malloc( sizeof(fctprop) ) ;
+
+	p->args = NULL ;
+	
+	return p ;
+}
+
 node* create_node( nodetype ntype, char* dtype, void* data, unsigned int linenr )
 {
 	node *n = malloc( sizeof(node) ) ;
@@ -88,7 +97,7 @@ static struct ntname { nodetype type; const char* name; } ntnames[] =
 	{INPUT, "Input"},
 	{OUTPUT, "Output"},
 	{IMMEDIATE, "Immediate"},
-	{FKTDEF, "FktDef"},
+	{FCTDEF, "FctDef"},
 	{ARGS, "Args"},
 	{IFTHENELSE, "ITE"},
 	{LOGICALOR, "||"},
@@ -109,7 +118,7 @@ static struct ntname { nodetype type; const char* name; } ntnames[] =
 	{CONCATENATION, "++"},
 	{BITSLICE, "[ ]"},
 	{PROPSELECTION, "."},
-	{FKTCALL, "FktCall()"},
+	{FCTCALL, "FctCall()"},
 	{NUMBER, "Number"},
 	{BITSTRING, "Bitstring"},
 	{ID, "ID"}
@@ -163,15 +172,6 @@ static void write_node( FILE* f, node* p )
 		fprintf( f, " ;\n" ) ;
 		write_node( f, c ) ;
 	}
-
-/*		for( node* n = p->first_child; n != 0; n=n->next_sibling ){
-			node2string( f, p ) ;
-			fprintf( f, " -> " ) ;
-			node2string( f, n ) ;
-			fprintf( f, " ;\n" ) ;
-			write_node( f, n ) ;
-		}
-*/
 }
 
 void view_tree( node* n )

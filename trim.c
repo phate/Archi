@@ -55,9 +55,28 @@ static void trim_instrdef( node *n )
 
 static void trim_instrsect( node *n )
 {
-	node* c ;
+	node *c ;
 	FOREACH_CHILD(n, c){
 		if( c->ntype == INSTRDEF ) trim_instrdef( c ) ; 
+		else assert(0) ;
+	}
+}
+
+static void trim_auxsect( node *n )
+{
+	node *c ;
+	fctprop *p = (fctprop*)n->data ;
+	FOREACH_CHILD( n, c ){
+		if( n->ntype == ARGS )
+			p->args = c->first_child ;
+	}
+}
+
+static void trim_auxsect( node *n )
+{
+	node *c ;
+	FOREACH_CHILD( n, c ){
+		if( c->ntype == FCTDEF ) trim_fctdef( c ) ;
 		else assert(0) ;
 	}
 }
@@ -67,8 +86,9 @@ void trim_tree( node *n )
 	node *c ;
 	FOREACH_CHILD(n, c){
 		switch( c->ntype ){
-			case REGSECT: 		trim_regsect( c ) ; break ;
-			case INSTRSECT:		trim_instrsect( c ) ; break ;
+			case REGSECT: 	trim_regsect( c ) ; break ;
+			case INSTRSECT:	trim_instrsect( c ) ; break ;
+			case AUXSECT:		trim_auxsect( c ) ; break ;
 			default: assert(0) ;
 		}	
 	}

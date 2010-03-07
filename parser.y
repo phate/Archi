@@ -152,7 +152,7 @@ Id						: IDENT															{ $$ = create_node( ID, NULL, strdup(yytext), line
 AuxSect				: FktDef AuxSect										{ $$ = $1 ; if( $2 != NULL ){ ARE_SIBLINGS($$, $2) ;}}
 							|																		{ $$ = 0 ; }
 							;
-FktDef				: TId Args '=' Exp									{ $$ = create_node( FKTDEF, NULL, NULL, linenr ) ;
+FktDef				: TId Args '=' Exp									{ $$ = create_node( FCTDEF, NULL, NULL, linenr ) ;
 																										ARE_SIBLINGS( $1, $2 ) ; ARE_SIBLINGS( $2, $4 ) ;
 																										add_children( $$, $1 ) ;}
 							;
@@ -202,7 +202,7 @@ Exp9					: Exp10 '[' Exp ':' Exp ']'					{ $$ = create_node( BITSLICE, NULL, NUL
 Exp10					: Id '.' Id													{ $$ = create_expression( PROPSELECTION, $1, $3 ) ; }
 							| Exp11															{ $$ = $1 ; }
 							;
-Exp11					: Id '(' ExpList ')'								{ $$ = create_expression( FKTCALL, $1, $3 ) ; }
+Exp11					: Id '(' ExpList ')'								{ $$ = create_expression( FCTCALL, $1, $3 ) ; }
 							| Exp12															{ $$ = $1 ; }
 							;
 Exp12					: Id																{ $$ = $1 ; }

@@ -32,7 +32,7 @@ typedef enum{	ARCHDEF,
 							OUTPUT,
 							IMMEDIATE,
 
-							FKTDEF,
+							FCTDEF,
 							ARGS,
 							IFTHENELSE,
 							LOGICALOR,
@@ -53,7 +53,7 @@ typedef enum{	ARCHDEF,
 							CONCATENATION,
 							BITSLICE,
 							PROPSELECTION,
-							FKTCALL,
+							FCTCALL,
 							NUMBER,
 							BITSTRING,
 
@@ -89,9 +89,14 @@ typedef struct instrprop_{
 	node *immediates ;
 } instrprop ;
 
+typedef struct fctprop_{
+	node *args ;
+} fctprop ;
+
 regprop* create_regprop() ;
 regclprop* create_regclprop() ;
 instrprop* create_instrprop() ;
+fctprop* create_fctprop() ;
 
 node* create_node( nodetype ntype, char* dtype, void* data, unsigned int linenr ) ;
 void destroy_node( node* p ) ;
