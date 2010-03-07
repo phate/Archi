@@ -62,7 +62,7 @@ static void trim_instrsect( node *n )
 	}
 }
 
-static void trim_auxsect( node *n )
+static void trim_fctdef( node *n )
 {
 	node *c ;
 	fctprop *p = (fctprop*)n->data ;

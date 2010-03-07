@@ -149,10 +149,10 @@ TId						: IDENT															{ buffer[1] = strdup(yytext) ;}
 Id						: IDENT															{ $$ = create_node( ID, NULL, strdup(yytext), linenr ) ; }
 							; 
 
-AuxSect				: FktDef AuxSect										{ $$ = $1 ; if( $2 != NULL ){ ARE_SIBLINGS($$, $2) ;}}
+AuxSect				: FctDef AuxSect										{ $$ = $1 ; if( $2 != NULL ){ ARE_SIBLINGS($$, $2) ;}}
 							|																		{ $$ = 0 ; }
 							;
-FktDef				: TId Args '=' Exp									{ $$ = create_node( FCTDEF, NULL, NULL, linenr ) ;
+FctDef				: TId Args '=' Exp									{ $$ = create_node( FCTDEF, NULL, create_fctprop(), linenr ) ;
 																										ARE_SIBLINGS( $1, $2 ) ; ARE_SIBLINGS( $2, $4 ) ;
 																										add_children( $$, $1 ) ;}
 							;
