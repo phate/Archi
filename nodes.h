@@ -57,7 +57,8 @@ typedef enum{	ARCHDEF,
 							NUMBER,
 							BITSTRING,
 
-							ID
+							ID,
+							TID
 						 } nodetype ;
 
 typedef struct node_{

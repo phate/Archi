@@ -38,10 +38,14 @@ void fill_symtab( symtab stab, node *n )
 		node *c ;
 		FOREACH_CHILD( n, c ){
 			if( c->ntype == ID ){
-				if( n->ntype == FCTDEF ) n->dtype = c->dtype ;
 				insert_node( stab, c->data, n, c->linenr ) ;
 				destroy_node( c ) ;
 				break ;
+			}
+			else if( c->ntype == TID ){
+				n->dtype = c->dtype ;
+				insert_node( stab, c->data, n, c->linenr ) ;
+				destroy_node( c ) ;	
 			}
 		}
 	}

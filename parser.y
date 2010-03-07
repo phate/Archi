@@ -141,10 +141,10 @@ TIdList				: TId ',' TIdList										{ ARE_SIBLINGS($1, $3) ; $$ = $1 ; }
 							| TId																{ $$ = $1 ; }
 							;
 TId						: IDENT															{ buffer[1] = strdup(yytext) ;}
-								IDENT															{ $$ = create_node( ID, buffer[1], strdup(yytext), linenr ) ;}
-							| TINT IDENT												{ $$ = create_node( ID, strdup("Int"), strdup(yytext), linenr );}
-							| TBOOL IDENT												{ $$ = create_node( ID, strdup("Bool"), strdup(yytext), linenr );}
-							| TBITS IDENT												{	$$ = create_node( ID, strdup("Bits"), strdup(yytext), linenr );}
+								IDENT															{ $$ = create_node( TID, buffer[1], strdup(yytext), linenr ) ;}
+							| TINT IDENT												{ $$ = create_node( TID, strdup("Int"), strdup(yytext), linenr );}
+							| TBOOL IDENT												{ $$ = create_node( TID, strdup("Bool"), strdup(yytext), linenr );}
+							| TBITS IDENT												{	$$ = create_node( TID, strdup("Bits"), strdup(yytext), linenr );}
 							;
 Id						: IDENT															{ $$ = create_node( ID, NULL, strdup(yytext), linenr ) ; }
 							; 

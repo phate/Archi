@@ -121,7 +121,8 @@ static struct ntname { nodetype type; const char* name; } ntnames[] =
 	{FCTCALL, "FctCall()"},
 	{NUMBER, "Number"},
 	{BITSTRING, "Bitstring"},
-	{ID, "ID"}
+	{ID, "ID"},
+	{TID, "TID"}
 } ;
 
 static const char* ntnames_lookup( nodetype type )
@@ -148,6 +149,8 @@ static void node2string( FILE* f, node* n )
 			sprintf( str, "%ld", *((long*)n->data) ) ; break ;
 		case ID:
 			sprintf( str, "%s", (const char*)n->data ) ; break ;
+		case TID:
+			sprintf( str, "%s %s", n->dtype, (const char*)n->data ) ; break ;
 		case NUMBER:
 			sprintf( str, "%s", (const char*)n->data ) ; break ;
 		case BITSTRING:{
