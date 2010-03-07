@@ -33,11 +33,12 @@ static void insert_node( symtab stab, const char* key, node* n, uint32_t linenr 
 void fill_symtab( symtab stab, node *n )
 {
 	if( n->ntype == REGDEF || n->ntype == REGCLDEF ||
-			n->ntype == INSTRDEF )
+			n->ntype == INSTRDEF || n->ntype == FCTDEF )
 	{
 		node *c ;
 		FOREACH_CHILD( n, c ){
 			if( c->ntype == ID ){
+				if( n->ntype == FCTDEF ) n->dtype = c->dtype ;
 				insert_node( stab, c->data, n, c->linenr ) ;
 				destroy_node( c ) ;
 				break ;

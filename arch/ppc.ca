@@ -53,4 +53,5 @@ immediate = [int k]
 %%
 
 Bool fkt () = ""
+
 Int fkt2 ( Bool b, Int i, Bits bi ) = 345

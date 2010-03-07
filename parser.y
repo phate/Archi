@@ -75,7 +75,7 @@ RegDef				:	RegDefIdent ',' RegDef					{ ARE_SIBLINGS( $1, $3 ) ; $$ = $1 ; }
 							| RegDefIdent											{ $$ = $1 ; }						
 							;
 RegDefIdent		: Id '{' RegBody '}'							{ $$ = create_node( REGDEF, strdup("Reg"),
-																									create_regprop(), linenr ) ;
+																									create_regprop(), $1->linenr ) ;
 																									ARE_SIBLINGS( $1, $3 ) ;
 																									add_children( $$, $1 ) ;}
 							;
@@ -87,7 +87,7 @@ RegClDef			: RegClDefIdent ',' RegClDef			{ ARE_SIBLINGS( $1, $3 ) ; $$ = $1 ; }
 							| RegClDefIdent										{ $$ = $1 ; }
 							;
 RegClDefIdent :	Id '{' RegClBody '}'						{ $$ = create_node( REGCLDEF, strdup("RegClass"),
-																									create_regclprop(), linenr ) ;
+																									create_regclprop(), $1->linenr ) ;
 																									ARE_SIBLINGS( $1, $3 ) ;
 																								  add_children( $$, $1 ) ;}
 							;
@@ -120,11 +120,11 @@ InstrDef			: InstrDefIdent ',' InstrDef				{ ARE_SIBLINGS( $1, $3 ) ; $$ = $1 ; 
 							| InstrDefIdent											{ $$ = $1 ; }
 							;
 InstrDefIdent : Id '{' InstrBody '}'							{ $$ = create_node( INSTRDEF, strdup("Instruction"),
-																										create_instrprop(), linenr ) ;
+																										create_instrprop(), $1->linenr ) ;
 																									  ARE_SIBLINGS( $1, $3 ) ;
 																										add_children( $$, $1 ) ;}
 							;
-InstrBody			: InstrBody ',' InstrProp						{ ARE_SIBLINGS($3, $1) ; $$ = $3 ; }
+InstrBody			: InstrProp ',' InstrBody						{ ARE_SIBLINGS($1, $3) ; $$ = $1 ; }
 							| InstrProp													{ $$ = $1 ; }
 							;
 InstrProp			: INSTR_INPUT '=' '[' ETIdList ']'	{ $$ = create_node( INPUT, NULL, NULL, linenr ) ;
@@ -152,7 +152,7 @@ Id						: IDENT															{ $$ = create_node( ID, NULL, strdup(yytext), line
 AuxSect				: FctDef AuxSect										{ $$ = $1 ; if( $2 != NULL ){ ARE_SIBLINGS($$, $2) ;}}
 							|																		{ $$ = 0 ; }
 							;
-FctDef				: TId Args '=' Exp									{ $$ = create_node( FCTDEF, NULL, create_fctprop(), linenr ) ;
+FctDef				: TId Args '=' Exp									{ $$ = create_node( FCTDEF, NULL, create_fctprop(), $1->linenr ) ;
 																										ARE_SIBLINGS( $1, $2 ) ; ARE_SIBLINGS( $2, $4 ) ;
 																										add_children( $$, $1 ) ;}
 							;

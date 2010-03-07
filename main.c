@@ -25,16 +25,15 @@ int main()
 	if( ast == NULL ) exit( EXIT_FAILURE ) ;
 	
 	trim_tree( ast ) ;
-	view_tree( ast ) ;
-/*
+
 	fill_symtab( stab, ast ) ;
 	report_errors( ast ) ;
-
+/*
 	typecheck( stab, ast ) ;
 	report_errors( ast ) ;
 */	
-//	print_symtab( stab ) ;
-//	view_tree( ast ) ;
+	print_symtab( stab ) ;
+	view_tree( ast ) ;
 
 	return 0 ;
 }

@@ -157,9 +157,9 @@ static void node2string( FILE* f, node* n )
 			sprintf( str, "%s", "" ) ; break ;
 	}
 	
-	const char* string = "\"n: %p\\np: %p\\nfc: %p\\nlc: %p\\nns: %p\\nps: %p\\n%s\\n%s\\n%p\"" ;					
+	const char* string = "\"n: %p\\np: %p\\nfc: %p\\nlc: %p\\nns: %p\\nps: %p\\n%s\\n%s\\nlnr:%d\"" ;					
 	fprintf( f, string, n, n->parent, n->first_child,
-		n->last_child, n->next_sibling, n->prev_sibling, name, str, n->emsgs ) ;
+		n->last_child, n->next_sibling, n->prev_sibling, name, str, n->linenr ) ;
 }
 
 static void write_node( FILE* f, node* p )
