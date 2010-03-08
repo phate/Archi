@@ -97,12 +97,8 @@ RegClBody			: RegClBody ',' RegClProp					{ ARE_SIBLINGS($3, $1) ; $$ = $3 ; }
 RegClProp			: REGCL_BITS '=' NUM							{ uint32_t* i = malloc( sizeof(uint32_t) ) ;
 																								  *i = strtol( yytext, 0, 10 ) ;
 																								  $$ = create_node( BITS, NULL, i, linenr ) ; }
-							| REGCL_REGS '=' '[' RegList ']'	{ $$ = create_node( REGS, NULL, NULL, linenr ) ;
+							| REGCL_REGS '=' '[' IdList ']'		{ $$ = create_node( REGS, NULL, NULL, linenr ) ;
 																									add_children( $$, $4 ) ;}
-							;
-RegList				: RegList ',' IDENT								{ $$ = create_node( ID, NULL, strdup(yytext), linenr ) ;
-																									ARE_SIBLINGS( $$, $1 ) ;}
-							| IDENT														{ $$ = create_node( ID, NULL, strdup(yytext), linenr ) ; }
 							;
 
 InstrSect			: InstrSectDef ';' InstrSect				{ node* n ;
@@ -145,6 +141,9 @@ TId						: IDENT															{ buffer[1] = strdup(yytext) ;}
 							| TINT IDENT												{ $$ = create_node( TID, strdup("Int"), strdup(yytext), linenr );}
 							| TBOOL IDENT												{ $$ = create_node( TID, strdup("Bool"), strdup(yytext), linenr );}
 							| TBITS IDENT												{	$$ = create_node( TID, strdup("Bits"), strdup(yytext), linenr );}
+							;
+IdList				: Id ',' IdList											{ ARE_SIBLINGS( $1, $3 ) ; $$ = $1 ; }
+							| Id																{ $$ = $1 ; }
 							;
 Id						: IDENT															{ $$ = create_node( ID, NULL, strdup(yytext), linenr ) ; }
 							; 

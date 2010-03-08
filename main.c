@@ -28,10 +28,10 @@ int main()
 
 	fill_symtab( stab, ast ) ;
 	report_errors( ast ) ;
-/*
+	
 	typecheck( stab, ast ) ;
 	report_errors( ast ) ;
-*/	
+	
 	print_symtab( stab ) ;
 	view_tree( ast ) ;
 

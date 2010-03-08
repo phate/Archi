@@ -6,11 +6,14 @@
 static void trim_regdef( node* n )
 {
 	node *c ;
+	regprop *p = (regprop*)n->data ;
 	FOREACH_CHILD( n, c ){
 		if( c->ntype == CODE ){
-			((regprop*)n->data)->code = *((int32_t*)c->data) ;
+			p->code = *((int32_t*)c->data) ;
 			destroy_node( c ) ;
 		}
+		else if( c->ntype == ID )
+			p->id = c ;
 	}
 }
 
@@ -25,7 +28,9 @@ static void trim_regcldef( node *n )
 		}
 		else if( c->ntype == REGS ){
 			p->regs = c->first_child ;
-		} 
+		}
+		else if( c->ntype == ID )
+			p->id = c ; 
 	}
 }
 
@@ -50,6 +55,8 @@ static void trim_instrdef( node *n )
 			p->output = c->first_child ;
 		else if( c->ntype == IMMEDIATE )
 			p->immediates = c->first_child ;
+		else if( c->ntype == ID )
+			p->id = c ;
 	}
 }
 
@@ -69,6 +76,8 @@ static void trim_fctdef( node *n )
 	FOREACH_CHILD( n, c ){
 		if( n->ntype == ARGS )
 			p->args = c->first_child ;
+		else if( c->ntype == TID )
+			p->id = c ;
 	}
 }
 

@@ -10,6 +10,7 @@ regprop* create_regprop()
 {
 	regprop *p = (regprop*)malloc( sizeof(regprop) ) ;
 	p->code = -1 ;
+	p->id = NULL ;
 
 	return p ;
 }
@@ -20,6 +21,7 @@ regclprop* create_regclprop()
 	
 	p->bits = -1 ;
 	p->regs = NULL ;
+	p->id = NULL ;
 
 	return p ;
 }
@@ -31,6 +33,7 @@ instrprop* create_instrprop()
 	p->input = NULL ;
 	p->output = NULL ;
 	p->immediates = NULL ;
+	p->id = NULL ;
 
 	return p ;
 }
@@ -40,7 +43,8 @@ fctprop* create_fctprop()
 	fctprop *p = (fctprop*)malloc( sizeof(fctprop) ) ;
 
 	p->args = NULL ;
-	
+	p->id = NULL ;	
+
 	return p ;
 }
 
@@ -69,12 +73,12 @@ void destroy_node( node* p )
 		destroy_node( c ) ;
 	}
 
+	//TODO check for p->parent (ARCHDESC)
 	if( p->prev_sibling ) p->prev_sibling->next_sibling = p->next_sibling ;
 	else p->parent->first_child = p->next_sibling ;
 
 	if( p->next_sibling ) p->next_sibling->prev_sibling = p->prev_sibling ;
 	else p->parent->last_child = p->prev_sibling ;
-
 
 	//TODO free emsgs
 	free( p->dtype ) ; 

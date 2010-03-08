@@ -7,10 +7,7 @@ struct node_ ;
 
 typedef struct emsg_ emsg ;
 
-emsg* append_msgs( emsg* m1, emsg* m2 ) ;
-
-emsg* create_msg( uint32_t linenr, const char* msg ) ;
-
 uint32_t print_msgs( struct node_ *n ) ;
 
+void add_emsg( struct node_ *n, const char *msg, ... ) ;
 #endif

@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
+#include <stdarg.h>
 
 struct emsg_{
 	struct emsg_* next ;
@@ -11,10 +13,11 @@ struct emsg_{
 } ;
 
 
-emsg* create_msg( uint32_t linenr, const char* msg )
+static emsg* create_msg( const char* msg, uint32_t linenr )
 {
 	char tmp[256] ;
-	snprintf( tmp, 256, "%d:\terror: %s", linenr, msg ) ;
+	int cnt = snprintf( tmp, 256, "%d:\terror: %s", linenr, msg ) ;
+	if( cnt >= 256 ) assert(0) ;
 
 	emsg* m = (emsg*)malloc( sizeof(emsg) ) ;
 	
@@ -24,7 +27,7 @@ emsg* create_msg( uint32_t linenr, const char* msg )
 	return m ;
 }
 
-emsg* append_msgs( emsg* m1, emsg* m2 )
+static emsg* append_msgs( emsg* m1, emsg* m2 )
 {
 	if( m1 == NULL ) return m2 ;
 	if( m2 == NULL ) return m1 ;
@@ -35,6 +38,21 @@ emsg* append_msgs( emsg* m1, emsg* m2 )
 	m1->next = m2 ;
 
 	return tmp ;	
+}
+
+void add_emsg( node *n, const char *msg, ... )
+{
+	char tmp[256] ;
+	
+	va_list args ;
+  va_start( args, msg ) ; 
+  int cnt = vsnprintf( tmp, 256, msg, args ) ;   
+  va_end(args) ;
+
+  if( cnt >= 256 ) assert(0) ;
+
+	emsg *m = create_msg( tmp, n->linenr ) ;
+	n->emsgs = append_msgs( n->emsgs, m ) ;
 }
 
 static emsg* linearize_msgs( node* n )

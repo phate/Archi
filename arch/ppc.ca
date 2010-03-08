@@ -14,16 +14,16 @@ fpregs{
 		regs=[r0,r1,r2,r3,r4]
 },
 	statusregs{
-		bits=32,
-		regs=[f0,f4,f6]
+		bits=32
+		#regs=[f0,f4,f6]
 } ;
 RegClass blub{
-		bits=24,
-		regs=[w,e,r]
+	bits = 24	
+	#regs=[w,e,r]
 } ;
 #RegClass
 #hallo{
-#	bits=32,
+	#bits=32,
 #	regs=[i,e,r]
 #} ;
 %%
@@ -34,7 +34,6 @@ output = [],
 immediate = [int brav, int zugs]
 },
 load{
-input = [int hallo],
 output = [],
 immediate = [tum hallo]
 },

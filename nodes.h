@@ -74,24 +74,27 @@ typedef struct node_{
 	emsg* emsgs ;
 } node ;
 
-
 typedef struct regprop_{
 	int32_t code ;
+	node *id ;
 } regprop ;
 
 typedef struct regclprop_{
 	int32_t bits ;
 	node *regs ;
+	node *id ;
 } regclprop ;
 
 typedef struct instrprop_{
 	node *input ;
 	node *output ;
 	node *immediates ;
+	node *id ;
 } instrprop ;
 
 typedef struct fctprop_{
 	node *args ;
+	node *id ;
 } fctprop ;
 
 regprop* create_regprop() ;

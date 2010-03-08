@@ -5,29 +5,23 @@
 #include <stdio.h>
 #include <assert.h>
 
-static void insert_node( symtab stab, const char* key, node* n, uint32_t linenr )
+static void insert_node( symtab stab, node *n )
 {
+	const char* key = (const char*)n->data ;
+
 	node *l = lookup( stab, key ) ;
 	if( l == NULL ){
-		insert( stab, key, n ) ;
+		insert( stab, key, n->parent ) ;
 		return ;
 	}
-		
-	char str[256] ;
-	emsg *m1, *m2 ;
-	if( !strcmp( l->dtype, n->dtype ) ){
-		sprintf( str, "redeclaration of '%s'", key ) ;
-		m1 = create_msg( linenr, str ) ;
-	}
-	else{
-		sprintf( str, "conflicting types for '%s'", key ) ;
-		m1 = create_msg( linenr, str ) ;
-	}
 	
-	sprintf( str, "previous declaration of '%s' was here", key ) ;
-	m2 = create_msg( l->linenr, str ) ;
+	if( !strcmp( l->dtype, n->parent->dtype ) )
+		add_emsg( n, "redeclaration of '%s'", key ) ;
+	else 
+		add_emsg( n, "conflicting type for '%s'", key ) ;
 
-	n->emsgs = append_msgs( n->emsgs, append_msgs( m1, m2 ) ) ;
+	add_emsg( n, "previous declaration of '%s' was in line %d", key, l->linenr ) ;
+
 }
 
 void fill_symtab( symtab stab, node *n )
@@ -37,15 +31,10 @@ void fill_symtab( symtab stab, node *n )
 	{
 		node *c ;
 		FOREACH_CHILD( n, c ){
-			if( c->ntype == ID ){
-				insert_node( stab, c->data, n, c->linenr ) ;
-				destroy_node( c ) ;
-				break ;
-			}
-			else if( c->ntype == TID ){
-				n->dtype = c->dtype ;
-				insert_node( stab, c->data, n, c->linenr ) ;
-				destroy_node( c ) ;	
+			switch( c->ntype ){
+				case TID:	n->dtype == strdup( c->dtype ) ;
+				case ID:	insert_node( stab, c ) ; break ;
+				default: break ;
 			}
 		}
 	}
@@ -56,27 +45,41 @@ void fill_symtab( symtab stab, node *n )
 	}
 }
 
+static void msg_missing_property( node *n, const char* prop, const char* name )
+{
+	add_emsg( n, "property '%s' was not defined in '%s'", prop, name ) ;
+}
+
 static void tc_regdef( node *n )
 {
 	regprop *p = (regprop*)n->data ;
-	if( p->code == -1 ){
-		emsg *m = create_msg( n->linenr, "property 'code' was not defined" ) ; 
-		n->emsgs = append_msgs( n->emsgs, m ) ;
+	if( p->code == -1 ) msg_missing_property( n, "code", (const char*)p->id->data ) ;
+}
+
+static void tc_regclregs( symtab stab, node *n )
+{
+	node *s ;
+	FOREACH_SIBLING( n, s ){
+		node* l = lookup( stab, (const char*)s->data ) ;
+		if( l == NULL ) add_emsg( s, "register '%s' was not declared", (const char*)s->data ) ;
 	}
 }
 
-static void tc_regcldef( node* n )
+static void tc_regcldef( symtab stab, node* n )
 {
-
+	regclprop *p = (regclprop*)n->data ;
+	if( p->bits == -1 ) 	msg_missing_property( n, "bits", (const char*)p->id->data ) ;
+	if( p->regs == NULL ) msg_missing_property( n, "regs", (const char*)p->id->data ) ;
+	else tc_regclregs( stab, p->regs ) ;
 }
 
-static void tc_regsect( node *n )
+static void tc_regsect( symtab stab, node *n )
 {
 	node *c ;
 	FOREACH_CHILD( n, c ){
 		switch( c->ntype ){
-			case REGDEF: tc_regdef( c ) ; break ;
-			case REGCLDEF: tc_regcldef( c ) ; break ;
+			case REGDEF: 		tc_regdef( c ) ; break ;
+			case REGCLDEF: 	tc_regcldef( stab, c ) ; break ;
 			default: assert(0) ;
 		}
 	}
@@ -87,13 +90,18 @@ static void tc_instrsect( node *n )
 
 }
 
+static void tc_auxsect( node *n )
+{
+}
+
 void typecheck( symtab stab, node *n )
 {
 	node *c ;
 	FOREACH_CHILD( n, c ){
 		switch( c->ntype ){
-			case REGSECT: tc_regsect( c ) ; break ;
+			case REGSECT: tc_regsect( stab, c ) ; break ;
 			case INSTRSECT:	tc_instrsect( c ) ; break ;
+			case AUXSECT:		tc_auxsect( c ) ; break ;
 			default: assert(0) ;
 		}
 	}
