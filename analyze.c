@@ -53,24 +53,27 @@ static void msg_missing_property( node *n, const char* prop, const char* name )
 static void tc_regdef( node *n )
 {
 	regprop *p = (regprop*)n->data ;
-	if( p->code == -1 ) msg_missing_property( n, "code", (const char*)p->id->data ) ;
+	if( p->code == -1 ) msg_missing_property( n, "code", p->name ) ;
+
 }
 
 static void tc_regclregs( symtab stab, node *n )
 {
 	node *s ;
 	FOREACH_SIBLING( n, s ){
-		node* l = lookup( stab, (const char*)s->data ) ;
-		if( l == NULL ) add_emsg( s, "register '%s' was not declared", (const char*)s->data ) ;
+		const char *name = s->data ;
+		node* l = lookup( stab, name ) ;
+		if( l == NULL ) add_emsg( s, "register '%s' was not declared", name ) ;
 	}
 }
 
 static void tc_regcldef( symtab stab, node* n )
 {
 	regclprop *p = (regclprop*)n->data ;
-	if( p->bits == -1 ) 	msg_missing_property( n, "bits", (const char*)p->id->data ) ;
-	if( p->regs == NULL ) msg_missing_property( n, "regs", (const char*)p->id->data ) ;
+	if( p->bits == -1 ) 	msg_missing_property( n, "bits", p->name ) ;
+	if( p->regs == NULL ) msg_missing_property( n, "regs", p->name ) ;
 	else tc_regclregs( stab, p->regs ) ;
+
 }
 
 static void tc_regsect( symtab stab, node *n )

@@ -10,7 +10,7 @@ regprop* create_regprop()
 {
 	regprop *p = (regprop*)malloc( sizeof(regprop) ) ;
 	p->code = -1 ;
-	p->id = NULL ;
+	p->name = NULL ;
 
 	return p ;
 }
@@ -21,7 +21,7 @@ regclprop* create_regclprop()
 	
 	p->bits = -1 ;
 	p->regs = NULL ;
-	p->id = NULL ;
+	p->name = NULL ;
 
 	return p ;
 }
@@ -33,7 +33,7 @@ instrprop* create_instrprop()
 	p->input = NULL ;
 	p->output = NULL ;
 	p->immediates = NULL ;
-	p->id = NULL ;
+	p->name = NULL ;
 
 	return p ;
 }
@@ -43,7 +43,7 @@ fctprop* create_fctprop()
 	fctprop *p = (fctprop*)malloc( sizeof(fctprop) ) ;
 
 	p->args = NULL ;
-	p->id = NULL ;	
+	p->name = NULL ;	
 
 	return p ;
 }

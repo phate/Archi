@@ -13,7 +13,7 @@ static void trim_regdef( node* n )
 			destroy_node( c ) ;
 		}
 		else if( c->ntype == ID )
-			p->id = c ;
+			p->name = (const char*)c->data ;
 	}
 }
 
@@ -30,7 +30,7 @@ static void trim_regcldef( node *n )
 			p->regs = c->first_child ;
 		}
 		else if( c->ntype == ID )
-			p->id = c ; 
+			p->name = (const char*)c->data ;
 	}
 }
 
@@ -56,7 +56,7 @@ static void trim_instrdef( node *n )
 		else if( c->ntype == IMMEDIATE )
 			p->immediates = c->first_child ;
 		else if( c->ntype == ID )
-			p->id = c ;
+			p->name = (const char*)c->data ;
 	}
 }
 
@@ -77,7 +77,7 @@ static void trim_fctdef( node *n )
 		if( n->ntype == ARGS )
 			p->args = c->first_child ;
 		else if( c->ntype == TID )
-			p->id = c ;
+			p->name = (const char*)c->data ;
 	}
 }
 

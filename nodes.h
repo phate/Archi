@@ -76,25 +76,25 @@ typedef struct node_{
 
 typedef struct regprop_{
 	int32_t code ;
-	node *id ;
+	const char *name ;
 } regprop ;
 
 typedef struct regclprop_{
 	int32_t bits ;
 	node *regs ;
-	node *id ;
+	const char *name ;
 } regclprop ;
 
 typedef struct instrprop_{
 	node *input ;
 	node *output ;
 	node *immediates ;
-	node *id ;
+	const char *name ;
 } instrprop ;
 
 typedef struct fctprop_{
 	node *args ;
-	node *id ;
+	const char *name ;
 } fctprop ;
 
 regprop* create_regprop() ;
