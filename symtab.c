@@ -68,7 +68,7 @@ void print_symtab( symtab t )
 		printf("%d:", i ) ;
 		entry* e = t[i] ;
 		while( e != 0 ){
-			printf( "{ key:%s node:%p } ", e->key, e->n ) ;	
+			printf( "{ key: %s node: %p } ", e->key, e->n ) ;	
 			e = e->next ;
 		}
 		printf("\n") ;

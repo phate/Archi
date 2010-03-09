@@ -7,7 +7,7 @@ Reg hallo{code=45} ;
 RegClass
 	intregs{
 		bits=32,
-		regs=[eax,b,c,d,e,f]
+		regs=[eax,fpregs,c,d,e,f]
 },
 fpregs{
 		bits=64,
@@ -29,7 +29,7 @@ RegClass blub{
 %%
 
 Instr store{
-input = [int bla, fpregs hallo, int args],
+input = [int blub, eax hallo, int args],
 output = [],
 immediate = [int brav, int zugs]
 },
@@ -44,7 +44,7 @@ immediate = [blub tra]
 } ;
 
 Instr sub{
-input = [int bla],
+#input = [int bla],
 output = [int ha],
 immediate = [int k]
 } ;

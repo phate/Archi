@@ -15,6 +15,7 @@ struct emsg_{
 
 static emsg* create_msg( const char* msg, uint32_t linenr )
 {
+	//TODO: hard coded, fix it
 	char tmp[256] ;
 	int cnt = snprintf( tmp, 256, "%d:\terror: %s", linenr, msg ) ;
 	if( cnt >= 256 ) assert(0) ;
@@ -42,6 +43,7 @@ static emsg* append_msgs( emsg* m1, emsg* m2 )
 
 void add_emsg( node *n, const char *msg, ... )
 {
+	//TODO: hard coded, fix it
 	char tmp[256] ;
 	
 	va_list args ;

@@ -50,11 +50,11 @@ static void trim_instrdef( node *n )
 	instrprop *p = (instrprop*)n->data ;
 	FOREACH_CHILD( n, c ){
 		if( c->ntype == INPUT )
-			p->input = c->first_child ;
+			p->input = c ;
 		else if( c->ntype == OUTPUT )
-			p->output = c->first_child ;
+			p->output = c ;
 		else if( c->ntype == IMMEDIATE )
-			p->immediates = c->first_child ;
+			p->immediates = c ;
 		else if( c->ntype == ID )
 			p->name = (const char*)c->data ;
 	}
