@@ -23,7 +23,7 @@ RegClass blub{
 } ;
 #RegClass
 #hallo{
-	#bits=32,
+#	bits=32,
 #	regs=[i,e,r]
 #} ;
 %%
@@ -51,6 +51,7 @@ immediate = [int k]
 
 %%
 
-Bool fkt () = ""
+Int fct( Int v, Bool b ) = v
 
-Int fkt2 ( Bool b, Int i, Bits bi ) = 345
+
+#Int fkt2 ( Int tag ) = 345

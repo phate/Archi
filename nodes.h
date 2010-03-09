@@ -56,6 +56,7 @@ typedef enum{	ARCHDEF,
 							FCTCALL,
 							NUMBER,
 							BITSTRING,
+							BOOLEAN,
 
 							ID,
 							TID
@@ -94,6 +95,7 @@ typedef struct instrprop_{
 
 typedef struct fctprop_{
 	node *args ;
+	node *body ;
 	const char *name ;
 } fctprop ;
 

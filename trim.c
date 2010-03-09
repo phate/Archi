@@ -74,10 +74,11 @@ static void trim_fctdef( node *n )
 	node *c ;
 	fctprop *p = (fctprop*)n->data ;
 	FOREACH_CHILD( n, c ){
-		if( n->ntype == ARGS )
+		if( c->ntype == ARGS )
 			p->args = c->first_child ;
 		else if( c->ntype == TID )
 			p->name = (const char*)c->data ;
+		else p->body = c ;
 	}
 }
 

@@ -43,6 +43,7 @@ fctprop* create_fctprop()
 	fctprop *p = (fctprop*)malloc( sizeof(fctprop) ) ;
 
 	p->args = NULL ;
+	p->body = NULL ;
 	p->name = NULL ;	
 
 	return p ;
@@ -125,6 +126,7 @@ static struct ntname { nodetype type; const char* name; } ntnames[] =
 	{FCTCALL, "FctCall()"},
 	{NUMBER, "Number"},
 	{BITSTRING, "Bitstring"},
+	{BOOLEAN, "Boolean"},
 	{ID, "ID"},
 	{TID, "TID"}
 } ;

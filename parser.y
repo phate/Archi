@@ -30,7 +30,7 @@ void add_children( node *p, node *fc )
 
 node* create_expression( nodetype ntype, node *e1, node *e2 )
 {
-	node *n = create_node( ntype, NULL, NULL, linenr ) ;
+	node *n = create_node( ntype, NULL, NULL, e1->linenr ) ;
 	ARE_SIBLINGS( e1, e2 ) ;
 	add_children( n, e1 ) ;
 
@@ -198,18 +198,25 @@ Exp9					: Exp10 '[' Exp ':' Exp ']'					{ $$ = create_node( BITSLICE, NULL, NUL
 																										add_children( $$, $1 ) ;}
 							| Exp10															{ $$ = $1 ; }
 							;
-Exp10					: Id '.' Id													{ $$ = create_expression( PROPSELECTION, $1, $3 ) ; }
+Exp10					: Id '.' REG_CODE										{ node *n = create_node( TID, "Int", "code", linenr ) ;
+																										$$ = create_expression( PROPSELECTION, $1, n ) ; }
 							| Exp11															{ $$ = $1 ; }
 							;
-Exp11					: Id '(' ExpList ')'								{ $$ = create_expression( FCTCALL, $1, $3 ) ; }
+Exp11					: Id '(' EExpList ')'								{ if( $3 == NULL ){
+																											$$ = create_node( FCTCALL, NULL, NULL, $1->linenr ) ;
+																											add_children( $$, $1 ) ;}
+																										else $$ = create_expression( FCTCALL, $1, $3 ) ; }
 							| Exp12															{ $$ = $1 ; }
 							;
 Exp12					: Id																{ $$ = $1 ; }
 							| NUM																{ $$ = create_node( NUMBER, strdup("Int"), strdup(yytext), linenr ) ; }
 							| BITSTR														{ $$ = create_node( BITSTRING, strdup("Bits"), strdup(yytext), linenr ) ; }
-							| TRUE															{ $$ = create_node( ID, strdup("Bool"), strdup("true"), linenr ) ; }
-							| FALSE															{ $$ = create_node( ID, strdup("Bool"), strdup("false"), linenr ) ; }
+							| TRUE															{ $$ = create_node( BOOLEAN, strdup("Bool"), strdup("true"), linenr ) ; }
+							| FALSE															{ $$ = create_node( BOOLEAN, strdup("Bool"), strdup("false"), linenr ) ; }
 							| '(' Exp ')'												{ $$ = $2 ; }
+							;
+EExpList			: ExpList														{ $$ = $1 ; }
+							|																		{ $$ = NULL ; }
 							;
 ExpList				: Exp ',' ExpList										{ ARE_SIBLINGS( $1, $3 ) ; $$ = $1 ; }								
 							| Exp																{ $$ = $1 ; }

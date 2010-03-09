@@ -51,6 +51,13 @@ whitespace [ \t]+
 ">="	{ return GTEQ; }
 "<="	{ return LTEQ; }
 
+":"		{ return(':'); }
+"."		{ return('.'); }
+"+"		{ return('+'); }
+"-"		{ return('-'); }
+"/"		{ return('/'); }
+"*"		{ return('*'); }
+"%"		{ return('%'); }
 ">"		{ return('>'); }
 "<"		{ return('<'); }
 "="		{ return('='); }
@@ -62,7 +69,6 @@ whitespace [ \t]+
 "["		{ return('['); }
 "]"		{ return(']'); }
 ";"		{ return(';'); }
-"%"		{ return('%'); }
 "%%"	{ return SECTSEP; }
 . 		{ yyerror("syntax error") ; exit( EXIT_FAILURE ) ; }
 %%
