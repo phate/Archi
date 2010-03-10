@@ -39,7 +39,8 @@ node* create_expression( nodetype ntype, node *e1, node *e2 )
 
 %}
 
-%token REG REGCL REG_CODE REGCL_BITS REGCL_REGS INSTR INSTR_INPUT INSTR_OUTPUT INSTR_IMM
+%token REG REGCL REG_CODE REGCL_BITS REGCL_REGS
+%token INSTR INSTR_INPUT INSTR_OUTPUT INSTR_IMM INSTR_ENCODING
 %token IDENT NUM TRUE FALSE BITSTR TINT TBOOL TBITS SECTSEP
 %token IF THEN ELSE SHIFTL SHIFTR LTEQ GTEQ LAND LOR CONCAT EQ NEQ 
 
@@ -129,6 +130,8 @@ InstrProp			: INSTR_INPUT '=' '[' ETIdList ']'	{ $$ = create_node( INPUT, NULL, 
 																										add_children( $$, $4 ) ;}
 							| INSTR_IMM '=' '[' ETIdList ']'		{ $$ = create_node( IMMEDIATE, NULL, NULL, linenr ) ;
 																										add_children( $$, $4 ) ;}
+							|	INSTR_ENCODING '=' Exp						{ $$ = create_node( ENCODING, NULL, NULL, linenr ) ;
+																										add_children( $$, $3 ) ;}	
 							;
 ETIdList			: TIdList														{ $$ = $1 ; }
 							|																		{ $$ = NULL ; }

@@ -33,6 +33,7 @@ instrprop* create_instrprop()
 	p->input = NULL ;
 	p->output = NULL ;
 	p->immediates = NULL ;
+	p->encoding = NULL ;
 	p->name = NULL ;
 
 	return p ;
@@ -102,6 +103,7 @@ static struct ntname { nodetype type; const char* name; } ntnames[] =
 	{INPUT, "Input"},
 	{OUTPUT, "Output"},
 	{IMMEDIATE, "Immediate"},
+	{ENCODING, "Encoding"},
 	{FCTDEF, "FctDef"},
 	{ARGS, "Args"},
 	{IFTHENELSE, "ITE"},

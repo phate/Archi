@@ -27,6 +27,10 @@ whitespace [ \t]+
 "input"			{ return INSTR_INPUT; }
 "output"		{ return INSTR_OUTPUT; }
 "immediate"	{ return INSTR_IMM; }
+"encoding"	{ return INSTR_ENCODING; }
+"if"				{ return IF; }
+"then"			{ return THEN; }
+"else"			{ return ELSE; }
 
 "Int"				{ return TINT; }
 "Bool"			{ return TBOOL; }

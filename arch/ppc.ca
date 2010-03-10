@@ -45,13 +45,13 @@ immediate = [blub tra]
 
 Instr sub{
 #input = [int bla],
-output = [int ha],
-immediate = [int k]
+output = [blub ha],
+immediate = [Int k],
+encoding = fct(45)
 } ;
 
 %%
 
-Int fct( Int v, Bool b ) = v
+Int fct(Int b) = b.code
 
-
-#Int fkt2 ( Int tag ) = 345
+#Int foobar() = 45

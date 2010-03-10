@@ -31,6 +31,7 @@ typedef enum{	ARCHDEF,
 							INPUT,
 							OUTPUT,
 							IMMEDIATE,
+							ENCODING,
 
 							FCTDEF,
 							ARGS,
@@ -90,6 +91,7 @@ typedef struct instrprop_{
 	node *input ;
 	node *output ;
 	node *immediates ;
+	node *encoding ;
 	const char *name ;
 } instrprop ;
 

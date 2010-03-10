@@ -107,49 +107,6 @@ static void tc_regsect( symtab stab, node *n )
 	}
 }
 
-static void tc_instrio( symtab stab, node *n )
-{
-	node *c ;
-	FOREACH_CHILD( n, c ){
-		const char *type = c->dtype ;
-		node* l = lookup( stab, type ) ;
-		if( l == NULL )
-			add_emsg( c, "register class '%s' was not declared", type ) ;
-		else if( strcmp(l->dtype, "RegClass") )
-			add_emsg( c, "'%s' is not of type 'RegClass'", (const char*)c->data ) ;
-	}
-}
-
-static void tc_instrimmediates( node *n )
-{
-	node *c ;
-	FOREACH_CHILD( n, c ){
-		if( strcmp( c->dtype, "Int") )
-			add_emsg( c, "'%s' is not of type 'Int'", (const char*)c->data ) ;
-	}
-}
-
-static void tc_instrdef( symtab stab, node *n )
-{
-	instrprop *p = (instrprop*)n->data ;
-	if( p->input == NULL ) msg_missing_property( n, "input", p->name ) ;
-	else tc_instrio( stab, p->input ) ;
-
-	if( p->output == NULL ) msg_missing_property( n, "output", p->name ) ;
-	else tc_instrio( stab, p->output ) ;
-
-	if( p->immediates == NULL ) msg_missing_property( n, "immediate", p->name ) ;
-	else tc_instrimmediates( p->immediates ) ;
-}
-
-static void tc_instrsect( symtab stab, node *n )
-{
-	node *c ;
-	FOREACH_CHILD( n, c ){
-		if( c->ntype == INSTRDEF ) tc_instrdef( stab, c ) ;
-		else assert(0) ;
-	}
-}
 
 static void tc_fctargs( symtab stab, node *n )
 {
@@ -224,7 +181,12 @@ static const char* inferExp( symtab stab, node *n, const char* prefix, node *f )
 			MANGLE_NAME( key, prefix, v ) ;
 			node *l = lookup( stab, key ) ;
 			if( l == NULL )
-				add_emsg( n, "'%s' undeclared", v ) ; 
+				add_emsg( n, "'%s' undeclared", v ) ;
+			else{
+				l = lookup( stab, l->dtype ) ;
+				if( l == NULL )
+					add_emsg( n, "'%s' is not of type RegClass", v )  ;
+			}
 		
 			if( strcmp( p, "code") )
 				add_emsg( n, "'%s' has no property '%s'", v, p ) ;
@@ -242,16 +204,16 @@ static const char* inferExp( symtab stab, node *n, const char* prefix, node *f )
 			}
 	
 			//check for forward declaration	
-			node *s ;
-			int found  = 0 ;	
-			FOREACH_SIBLING( f, s ){
-				if( f == s ) break ;
-				if( l == s ) found = 1 ;
+			if(f != NULL){
+				node *s ;
+				FOREACH_SIBLING( l->next_sibling, s ) if( f == s ) break ;
+	
+				if( s == NULL ){
+					add_emsg( n, "'%s' undeclared", fct ) ;
+					return l->dtype ;
+				}
 			}
-	
-			if( !found )
-				add_emsg( n, "'%s' undeclared", fct ) ;
-	
+
 			//check types of arguments
 			unsigned int i = 1 ;
 			node *al, *ag = ((fctprop*)l->data)->args ;
@@ -283,10 +245,11 @@ static const char* inferExp( symtab stab, node *n, const char* prefix, node *f )
 			const char* name = (const char*)n->data ;
 			MANGLE_NAME( key, prefix, name ) ;
 			node *l = lookup( stab, key ) ;
-			if( l == NULL )
-				add_emsg( n, "'%s' undeclared", name ) ; 
+			if( l == NULL ){
+				add_emsg( n, "'%s' undeclared", name ) ;
+				return "Int" ; //TODO: write message that it defaults to int
+			} 
 		
-			printf("TYYYPE: %s", l->dtype ) ;	
 			return l->dtype ;}
 		default: assert(0) ;	
 	}
@@ -300,12 +263,12 @@ static void checkExp( symtab stab, node *n, const char* type, const char* prefix
 	}
 }
 
-static void tc_fctdef( symtab stab, node *n, node *f )
+static void tc_fctdef( symtab stab, node *n )
 {
 	fctprop *p = (fctprop*)n->data ;
 	if( p->args != NULL ) tc_fctargs( stab, p->args ) ;
 
-	const char* type = inferExp( stab, p->body, p->name, f ) ;
+	const char* type = inferExp( stab, p->body, p->name, n ) ;
 
 	if( strcmp(type, n->dtype) )
 		msg_type_mismatch( n, n->dtype, type ) ;
@@ -315,7 +278,61 @@ static void tc_auxsect( symtab stab, node *n )
 {
 	node *c ;
 	FOREACH_CHILD( n, c ){
-		if( c->ntype == FCTDEF ) tc_fctdef( stab, c, n->first_child ) ;
+		if( c->ntype == FCTDEF ) tc_fctdef( stab, c ) ;
+		else assert(0) ;
+	}
+}
+
+static void tc_instrio( symtab stab, node *n )
+{
+	node *c ;
+	FOREACH_CHILD( n, c ){
+		const char *type = c->dtype ;
+		node* l = lookup( stab, type ) ;
+		if( l == NULL )
+			add_emsg( c, "register class '%s' was not declared", type ) ;
+		else if( strcmp(l->dtype, "RegClass") )
+			add_emsg( c, "'%s' is not of type 'RegClass'", (const char*)c->data ) ;
+	}
+}
+
+static void tc_instrimmediates( node *n )
+{
+	node *c ;
+	FOREACH_CHILD( n, c ){
+		if( strcmp( c->dtype, "Int") )
+			add_emsg( c, "'%s' is not of type 'Int'", (const char*)c->data ) ;
+	}
+}
+
+static void tc_instrencoding( symtab stab, node *n, const char* prefix )
+{
+	const char* type = inferExp( stab, n->first_child, prefix, NULL ) ;
+	if( strcmp(type, "Bits") )
+		msg_type_mismatch( n, "Bits", type ) ;
+}
+
+static void tc_instrdef( symtab stab, node *n )
+{
+	instrprop *p = (instrprop*)n->data ;
+	if( p->input == NULL ) msg_missing_property( n, "input", p->name ) ;
+	else tc_instrio( stab, p->input ) ;
+
+	if( p->output == NULL ) msg_missing_property( n, "output", p->name ) ;
+	else tc_instrio( stab, p->output ) ;
+
+	if( p->immediates == NULL ) msg_missing_property( n, "immediate", p->name ) ;
+	else tc_instrimmediates( p->immediates ) ;
+
+	if( p->encoding == NULL ) msg_missing_property( n, "encoding", p->name ) ;
+	else tc_instrencoding( stab, p->encoding, p->name ) ;
+}
+
+static void tc_instrsect( symtab stab, node *n )
+{
+	node *c ;
+	FOREACH_CHILD( n, c ){
+		if( c->ntype == INSTRDEF ) tc_instrdef( stab, c ) ;
 		else assert(0) ;
 	}
 }

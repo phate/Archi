@@ -23,6 +23,7 @@ int main()
 	
 	ast = parse() ;
 	if( ast == NULL ) exit( EXIT_FAILURE ) ;
+	view_tree(ast) ;
 	
 	trim_tree( ast ) ;
 

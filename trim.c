@@ -55,6 +55,8 @@ static void trim_instrdef( node *n )
 			p->output = c ;
 		else if( c->ntype == IMMEDIATE )
 			p->immediates = c ;
+		else if( c->ntype == ENCODING )
+			p->encoding = c ;
 		else if( c->ntype == ID )
 			p->name = (const char*)c->data ;
 	}
