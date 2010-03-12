@@ -47,11 +47,11 @@ Instr sub{
 #input = [int bla],
 output = [blub ha],
 immediate = [Int k],
-encoding = fct(45)
+encoding = k.code[1:3]
 } ;
 
 %%
 
-Int fct(Int b) = b.code
+#Int fct(Int b) = b.code
 
 #Int foobar() = 45
