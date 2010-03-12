@@ -4,7 +4,7 @@ LEX=flex
 YACC=bison
 YFLAGS += -d
 
-all: ehandling.o analyze.o trim.o symtab.o parser.o scanner.o main.o nodes.o
+all: cgen.o ehandling.o analyze.o trim.o symtab.o parser.o scanner.o main.o nodes.o
 	$(CC) $(CFLAGS) $^ $(LDFLAGS)
 
 .c.o:
