@@ -69,6 +69,8 @@ static void msg_missing_property( node *n, const char* prop, const char* name )
 
 static void tc_regdef( node *n )
 {
+	assert( n->ntype == REGDEF ) ;
+
 	regprop *p = (regprop*)n->data ;
 	if( p->code == -1 ) msg_missing_property( n, "code", p->name ) ;
 
@@ -76,8 +78,10 @@ static void tc_regdef( node *n )
 
 static void tc_regclregs( symtab stab, node *n )
 {
+	assert( n->ntype == REGS ) ;
+
 	node *s ;
-	FOREACH_SIBLING( n, s ){
+	FOREACH_SIBLING( n->first_child, s ){
 		const char *name = s->data ;
 		node* l = lookup( stab, name ) ;
 		if( l == NULL ) add_emsg( s, "register '%s' was not declared", name ) ;

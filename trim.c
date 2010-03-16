@@ -17,8 +17,12 @@ static void trim_regdef( node* n )
 	}
 }
 
+#include <stdio.h>
+
 static void trim_regcldef( node *n )
 {
+	assert( n->ntype == REGCLDEF ) ;
+
 	node *c ;
 	regclprop *p = (regclprop*)n->data ;
 	FOREACH_CHILD( n, c ){
@@ -27,7 +31,11 @@ static void trim_regcldef( node *n )
 			destroy_node( c ) ; 
 		}
 		else if( c->ntype == REGS ){
-			p->regs = c->first_child ;
+			p->regs = c ;
+			node *cc ;
+			int32_t i = 0 ;
+			FOREACH_CHILD( p->regs, cc ) i++ ;
+			*((int32_t*)c->data) = i ; 
 		}
 		else if( c->ntype == ID )
 			p->name = (const char*)c->data ;

@@ -98,7 +98,8 @@ RegClBody			: RegClBody ',' RegClProp					{ ARE_SIBLINGS($3, $1) ; $$ = $3 ; }
 RegClProp			: REGCL_BITS '=' NUM							{ uint32_t* i = malloc( sizeof(uint32_t) ) ;
 																								  *i = strtol( yytext, 0, 10 ) ;
 																								  $$ = create_node( BITS, NULL, i, linenr ) ; }
-							| REGCL_REGS '=' '[' IdList ']'		{ $$ = create_node( REGS, NULL, NULL, linenr ) ;
+							| REGCL_REGS '=' '[' IdList ']'		{	int32_t *i = malloc(sizeof(int32_t)) ; *i = -1 ;
+																									$$ = create_node( REGS, NULL, i, linenr ) ;
 																									add_children( $$, $4 ) ;}
 							;
 

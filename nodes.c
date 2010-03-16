@@ -153,6 +153,8 @@ static void node2string( FILE* f, node* n )
 	switch( n->ntype ){
 		case CODE:
 			sprintf( str, "%ld", *((long*)n->data) ) ; break ;
+		case REGS:
+			sprintf( str, "%d", *((int32_t*)n->data) ) ; break ;
 		case BITS:
 			sprintf( str, "%ld", *((long*)n->data) ) ; break ;
 		case ID:
