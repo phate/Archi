@@ -72,7 +72,6 @@ int main( int argc, char* argv[] )
 	view_tree(ast) ;
 	
 	trim_tree( ast ) ;
-
 	fill_symtab( stab, ast ) ;
 	report_errors( ast ) ;
 	

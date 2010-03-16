@@ -27,8 +27,10 @@ static void trim_regcldef( node *n )
 	regclprop *p = (regclprop*)n->data ;
 	FOREACH_CHILD( n, c ){
 		if( c->ntype == BITS ){
-			p->bits = *((int32_t*)c->data) ;
-			destroy_node( c ) ; 
+			if( p->bits == -1 ) 
+				p->bits = *((int32_t*)c->data) ;
+			else add_emsg( n, "property 'bits' is declared more than once" ) ;
+			destroy_node( c ) ;
 		}
 		else if( c->ntype == REGS ){
 			p->regs = c ;
@@ -44,6 +46,8 @@ static void trim_regcldef( node *n )
 
 static void trim_regsect( node* n )
 {
+	assert( n->ntype == REGSECT ) ;
+
 	node *c ;
 	FOREACH_CHILD(n, c){
 		if( c->ntype == REGDEF ) trim_regdef( c ) ;
@@ -54,6 +58,8 @@ static void trim_regsect( node* n )
 
 static void trim_instrdef( node *n )
 {
+	assert( n->ntype == INSTRDEF ) ;
+
 	node *c ;
 	instrprop *p = (instrprop*)n->data ;
 	FOREACH_CHILD( n, c ){
@@ -72,6 +78,8 @@ static void trim_instrdef( node *n )
 
 static void trim_instrsect( node *n )
 {
+	assert( n->ntype == INSTRSECT ) ;
+
 	node *c ;
 	FOREACH_CHILD(n, c){
 		if( c->ntype == INSTRDEF ) trim_instrdef( c ) ; 
@@ -81,6 +89,8 @@ static void trim_instrsect( node *n )
 
 static void trim_fctdef( node *n )
 {
+	assert( n->ntype == FCTDEF ) ;
+
 	node *c ;
 	fctprop *p = (fctprop*)n->data ;
 	FOREACH_CHILD( n, c ){
@@ -94,6 +104,8 @@ static void trim_fctdef( node *n )
 
 static void trim_auxsect( node *n )
 {
+	assert( n->ntype == AUXSECT ) ;
+
 	node *c ;
 	FOREACH_CHILD( n, c ){
 		if( c->ntype == FCTDEF ) trim_fctdef( c ) ;
@@ -103,6 +115,8 @@ static void trim_auxsect( node *n )
 
 void trim_tree( node *n )
 {
+	assert( n->ntype == ARCHDEF ) ;
+
 	node *c ;
 	FOREACH_CHILD(n, c){
 		switch( c->ntype ){
