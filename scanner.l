@@ -18,42 +18,42 @@ newline \n
 whitespace [ \t]+
 
 %%
-"Reg" 			{ return REG; }
-"RegClass"	{ return REGCL; }
-"code"			{ return REG_CODE; }
-"bits"			{ return REGCL_BITS; }
-"regs"			{ return REGCL_REGS; }
-"Instr"			{ return INSTR; }
-"input"			{ return INSTR_INPUT; }
-"output"		{ return INSTR_OUTPUT; }
-"immediate"	{ return INSTR_IMM; }
-"encoding"	{ return INSTR_ENCODING; }
-"if"				{ return IF; }
-"then"			{ return THEN; }
-"else"			{ return ELSE; }
+"Reg" 			{ return TREG; }
+"code"			{ return TREG_CODE; }
+"RegClass"	{ return TREGCL; }
+"bits"			{ return TREGCL_BITS; }
+"regs"			{ return TREGCL_REGS; }
+"Instr"			{ return TINSTR; }
+"input"			{ return TINSTR_INPUT; }
+"output"		{ return TINSTR_OUTPUT; }
+"immediate"	{ return TINSTR_IMM; }
+"encoding"	{ return TINSTR_ENCODING; }
+"if"				{ return TIF; }
+"then"			{ return TTHEN; }
+"else"			{ return TELSE; }
 
 "Int"				{ return TINT; }
 "Bool"			{ return TBOOL; }
 "Bits"			{ return TBITS; }
-"true"			{ return TRUE; }
-"false"			{ return FALSE; }
+"true"			{ return TTRUE; }
+"false"			{ return TFALSE; }
 
-{bitstr}		{ return BITSTR; }
-{number}		{ return NUM; }
-{identifier}	{ return IDENT; }
+{bitstr}		{ return TBITSTR; }
+{number}		{ return TNUM; }
+{identifier}	{ return TIDENT; }
 {comment} 	{ linenr++ ; }
 {whitespace}	{ /* skip whitespace */ }
 {newline}	{ linenr++ ;  }
 
-"!="	{ return NEQ; }
-"=="	{ return EQ; }
-"++"	{ return CONCAT; }
-"||"	{ return LOR; }
-"&&"	{ return LAND; }
-">>"	{ return SHIFTR; }
-"<<"	{ return SHIFTL; }
-">="	{ return GTEQ; }
-"<="	{ return LTEQ; }
+"!="	{ return TNEQ; }
+"=="	{ return TEQ; }
+"++"	{ return TCONCAT; }
+"||"	{ return TLOR; }
+"&&"	{ return TLAND; }
+">>"	{ return TSHIFTR; }
+"<<"	{ return TSHIFTL; }
+">="	{ return TGTEQ; }
+"<="	{ return TLTEQ; }
 
 ":"		{ return(':'); }
 "."		{ return('.'); }
@@ -73,6 +73,6 @@ whitespace [ \t]+
 "["		{ return('['); }
 "]"		{ return(']'); }
 ";"		{ return(';'); }
-"%%"	{ return SECTSEP; }
+"%%"	{ return TSECTSEP; }
 . 		{ yyerror("syntax error") ; exit( EXIT_FAILURE ) ; }
 %%
