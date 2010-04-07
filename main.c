@@ -16,7 +16,7 @@ FILE *sf = NULL ;
 
 static void cleanup()
 {
-	//TODO: more todo
+	//TODO: more todo than just closing handles
 	fclose( ad ) ;
 	fclose( hf ) ;
 	fclose( sf ) ;

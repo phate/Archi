@@ -11,7 +11,6 @@ RegClass
 },
 fpregs{
 		bits=64,
-		bits=32,
 		regs=[r0,r1,r2,r3,r4]
 },
 	statusregs{
@@ -31,6 +30,7 @@ RegClass blub{
 
 Instr store{
 input = [int blub, eax hallo, int args],
+output = [],
 output = [],
 immediate = [int brav, int zugs]
 },
