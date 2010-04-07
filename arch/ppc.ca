@@ -11,6 +11,7 @@ RegClass
 },
 fpregs{
 		bits=64,
+    bits=32,
 		regs=[r0,r1,r2,r3,r4]
 },
 	statusregs{

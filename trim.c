@@ -17,8 +17,6 @@ static void trim_regdef( node* n )
 	}
 }
 
-#include <stdio.h>
-
 static void trim_regcldef( node *n )
 {
 	assert( n->ntype == REGCLDEF ) ;
@@ -29,8 +27,8 @@ static void trim_regcldef( node *n )
 		if( c->ntype == BITS ){
 			if( p->bits == -1 ) 
 				p->bits = *((int32_t*)c->data) ;
-			else add_emsg( n, "property 'bits' is declared more than once" ) ;
-			destroy_node( c ) ;
+			else EMSG_MISSING_PROPERTY( n, "bits" ) ;
+      destroy_node( c ) ;
 		}
 		else if( c->ntype == REGS ){
 			if( p->regs == NULL ){
@@ -40,8 +38,8 @@ static void trim_regcldef( node *n )
 			  FOREACH_CHILD( p->regs, cc ) i++ ;
 			  *((int32_t*)c->data) = i ;
       }
-      else add_emsg( n, "property 'regs' is declared more than once" ) ; 
-		}
+		  else EMSG_MISSING_PROPERTY( n, "regs" ) ;
+    }
 		else if( c->ntype == ID )
 			p->name = (const char*)c->data ;
 	}
@@ -68,19 +66,19 @@ static void trim_instrdef( node *n )
 	FOREACH_CHILD( n, c ){
 		if( c->ntype == INPUT ){
 			if( p->input == NULL ) p->input = c ;
-      else add_emsg( n, "property 'input' is declared more than once" ) ;
+      else EMSG_MISSING_PROPERTY( n, "input" ) ;
     }
 		else if( c->ntype == OUTPUT ){
 			if( p->output == NULL ) p->output = c ;
-      else add_emsg( n, "property 'output' is declared more than once" ) ;
+      else EMSG_MISSING_PROPERTY( n, "output" ) ;
     }
 		else if( c->ntype == IMMEDIATE ){
 			if( p->immediates == NULL ) p->immediates = c ;
-      else add_emsg( n, "property 'immediates' is declared more than once" ) ;
+      else EMSG_MISSING_PROPERTY( n, "immediates" ) ;
     }
 		else if( c->ntype == ENCODING )
 			if( p->encoding == NULL ) p->encoding = c ;
-      else add_emsg( n, "property 'encoding' is declared more than once" ) ;
+      else EMSG_MISSING_PROPERTY( n, "encoding" ) ;
 		else if( c->ntype == ID )
 			p->name = (const char*)c->data ;
 	}
