@@ -1,67 +1,69 @@
 #include "trim.h"
+#include "ehandling.h"
 
 #include <stdlib.h>
 #include <assert.h>
 
-static void trim_regdef( node* n )
+static void archi_regdef_trim( archi_ast_node* n )
 {
-	node *c ;
-	regprop *p = (regprop*)n->data ;
+  assert( n->node_type == REGDEF ) ;
+
+	archi_ast_node *c ;
+	archi_reg_attributes *attr = (archi_reg_attributes*)n->data ;
 	FOREACH_CHILD( n, c ){
-		if( c->ntype == CODE ){
-			p->code = *((int32_t*)c->data) ;
-			destroy_node( c ) ;
+		if( c->node_type == CODE ){
+      if( attr->code == -1 ) attr->code = *((int32_t*)c->data) ;
+      else EMSG_MULTIPLE_ATTRIBUTE( n, "code" ) ;
 		}
-		else if( c->ntype == ID )
-			p->name = (const char*)c->data ;
+		else if( c->node_type == ID )
+			attr->name = (const char*)c->data ;
 	}
 }
 
-static void trim_regcldef( node *n )
+static void archi_regcldef_trim( archi_ast_node *n )
 {
-	assert( n->ntype == REGCLDEF ) ;
+	assert( n->node_type == REGCLDEF ) ;
 
-	node *c ;
-	regclprop *p = (regclprop*)n->data ;
+	archi_ast_node *c ;
+	archi_regcl_attributes *attr = (archi_regcl_attributes*)n->data ;
 	FOREACH_CHILD( n, c ){
-		if( c->ntype == BITS ){
-			if( p->bits == -1 ) 
-				p->bits = *((int32_t*)c->data) ;
-			else EMSG_MISSING_PROPERTY( n, "bits" ) ;
-      destroy_node( c ) ;
+		if( c->node_type == BITS ){
+			if( attr->bits == -1 ) attr->bits = *((int32_t*)c->data) ;
+			else EMSG_MULTIPLE_ATTRIBUTE( n, "bits" ) ;
 		}
-		else if( c->ntype == REGS ){
-			if( p->regs == NULL ){
-        p->regs = c ;
-			  node *cc ;
+		else if( c->node_type == REGS ){
+			if( attr->regs == NULL ){
+        attr->regs = c ;
 			  int32_t i = 0 ;
-			  FOREACH_CHILD( p->regs, cc ) i++ ;
+			  archi_ast_node *cc ;
+			  FOREACH_CHILD( attr->regs, cc ) i++ ;
 			  *((int32_t*)c->data) = i ;
       }
-		  else EMSG_MISSING_PROPERTY( n, "regs" ) ;
+		  else EMSG_MULTIPLE_ATTRIBUTE( n, "regs" ) ;
     }
-		else if( c->ntype == ID )
-			p->name = (const char*)c->data ;
+		else if( c->node_type == ID )
+			attr->name = (const char*)c->data ;
 	}
 }
 
-static void trim_regsect( node* n )
+static void archi_regsect_trim( archi_ast_node *n )
 {
-	assert( n->ntype == REGSECT ) ;
+	assert( n->node_type == REGSECT ) ;
 
-	node *c ;
+	archi_ast_node *c ;
 	FOREACH_CHILD(n, c){
-		if( c->ntype == REGDEF ) trim_regdef( c ) ;
-		else if( c->ntype == REGCLDEF ) trim_regcldef( c ) ; 
+		if( c->node_type == REGDEF ) archi_regdef_trim( c ) ;
+		else if( c->node_type == REGCLDEF ) archi_regcldef_trim( c ) ; 
 		else assert(0) ;
 	}
 }
 
-static void trim_instrdef( node *n )
+static void archi_instrdef_trim( archi_ast_node *n )
 {
-	assert( n->ntype == INSTRDEF ) ;
-
-	node *c ;
+	assert(0) ;
+  assert( n->node_type == INSTRDEF ) ;
+/*
+	archi_ast_node *c ;
 	instrprop *p = (instrprop*)n->data ;
 	FOREACH_CHILD( n, c ){
 		if( c->ntype == INPUT ){
@@ -82,24 +84,26 @@ static void trim_instrdef( node *n )
 		else if( c->ntype == ID )
 			p->name = (const char*)c->data ;
 	}
+*/
 }
 
-static void trim_instrsect( node *n )
+static void archi_instrsect_trim( archi_ast_node *n )
 {
-	assert( n->ntype == INSTRSECT ) ;
+	assert( n->node_type == INSTRSECT ) ;
 
-	node *c ;
+	archi_ast_node *c ;
 	FOREACH_CHILD(n, c){
-		if( c->ntype == INSTRDEF ) trim_instrdef( c ) ; 
+		if( c->node_type == INSTRDEF ) archi_instrdef_trim( c ) ; 
 		else assert(0) ;
 	}
 }
 
-static void trim_fctdef( node *n )
+static void archi_fctdef_trim( archi_ast_node *n )
 {
-	assert( n->ntype == FCTDEF ) ;
-
-	node *c ;
+  assert(0) ;
+	assert( n->node_type == FCTDEF ) ;
+/*
+	archi_ast_node *c ;
 	fctprop *p = (fctprop*)n->data ;
 	FOREACH_CHILD( n, c ){
 		if( c->ntype == ARGS )
@@ -108,29 +112,30 @@ static void trim_fctdef( node *n )
 			p->name = (const char*)c->data ;
 		else p->body = c ;
 	}
+*/
 }
 
-static void trim_auxsect( node *n )
+static void archi_auxsect_trim( archi_ast_node *n )
 {
-	assert( n->ntype == AUXSECT ) ;
+	assert( n->node_type == AUXSECT ) ;
 
-	node *c ;
+	archi_ast_node *c ;
 	FOREACH_CHILD( n, c ){
-		if( c->ntype == FCTDEF ) trim_fctdef( c ) ;
+		if( c->node_type == FCTDEF ) archi_fctdef_trim( c ) ;
 		else assert(0) ;
 	}
 }
 
-void trim_tree( node *n )
+void archi_ast_trim( archi_ast_node *n )
 {
-	assert( n->ntype == ARCHDEF ) ;
+	assert( n->node_type == ARCHDEF ) ;
 
-	node *c ;
+	archi_ast_node *c ;
 	FOREACH_CHILD(n, c){
-		switch( c->ntype ){
-			case REGSECT: 	trim_regsect( c ) ; break ;
-			case INSTRSECT:	trim_instrsect( c ) ; break ;
-			case AUXSECT:		trim_auxsect( c ) ; break ;
+		switch( c->node_type ){
+			case REGSECT: 	archi_regsect_trim( c ) ; break ;
+			case INSTRSECT:	archi_instrsect_trim( c ) ; break ;
+			case AUXSECT:		archi_auxsect_trim( c ) ; break ;
 			default: assert(0) ;
 		}	
 	}

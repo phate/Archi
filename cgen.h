@@ -5,6 +5,6 @@
 
 #include <stdio.h>
 
-void generate_code( node *n, FILE *hf, FILE *sf ) ;
+void generate_code( archi_ast_node *n, FILE *hf, FILE *sf ) ;
 
 #endif

@@ -6,26 +6,19 @@
 #include <assert.h>
 
 
-regprop* create_regprop()
+void archi_reg_attributes_init( archi_reg_attributes *attr )
 {
-	regprop *p = (regprop*)malloc( sizeof(regprop) ) ;
-	p->code = -1 ;
-	p->name = NULL ;
-
-	return p ;
+	attr->code = -1 ;
+	attr->name = NULL ;
 }
 
-regclprop* create_regclprop()
+void archi_regcl_attributes_init( archi_regcl_attributes *attr )
 {
-	regclprop *p = (regclprop*)malloc( sizeof(regclprop) ) ;
-	
-	p->bits = -1 ;
-	p->regs = NULL ;
-	p->name = NULL ;
-
-	return p ;
+	attr->bits = -1 ;
+	attr->regs = NULL ;
+	attr->name = NULL ;
 }
-
+/*
 instrprop* create_instrprop()
 {
 	instrprop *p = (instrprop*)malloc( sizeof(instrprop) ) ;
@@ -49,13 +42,14 @@ fctprop* create_fctprop()
 
 	return p ;
 }
+*/
 
-node* create_node( nodetype ntype, char* dtype, void* data, unsigned int linenr )
+archi_ast_node* archi_ast_node_create( archi_ast_nodetype ntype, char* dtype, void* data, unsigned int linenr )
 {
-	node *n = malloc( sizeof(node) ) ;
+	archi_ast_node *n = malloc( sizeof(archi_ast_node) ) ;
 
-	n->ntype = ntype ;
-	n->dtype = dtype ;
+	n->node_type = ntype ;
+	n->data_type = dtype ;
 	n->first_child = NULL ;
 	n->last_child = NULL ;
 	n->next_sibling = NULL ;
@@ -63,32 +57,31 @@ node* create_node( nodetype ntype, char* dtype, void* data, unsigned int linenr 
 	n->parent = NULL ;
 	n->data = data ;
 	n->linenr = linenr ;
-	n->emsgs = NULL ;
+	n->emsg_list = NULL ;
 
 	return n ;
 }
 
-void destroy_node( node* p )
+void archi_ast_node_destroy( archi_ast_node *n )
 {
-	node *c ;
-	FOREACH_CHILD( p, c ){
-		destroy_node( c ) ;
+	archi_ast_node *c ;
+	FOREACH_CHILD( n, c ){
+		archi_ast_node_destroy( c ) ;
 	}
 
-	//TODO check for p->parent (ARCHDESC)
-	if( p->prev_sibling ) p->prev_sibling->next_sibling = p->next_sibling ;
-	else p->parent->first_child = p->next_sibling ;
+	if( n->prev_sibling ) n->prev_sibling->next_sibling = n->next_sibling ;
+	else if( n->parent != NULL ) n->parent->first_child = n->next_sibling ;
 
-	if( p->next_sibling ) p->next_sibling->prev_sibling = p->prev_sibling ;
-	else p->parent->last_child = p->prev_sibling ;
+	if( n->next_sibling ) n->next_sibling->prev_sibling = n->prev_sibling ;
+	else if( n->parent != NULL ) n->parent->last_child = n->prev_sibling ;
 
-	//TODO free emsgs
-	free( p->dtype ) ; 
-	free( p->data ) ;	
-	free( p ) ;
+	free( n->data_type ) ; 
+	free( n->data ) ;	
+	archi_destroy_emsgs( n->emsg_list ) ;
+  free( n ) ;
 }
 
-static struct ntname { nodetype type; const char* name; } ntnames[] =
+static struct ntname { archi_ast_nodetype type; const char* name; } ntnames[] =
 {
 	{ARCHDEF, "ArchDef"},
 	{REGSECT, "RegSect"},
@@ -133,7 +126,7 @@ static struct ntname { nodetype type; const char* name; } ntnames[] =
 	{TID, "TID"}
 } ;
 
-static const char* ntnames_lookup( nodetype type )
+static const char* ntnames_lookup( archi_ast_nodetype type )
 {
 
 	for( int i = 0, f = 0; f < sizeof(ntnames); f += sizeof(struct ntname), i++ ){
@@ -143,14 +136,14 @@ static const char* ntnames_lookup( nodetype type )
 	return NULL ;
 }
 
-static void node2string( FILE* f, node* n )
+static void node2string( FILE* f, archi_ast_node *n )
 {
 	char str[256] ;
 
-	const char* name = ntnames_lookup( n->ntype ) ;
+	const char* name = ntnames_lookup( n->node_type ) ;
 	if( name == NULL ) assert(0) ;
 	
-	switch( n->ntype ){
+	switch( n->node_type ){
 		case CODE:
 			sprintf( str, "%ld", *((long*)n->data) ) ; break ;
 		case REGS:
@@ -160,7 +153,7 @@ static void node2string( FILE* f, node* n )
 		case ID:
 			sprintf( str, "%s", (const char*)n->data ) ; break ;
 		case TID:
-			sprintf( str, "%s %s", n->dtype, (const char*)n->data ) ; break ;
+			sprintf( str, "%s %s", n->data_type, (const char*)n->data ) ; break ;
 		case NUMBER:
 			sprintf( str, "%s", (const char*)n->data ) ; break ;
 		case BITSTRING:{
@@ -175,9 +168,9 @@ static void node2string( FILE* f, node* n )
 		n->last_child, n->next_sibling, n->prev_sibling, name, str, n->linenr ) ;
 }
 
-static void write_node( FILE* f, node* p )
+static void write_node( FILE *f, archi_ast_node *p )
 {
-	node *c ;
+	archi_ast_node *c ;
 	FOREACH_CHILD( p, c ){
 		node2string( f, p ) ;
 		fprintf( f, " -> " ) ;
@@ -187,7 +180,7 @@ static void write_node( FILE* f, node* p )
 	}
 }
 
-void view_tree( node* n )
+void archi_view_ast( archi_ast_node* n )
 {
 	if( !n ) return ;
 

@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
-
+/*
 static void insert_node( symtab stab, node *n, const char* name, const char* prefix )
 {
 
@@ -340,16 +340,19 @@ static void tc_instrsect( symtab stab, node *n )
 		else assert(0) ;
 	}
 }
-
-void typecheck( symtab stab, node *n )
+*/
+void archi_typecheck( /*symtab stab, */archi_ast_node *n )
 {
-	node *c ;
+  assert( n->node_type == ARCHDEF ) ;
+/*
+	archi_ast_node *c ;
 	FOREACH_CHILD( n, c ){
-		switch( c->ntype ){
+		switch( c->node_type ){
 			case REGSECT: tc_regsect( stab, c ) ; break ;
 			case INSTRSECT:	tc_instrsect( stab, c ) ; break ;
 			case AUXSECT:		tc_auxsect( stab, c ) ; break ;
 			default: assert(0) ;
 		}
 	}
+*/
 }

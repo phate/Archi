@@ -3,6 +3,6 @@
 
 #include "nodes.h"
 
-void trim_tree( node *n ) ;
+void trim_tree( archi_ast_node *n ) ;
 
 #endif

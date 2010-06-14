@@ -1,7 +1,7 @@
 #include "cgen.h"
 
 #include <assert.h>
-
+/*
 static void gc_regdef( node *n, FILE *hf, FILE *sf )
 {
 	regprop *p = (regprop*)n->data ;
@@ -42,10 +42,12 @@ static void gc_instrsect( node *c )
 static void gc_auxsect( node *c )
 {
 }
+*/
 
-void generate_code( node *n, FILE *hf, FILE *sf )
+void generate_code( archi_ast_node *n, FILE *hf, FILE *sf )
 {
-	node *c ;
+  assert(0) ;
+/*	node *c ;
 	FOREACH_CHILD( n, c ){
 		switch( n->ntype ){
 			case REGSECT: gc_regsect( c, hf, sf ) ; break ;
@@ -54,4 +56,5 @@ void generate_code( node *n, FILE *hf, FILE *sf )
 			default: assert(0) ;
 		}
 	}
+*/
 }

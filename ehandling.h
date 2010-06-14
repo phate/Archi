@@ -1,17 +1,18 @@
-#ifndef EHANDLING_H_
-#define EHANDLING_H_
+#ifndef ARCHI_EHANDLING_H_
+#define ARCHI_EHANDLING_H_
 
 #include <stdint.h>
 
-#define EMSG_MISSING_PROPERTY( node, prop ) \
-  add_emsg( node, "property '%s' is declared more than once", prop )
+#define EMSG_MULTIPLE_ATTRIBUTE( node, attr ) \
+  archi_add_emsg( node, "attribute '%s' is declared more than once", attr )
 
-struct node_ ;
+struct archi_ast_node_ ;
 
-typedef struct emsg_ emsg ;
+typedef struct archi_emsg_ archi_emsg ;
 
-uint32_t print_msgs( struct node_ *n ) ;
+uint32_t archi_print_emsgs( struct archi_ast_node_ *n ) ;
 
-void add_emsg( struct node_ *n, const char *msg, ... ) ;
+void archi_add_emsg( struct archi_ast_node_ *n, const char *msg, ... ) ;
+void archi_destroy_emsgs( archi_emsg *emsg ) ;
 
 #endif

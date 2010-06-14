@@ -7,10 +7,8 @@
 
 //change them
 #define FOREACH_CHILD( p, c ) for( c = p->first_child; c != NULL; c = c->next_sibling )
-//#define FOREACH_CHILD_R( p, c ) for( c = p; c != NULL; c = c->prev_sibling )
 #define FOREACH_SIBLING( p, c ) for( c = p; c != NULL; c = c->next_sibling ) 
 
-//#define FOREACH_SIBLING_R( p, c ) for( c = p; c->prev_sibling != NULL; c = c->prev_sibling ) 
 #define SET_FIRST_CHILD( p, c ) do{ p->first_child = c ; c->parent = p ; }while(0)
 #define SET_LAST_CHILD( p, c ) do{ p->last_child = c ; c->parent = p ; }while(0)
 #define ARE_SIBLINGS( ls, rs ) do{ls->next_sibling = rs ; rs->prev_sibling = ls ;}while(0)
@@ -61,32 +59,32 @@ typedef enum{	ARCHDEF,
 
 							ID,
 							TID
-						 } nodetype ;
+						 } archi_ast_nodetype ;
 
-typedef struct node_{
-	nodetype ntype ;
-	char* dtype ;										
-	struct node_* first_child ;
-	struct node_* last_child ;
-	struct node_* next_sibling ;
-	struct node_* prev_sibling ;
-	struct node_* parent ;
+typedef struct archi_ast_node_{
+	archi_ast_nodetype node_type ;
+	char* data_type ;										
+	struct archi_ast_node_* first_child ;
+	struct archi_ast_node_* last_child ;
+	struct archi_ast_node_* next_sibling ;
+	struct archi_ast_node_* prev_sibling ;
+	struct archi_ast_node_* parent ;
 	void* data ;
 	uint32_t linenr ;
-	emsg* emsgs ;
-} node ;
+	archi_emsg* emsg_list ;
+} archi_ast_node ;
 
-typedef struct regprop_{
+typedef struct archi_reg_attributes_{
 	int32_t code ;
 	const char *name ;
-} regprop ;
+} archi_reg_attributes ;
 
-typedef struct regclprop_{
+typedef struct archi_regcl_attributes_{
 	int32_t bits ;
-	node *regs ;
+	archi_ast_node *regs ;
 	const char *name ;
-} regclprop ;
-
+} archi_regcl_attributes ;
+/*
 typedef struct instrprop_{
 	node *input ;
 	node *output ;
@@ -100,15 +98,17 @@ typedef struct fctprop_{
 	node *body ;
 	const char *name ;
 } fctprop ;
+*/
 
-regprop* create_regprop() ;
-regclprop* create_regclprop() ;
-instrprop* create_instrprop() ;
-fctprop* create_fctprop() ;
+void archi_reg_attributes_init( archi_reg_attributes *attr ) ;
+void archi_regcl_attributes_init( archi_regcl_attributes *attr ) ;
 
-node* create_node( nodetype ntype, char* dtype, void* data, unsigned int linenr ) ;
-void destroy_node( node* p ) ;
+//instrprop* create_instrprop() ;
+//fctprop* create_fctprop() ;
 
-void view_tree( node* n ) ;
+archi_ast_node* archi_ast_node_create( archi_ast_nodetype ntype, char *dtype, void *data, unsigned int linenr ) ;
+void archi_ast_node_destroy( archi_ast_node *p ) ;
+
+void archi_view_ast( archi_ast_node *n ) ;
 
 #endif

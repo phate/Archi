@@ -7,20 +7,27 @@
 #include <assert.h>
 #include <stdarg.h>
 
-struct emsg_{
-	struct emsg_* next ;
-	const char* msg ;
+struct archi_emsg_{
+	struct archi_emsg_* next ;
+	char* msg ;
 } ;
 
+void archi_destroy_emsgs( archi_emsg *emsg )
+{
+  if( emsg == NULL ) return ;
+  free( emsg->msg ) ;
+  archi_destroy_emsgs( emsg->next ) ;
+  free( emsg ) ;
+}
 
-static emsg* create_msg( const char* msg, uint32_t linenr )
+static archi_emsg* create_msg( const char* msg, uint32_t linenr )
 {
 	//TODO: hard coded, fix it
 	char tmp[256] ;
 	int cnt = snprintf( tmp, 256, "%d:\terror: %s", linenr, msg ) ;
 	if( cnt >= 256 ) assert(0) ;
 
-	emsg* m = (emsg*)malloc( sizeof(emsg) ) ;
+	archi_emsg* m = (archi_emsg*)malloc( sizeof(archi_emsg) ) ;
 	
 	m->msg = strdup( tmp ) ;
 	m->next = NULL ;
@@ -28,12 +35,12 @@ static emsg* create_msg( const char* msg, uint32_t linenr )
 	return m ;
 }
 
-static emsg* append_msgs( emsg* m1, emsg* m2 )
+static archi_emsg* append_msgs( archi_emsg* m1, archi_emsg* m2 )
 {
 	if( m1 == NULL ) return m2 ;
 	if( m2 == NULL ) return m1 ;
 
-	emsg* tmp = m1 ;
+	archi_emsg* tmp = m1 ;
 	while( m1->next != NULL ){ m1 = m1->next ; }
 
 	m1->next = m2 ;
@@ -41,7 +48,7 @@ static emsg* append_msgs( emsg* m1, emsg* m2 )
 	return tmp ;	
 }
 
-void add_emsg( node *n, const char *msg, ... )
+void archi_add_emsg( archi_ast_node *n, const char *msg, ... )
 {
 	//TODO: hard coded, fix it
 	char tmp[256] ;
@@ -53,24 +60,24 @@ void add_emsg( node *n, const char *msg, ... )
 
   if( cnt >= 256 ) assert(0) ;
 
-	emsg *m = create_msg( tmp, n->linenr ) ;
-	n->emsgs = append_msgs( n->emsgs, m ) ;
+	archi_emsg *m = create_msg( tmp, n->linenr ) ;
+	n->emsg_list = append_msgs( n->emsg_list, m ) ;
 }
 
-static emsg* linearize_msgs( node* n )
+static archi_emsg* linearize_msgs( archi_ast_node *n )
 {
-	node* c ;
+	archi_ast_node* c ;
 	FOREACH_CHILD( n, c ){
-		emsg *msgs = linearize_msgs( c ) ;
-		n->emsgs = append_msgs( n->emsgs, msgs ) ;
+		archi_emsg *msgs = linearize_msgs( c ) ;
+		n->emsg_list = append_msgs( n->emsg_list, msgs ) ;
 	}
 
-	return n->emsgs ;	
+	return n->emsg_list ;	
 }
 
-uint32_t print_msgs( node* n )
+uint32_t archi_print_emsgs( archi_ast_node *n )
 {
-	emsg *msgs = linearize_msgs( n ) ;
+	archi_emsg *msgs = linearize_msgs( n ) ;
 
 	uint32_t cnt = 0 ;
 	while( msgs ){

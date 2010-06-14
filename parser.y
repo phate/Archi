@@ -6,20 +6,20 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#define YYSTYPE node*
+#define YYSTYPE archi_ast_node*
 
 extern int yyerror(char*) ;
 extern int yylex() ;
 extern char* yytext ; 
 extern unsigned int linenr ; 
 
-static node* ast = NULL ;
+static archi_ast_node* ast = NULL ;
 static void* buffer[2] ;
 
-void add_children( node *p, node *fc )
+void add_children( archi_ast_node *p, archi_ast_node *fc )
 {
 	if( p != NULL && fc != NULL ){ 
-		node *n ;
+		archi_ast_node *n ;
 		SET_FIRST_CHILD( p, fc ) ;
 		FOREACH_SIBLING( fc, n ){ 
 			n->parent = p ;
@@ -28,9 +28,9 @@ void add_children( node *p, node *fc )
 	}
 }
 
-node* create_expression( nodetype ntype, node *e1, node *e2 )
+archi_ast_node* create_expression( archi_ast_nodetype ntype, archi_ast_node *e1, archi_ast_node *e2 )
 {
-	node *n = create_node( ntype, NULL, NULL, e1->linenr ) ;
+	archi_ast_node *n = archi_ast_node_create( ntype, NULL, NULL, e1->linenr ) ;
 	ARE_SIBLINGS( e1, e2 ) ;
 	add_children( n, e1 ) ;
 
@@ -46,22 +46,22 @@ node* create_expression( nodetype ntype, node *e1, node *e2 )
 %token TIF TTHEN TELSE TSHIFTL TSHIFTR TLTEQ TGTEQ TLAND TLOR TCONCAT TEQ TNEQ 
 
 %%
-ArchDesc			:	Sections												{ ast = create_node( ARCHDEF, NULL, NULL, linenr ) ;
+ArchDesc			:	Sections												{ ast = archi_ast_node_create( ARCHDEF, NULL, NULL, linenr ) ;
 																									add_children( ast, $1 ) ;}
 							;
 Sections			: RegSect TSECTSEP
-								InstrSect TSECTSEP AuxSect			{ node *rs, *is, *au ;
-																									rs = create_node( REGSECT, NULL, NULL, linenr ) ;
-																									is = create_node( INSTRSECT, NULL, NULL, linenr ) ;
-																									au = create_node( AUXSECT, NULL, NULL, linenr ) ;
+								/*InstrSect TSECTSEP AuxSect*/		{ archi_ast_node *rs, *is, *au ;
+																									rs = archi_ast_node_create( REGSECT, NULL, NULL, linenr ) ;
+																									//is = create_node( INSTRSECT, NULL, NULL, linenr ) ;
+																									//au = create_node( AUXSECT, NULL, NULL, linenr ) ;
 																									add_children( rs, $1 ) ;
-																									add_children( is, $3 ) ;
-																									add_children( au, $5 ) ;
-																									ARE_SIBLINGS( rs, is ) ;
-																									ARE_SIBLINGS( is, au ) ;
+																									//add_children( is, $3 ) ;
+																									//add_children( au, $5 ) ;
+																									//ARE_SIBLINGS( rs, is ) ;
+																									//ARE_SIBLINGS( is, au ) ;
 																									$$ = rs ;}
 							;
-RegSect				: RegSectDef ';' RegSect					{ node* n ;
+RegSect				: RegSectDef ';' RegSect					{ archi_ast_node *n ;
 																									FOREACH_SIBLING( $1, n){
 																										if( n->next_sibling == NULL ){
 																											ARE_SIBLINGS( n, $3 ) ;
@@ -76,20 +76,22 @@ RegSectDef		: TREGCL RegClDef									{ $$ = $2 ;}
 RegDef				:	RegDefIdent ',' RegDef					{ ARE_SIBLINGS( $1, $3 ) ; $$ = $1 ; }
 							| RegDefIdent											{ $$ = $1 ; }						
 							;
-RegDefIdent		: Id '{' RegBody '}'							{ $$ = create_node( REGDEF, strdup("Reg"),
-																									create_regprop(), $1->linenr ) ;
+RegDefIdent		: Id '{' RegBody '}'							{ archi_reg_attributes *attr = malloc( sizeof(archi_reg_attributes) ) ;
+                                                  archi_reg_attributes_init( attr ) ;
+                                                  $$ = archi_ast_node_create( REGDEF, strdup("Reg"), attr, $1->linenr ) ;
 																									ARE_SIBLINGS( $1, $3 ) ;
 																									add_children( $$, $1 ) ;}
 							;
 RegBody				: TREG_CODE '=' TNUM							{ int32_t* i = malloc( sizeof(int32_t) ) ;
 																									*i = strtol( yytext, 0, 10 ) ;
-																									$$ = create_node( CODE, NULL, i, linenr ) ;}
+																									$$ = archi_ast_node_create( CODE, NULL, i, linenr ) ;}
 							;
 RegClDef			: RegClDefIdent ',' RegClDef			{ ARE_SIBLINGS( $1, $3 ) ; $$ = $1 ; }
 							| RegClDefIdent										{ $$ = $1 ; }
 							;
-RegClDefIdent :	Id '{' RegClBody '}'						{ $$ = create_node( REGCLDEF, strdup("RegClass"),
-																									create_regclprop(), $1->linenr ) ;
+RegClDefIdent :	Id '{' RegClBody '}'						{ archi_regcl_attributes *attr = malloc( sizeof(archi_regcl_attributes) ) ;
+                                                  archi_regcl_attributes_init( attr ) ;
+                                                  $$ = archi_ast_node_create( REGCLDEF, strdup("RegClass"), attr, $1->linenr ) ;
 																									ARE_SIBLINGS( $1, $3 ) ;
 																								  add_children( $$, $1 ) ;}
 							;
@@ -98,12 +100,12 @@ RegClBody			: RegClBody ',' RegClProp					{ ARE_SIBLINGS($3, $1) ; $$ = $3 ; }
 							;
 RegClProp			: TREGCL_BITS '=' TNUM						{ uint32_t* i = malloc( sizeof(uint32_t) ) ;
 																								  *i = strtol( yytext, 0, 10 ) ;
-																								  $$ = create_node( BITS, NULL, i, linenr ) ; }
+																								  $$ = archi_ast_node_create( BITS, NULL, i, linenr ) ; }
 							| TREGCL_REGS '=' '[' IdList ']'	{	int32_t *i = malloc(sizeof(int32_t)) ; *i = -1 ;
-																									$$ = create_node( REGS, NULL, i, linenr ) ;
+																									$$ = archi_ast_node_create( REGS, NULL, i, linenr ) ;
 																									add_children( $$, $4 ) ;}
 							;
-
+/*
 InstrSect			: InstrSectDef ';' InstrSect				{ node* n ;
 																										FOREACH_SIBLING( $1, n ){
 																											if( n->next_sibling == NULL ){
@@ -147,12 +149,13 @@ TId						: TIDENT														{buffer[1] = strdup(yytext) ;}
 							| TBOOL TIDENT											{$$ = create_node( TID, strdup("Bool"), strdup(yytext), linenr );}
 							| TBITS TIDENT											{$$ = create_node( TID, strdup("Bits"), strdup(yytext), linenr );}
 							;
+*/
 IdList				: Id ',' IdList											{ ARE_SIBLINGS( $1, $3 ) ; $$ = $1 ; }
 							| Id																{ $$ = $1 ; }
 							;
-Id						: TIDENT														{ $$ = create_node( ID, NULL, strdup(yytext), linenr ) ; }
+Id						: TIDENT														{ $$ = archi_ast_node_create( ID, NULL, strdup(yytext), linenr ) ; }
 							; 
-
+/*
 AuxSect				: FctDef AuxSect										{ $$ = $1 ; if( $2 != NULL ){ ARE_SIBLINGS($$, $2) ;}}
 							|																		{ $$ = 0 ; }
 							;
@@ -231,9 +234,10 @@ EExpList			: ExpList														{ $$ = $1 ; }
 ExpList				: Exp ',' ExpList										{ ARE_SIBLINGS( $1, $3 ) ; $$ = $1 ; }								
 							| Exp																{ $$ = $1 ; }
 							;
+*/
 %%
 
-node* parse()
+archi_ast_node* parse()
 {
 	yyparse() ;
 

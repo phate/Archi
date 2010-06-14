@@ -3,12 +3,13 @@
 #include "analyze.h"
 #include "symtab.h"
 #include "trim.h"
+#include "cgen.h"
 #include "ehandling.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 
-extern node* parse() ;
+extern archi_ast_node* parse() ;
 extern FILE *yyin ;
 FILE *ad = NULL ;
 FILE *hf = NULL ;
@@ -36,20 +37,21 @@ static FILE* open_file( const char *filename, const char *mode )
 
 static void process_input( int argc, char* argv[] )
 {
-	if( argc != 4 ){
+/*
+  if( argc != 4 ){
 		fprintf( stderr, "Invalid number of arguments:\n" ) ;
 		fprintf( stderr, "%s <arch description> <output header file> <output source file>\n", argv[0] ) ;
 		exit( EXIT_FAILURE ) ;
 	}
-
+*/
 	ad = open_file( argv[1], "r" ) ;
-	hf = open_file( argv[2], "w" ) ;
-	sf = open_file( argv[3], "w" ) ;	
+//	hf = open_file( argv[2], "w" ) ;
+//	sf = open_file( argv[3], "w" ) ;	
 } 
 
-static void report_errors( node *n )
+static void report_errors( archi_ast_node *n )
 {
-	uint32_t cnt = print_msgs( n ) ;
+	uint32_t cnt = archi_print_emsgs( n ) ;
 	if( cnt != 0 ){
 		cleanup() ;
 	 	exit( EXIT_FAILURE ) ;
@@ -61,16 +63,16 @@ int main( int argc, char* argv[] )
 	process_input( argc, argv ) ;
 	yyin = ad ;
 
-	node* ast ;
-	symtab stab = create_symtab() ;
+	archi_ast_node* ast ;
+	//symtab stab = create_symtab() ;
 	
 	ast = parse() ;
 	if( ast == NULL ){
 		cleanup() ;
 		exit( EXIT_FAILURE ) ;
 	}
-	view_tree(ast) ;
-	
+	archi_view_ast(ast) ;
+/*
 	trim_tree( ast ) ;
 	fill_symtab( stab, ast ) ;
 	report_errors( ast ) ;
@@ -80,6 +82,9 @@ int main( int argc, char* argv[] )
 	typecheck( stab, ast ) ;
 	report_errors( ast ) ;
 
+  generate_code( ast, stdout, stdout ) ;
+
 	cleanup() ;
+*/
 	return 0 ;
 }

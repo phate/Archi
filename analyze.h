@@ -1,16 +1,17 @@
-#ifndef ANALYZE_H_
-#define ANALYZE_H_
+#ifndef ARCHI_ANALYZE_H_
+#define ARCHI_ANALYZE_H_
 
 #include "symtab.h"
 
-#include <string.h>
+//#include <string.h>
 
-#define MANGLE_NAME( name, prefix, postfix ) \
-  char name[strlen(prefix)+strlen( strcmp(prefix, "") ? "::" : "")+strlen(postfix)+1] ; \
+/* #define MANGLE_NAME( name, prefix, postfix ) \
+//  char name[strlen(prefix)+strlen( strcmp(prefix, "") ? "::" : "")+strlen(postfix)+1] ; \
   sprintf( name, "%s%s%s", prefix, strcmp(prefix, "") ? "::" : "", postfix )
+*/
 
-void fill_symtab( symtab stab, node *n ) ;
+//void archi_symtab_fill( archi_symtab stab, archi_ast_node *n ) ;
 
-void typecheck( symtab stab, node *n ) ;
+void archi_typecheck( /*archi_symtab stab, */archi_ast_node *n ) ;
 
 #endif

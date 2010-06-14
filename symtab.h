@@ -1,24 +1,36 @@
-#ifndef SYMTAB_H_
-#define SYMTAB_H_
+#ifndef ARCHI_SYMTAB_H_
+#define ARCHI_SYMTAB_H_
 
 #include "nodes.h"
 
-#define SIZE 211
+/*
+#define ARCHI_ENTRY_CNT 211
 
-typedef struct entry_{
-	struct entry_* next ;
-	char* key ;
-	node* n ;
-} entry ;
+typedef struct archi_symtab_entry_{
+	struct archi_symtab_entry_ *next ;
+	char *key ;
+	archi_ast_node *node ;
+} archi_symtab_entry ;
 
-typedef entry** symtab ;
+typedef struct archi_symtab_scope_{
+  struct archi_symtab_scope_* prev_scope ;
+  archi_symtab_entry* entry[ARCHI_ENTRY_CNT] ;
+} archi_symtab_scope ;
+*/
 
-symtab create_symtab() ;
-void destroy_symtab( symtab t ) ;
+struct archi_symtab_scope_ ;
 
-node* lookup( symtab t, const char* key ) ;
-void insert( symtab t, const char* key, node* n ) ;
+typedef struct archi_symtab_{
+  struct archi_symtab_scope_* innermost_scope ;
+} archi_symtab ;
 
-void print_symtab( symtab t ) ;
+void archi_symtab_init( archi_symtab *st ) ;
+void archi_symtab_destroy( archi_symtab *st ) ;
+
+archi_ast_node* archi_symtab_lookup( archi_symtab *st, const char* key ) ;
+void archi_symtab_insert( archi_symtab *st, const char* key, archi_ast_node* n ) ;
+
+void archi_symtab_push_scope( archi_symtab *symtab ) ;
+void archi_symtab_pop_scope( archi_symtab *symtab ) ;
 
 #endif

@@ -4,15 +4,62 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-symtab create_symtab()
+#define ARCHI_ENTRY_CNT 211
+
+typedef struct archi_symtab_entry_{
+  struct archi_symtab_entry_ *next ;
+  char *key ;
+  archi_ast_node *node ;
+} archi_symtab_entry ;
+
+typedef struct archi_symtab_scope_{
+  struct archi_symtab_scope_* prev_scope ;
+  archi_symtab_entry* entry[ARCHI_ENTRY_CNT] ;
+} archi_symtab_scope ;
+
+static void archi_symtab_scope_init( archi_symtab_scope *sc, archi_symtab_scope *prev_scope )
 {
-	symtab t = malloc( SIZE*sizeof(entry*) ) ;
-	memset( t, 0, SIZE*sizeof(entry*) ) ;
-	
-	return t ;
+  sc->prev_scope = prev_scope ;
+  memset( sc->entry, 0, sizeof(archi_symtab_entry*)*ARCHI_ENTRY_CNT ) ;
 }
 
-void destroy_symtab( symtab t )
+void archi_symtab_init( archi_symtab *st )
+{
+  st->innermost_scope = NULL ;
+  archi_symtab_push_scope( st ) ;
+}
+
+void archi_symtab_destroy( archi_symtab *st )
+{
+  while( st->innermost_scope != NULL ){
+    archi_symtab_pop_scope( st ) ;
+  }
+}
+
+void archi_symtab_push_scope( archi_symtab *st )
+{
+  archi_symtab_scope* sc = malloc( sizeof(archi_symtab_scope) ) ;
+  archi_symtab_scope_init( sc, st->innermost_scope ) ;
+  st->innermost_scope = sc ;
+}
+
+void archi_symtab_pop_scope( archi_symtab *st )
+{
+  for( unsigned int i = 0; i < ARCHI_ENTRY_CNT; i++ ){
+    archi_symtab_entry* e = st->innermost_scope->entry[i] ;
+    while( st->innermost_scope->entry[i] != 0 ){
+      st->innermost_scope->entry[i] = e->next ;
+      free( e->key ) ;
+      free( e ) ;
+    }
+  }
+
+  archi_symtab_scope* sc = st->innermost_scope->prev_scope ;
+  free( st->innermost_scope ) ;
+  st->innermost_scope = sc ;  
+}
+
+/*void destroy_symtab( symtab t )
 {
 	for( unsigned int i = 0; i < SIZE; i++ ){
 		entry* e = t[i] ;
@@ -25,20 +72,35 @@ void destroy_symtab( symtab t )
 
 	free( t ) ;
 }
+*/
 
 #define SHIFT 4
 static unsigned int hash( const char* key )
 {
 	unsigned int tmp = 0, i = 0 ;
 	while( key[i] != '\0' ){
-		tmp = ((tmp << SHIFT) + key[i]) % SIZE ;
+		tmp = ((tmp << SHIFT) + key[i]) % ARCHI_ENTRY_CNT ;
 		i++ ; 
 	}
 
 	return tmp ;
 }
 
-node* lookup( symtab t, const char* key )
+
+archi_ast_node* archi_symtab_lookup( archi_symtab *st, const char* key )
+{
+  archi_symtab_scope* sc = st->innermost_scope ;
+  for( ; sc != NULL; sc = sc->prev_scope ){
+    archi_symtab_entry *e = sc->entry[hash(key)] ;
+    for( ; e != NULL; e = e->next ){
+      if( strcmp(key, e->key) == 0 ) return e->node ;
+    }
+  }
+
+  return NULL ;
+}
+
+/*node* lookup( symtab t, const char* key )
 {
 	entry* e = t[hash(key)] ;
 
@@ -48,7 +110,22 @@ node* lookup( symtab t, const char* key )
 	if( e != NULL ) return e->n ;
 	else return NULL ;
 }
+*/
 
+void archi_symtab_insert( archi_symtab *st, const char* key, archi_ast_node *n )
+{
+  archi_symtab_entry* e = malloc(sizeof(archi_symtab_entry)) ;
+
+  unsigned int h = hash(key) ;
+
+  e->node = n ;
+  e->key = strdup( key ) ;
+  e->next = st->innermost_scope->entry[h] ;
+
+  st->innermost_scope->entry[h] = e ;
+}
+
+/*
 void insert( symtab t, const char* key, node* n )
 {
 	entry* e = malloc( sizeof(entry) ) ;
@@ -61,7 +138,10 @@ void insert( symtab t, const char* key, node* n )
 
 	t[h] = e ;
 }
+*/
 
+
+/*
 void print_symtab( symtab t )
 {
 	for( unsigned int i = 0; i < SIZE; i++ ){
@@ -74,3 +154,4 @@ void print_symtab( symtab t )
 		printf("\n") ;
 	}
 }
+*/
