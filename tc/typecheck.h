@@ -1,7 +1,7 @@
 #ifndef ARCHI_ANALYZE_H_
 #define ARCHI_ANALYZE_H_
 
-#include "symtab.h"
+#include "../symtab.h"
 
 //#include <string.h>
 
@@ -12,6 +12,6 @@
 
 //void archi_symtab_fill( archi_symtab stab, archi_ast_node *n ) ;
 
-void archi_typecheck( /*archi_symtab stab, */archi_ast_node *n ) ;
+void archi_typecheck( archi_symtab *st, archi_ast_node *n ) ;
 
 #endif

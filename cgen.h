@@ -1,7 +1,7 @@
 #ifndef CGEN_H_
 #define CGEN_H_
 
-#include "nodes.h"
+#include "ast/node.h"
 
 #include <stdio.h>
 

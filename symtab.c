@@ -29,33 +29,25 @@ void archi_symtab_init( archi_symtab *st )
   archi_symtab_push_scope( st ) ;
 }
 
+/*
 void archi_symtab_destroy( archi_symtab *st )
 {
   while( st->innermost_scope != NULL ){
     archi_symtab_pop_scope( st ) ;
   }
 }
-
+*/
 void archi_symtab_push_scope( archi_symtab *st )
 {
-  archi_symtab_scope* sc = malloc( sizeof(archi_symtab_scope) ) ;
+  archi_symtab_scope* sc = talloc( st, archi_symtab_scope ) ;
   archi_symtab_scope_init( sc, st->innermost_scope ) ;
   st->innermost_scope = sc ;
 }
 
 void archi_symtab_pop_scope( archi_symtab *st )
 {
-  for( unsigned int i = 0; i < ARCHI_ENTRY_CNT; i++ ){
-    archi_symtab_entry* e = st->innermost_scope->entry[i] ;
-    while( st->innermost_scope->entry[i] != 0 ){
-      st->innermost_scope->entry[i] = e->next ;
-      free( e->key ) ;
-      free( e ) ;
-    }
-  }
-
   archi_symtab_scope* sc = st->innermost_scope->prev_scope ;
-  free( st->innermost_scope ) ;
+  talloc_free( st->innermost_scope ) ;
   st->innermost_scope = sc ;  
 }
 
@@ -114,12 +106,12 @@ archi_ast_node* archi_symtab_lookup( archi_symtab *st, const char* key )
 
 void archi_symtab_insert( archi_symtab *st, const char* key, archi_ast_node *n )
 {
-  archi_symtab_entry* e = malloc(sizeof(archi_symtab_entry)) ;
+  archi_symtab_entry* e = talloc( st->innermost_scope, archi_symtab_entry ) ;
 
   unsigned int h = hash(key) ;
 
   e->node = n ;
-  e->key = strdup( key ) ;
+  e->key = talloc_strdup( e, key ) ;
   e->next = st->innermost_scope->entry[h] ;
 
   st->innermost_scope->entry[h] = e ;
@@ -141,17 +133,22 @@ void insert( symtab t, const char* key, node* n )
 */
 
 
-/*
-void print_symtab( symtab t )
+
+void archi_symtab_print( archi_symtab *st )
 {
-	for( unsigned int i = 0; i < SIZE; i++ ){
-		printf("%d:", i ) ;
-		entry* e = t[i] ;
-		while( e != 0 ){
-			printf( "{ key: %s node: %p } ", e->key, e->n ) ;	
-			e = e->next ;
-		}
-		printf("\n") ;
-	}
+  archi_symtab_scope *sc = st->innermost_scope ;
+  while( sc ){
+	  for( unsigned int i = 0; i < ARCHI_ENTRY_CNT; i++ ){
+		  printf("%d:", i ) ;
+		  archi_symtab_entry *e = sc->entry[i] ;
+		  while( e != 0 ){
+			  printf( "{ key: %s node: %p } ", e->key, e->node ) ;	
+			  e = e->next ;
+		  }
+		  printf("\n") ;
+	  }
+    printf("\n") ;
+    sc = sc->prev_scope ;
+  }
 }
-*/
+

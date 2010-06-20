@@ -1,23 +1,11 @@
-#include "nodes.h"
+#include "node.h"
+#include "../debug.h"
 
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
 
-
-void archi_reg_attributes_init( archi_reg_attributes *attr )
-{
-	attr->code = -1 ;
-	attr->name = NULL ;
-}
-
-void archi_regcl_attributes_init( archi_regcl_attributes *attr )
-{
-	attr->bits = -1 ;
-	attr->regs = NULL ;
-	attr->name = NULL ;
-}
 /*
 instrprop* create_instrprop()
 {
@@ -44,7 +32,8 @@ fctprop* create_fctprop()
 }
 */
 
-archi_ast_node* archi_ast_node_create( archi_ast_nodetype ntype, char* dtype, void* data, unsigned int linenr )
+/*
+archi_ast_node* archi_ast_node_create( archi_ast_nodetype ntype, char* dtype, unsigned int linenr )
 {
 	archi_ast_node *n = malloc( sizeof(archi_ast_node) ) ;
 
@@ -55,43 +44,66 @@ archi_ast_node* archi_ast_node_create( archi_ast_nodetype ntype, char* dtype, vo
 	n->next_sibling = NULL ;
 	n->prev_sibling = NULL ;
 	n->parent = NULL ;
-	n->data = data ;
 	n->linenr = linenr ;
 	n->emsg_list = NULL ;
 
+  memset( n->attr, 0, sizeof(node_attributes) ) ;
+
 	return n ;
 }
-
-void archi_ast_node_destroy( archi_ast_node *n )
+*/
+static int archi_ast_node_destroy( archi_ast_node *n )
 {
-	archi_ast_node *c ;
-	FOREACH_CHILD( n, c ){
-		archi_ast_node_destroy( c ) ;
-	}
+  archi_ast_node *c ;
+  FOREACH_CHILD( n, c ){
+    talloc_free( c ) ;
+  }
 
-	if( n->prev_sibling ) n->prev_sibling->next_sibling = n->next_sibling ;
-	else if( n->parent != NULL ) n->parent->first_child = n->next_sibling ;
+  if( n->prev_sibling ) n->prev_sibling->next_sibling = n->next_sibling ;
+  else if( n->parent != NULL ) n->parent->first_child = n->next_sibling ;
 
-	if( n->next_sibling ) n->next_sibling->prev_sibling = n->prev_sibling ;
-	else if( n->parent != NULL ) n->parent->last_child = n->prev_sibling ;
+  if( n->next_sibling ) n->next_sibling->prev_sibling = n->prev_sibling ;
+  else if( n->parent != NULL ) n->parent->last_child = n->prev_sibling ;
 
-	free( n->data_type ) ; 
-	free( n->data ) ;	
-	archi_destroy_emsgs( n->emsg_list ) ;
-  free( n ) ;
+  return 0 ;
+}
+
+archi_ast_node* archi_ast_node_talloc( TALLOC_CTX *ctx )
+{
+  archi_ast_node *n = talloc( ctx, archi_ast_node ) ;
+  talloc_set_destructor( n, archi_ast_node_destroy ) ;
+
+  return n ;
+}
+
+void archi_ast_node_init( archi_ast_node *n, archi_ast_nodetype ntype, const char* dtype, unsigned int linenr )
+{
+  DEBUG_ASSERT( n ) ;
+
+  n->node_type = ntype ;
+  n->data_type =  dtype == NULL ? NULL : talloc_strdup( n, dtype ) ;
+  n->first_child = NULL ;
+  n->last_child = NULL ;
+  n->next_sibling = NULL ;
+  n->prev_sibling = NULL ;
+  n->parent = NULL ;
+  n->linenr = linenr ;
+  n->emsg_list = NULL ; 
+
+  //FIXME: initialize union
 }
 
 static struct ntname { archi_ast_nodetype type; const char* name; } ntnames[] =
 {
-	{ARCHDEF, "ArchDef"},
-	{REGSECT, "RegSect"},
+	{NT_ARCHDEF, "ArchDef"},
+	{NT_REGSECT, "RegSect"},
 	{INSTRSECT, "InstrSect"},
 	{AUXSECT, "AuxSect"},
-	{REGDEF, "RegDef"},
-	{CODE, "Code"},
-	{REGCLDEF, "RegClDef"},
-	{REGS, "Regs"},
-	{BITS, "Bits"},
+	{NT_REGDEF, "RegDef"},
+	{NT_CODE, "Code"},
+	{NT_REGCLDEF, "RegClDef"},
+	{NT_REGS, "Regs"},
+	{NT_BITS, "Bits"},
 	{INSTRDEF, "InstrDef"},
 	{INPUT, "Input"},
 	{OUTPUT, "Output"},
@@ -122,7 +134,7 @@ static struct ntname { archi_ast_nodetype type; const char* name; } ntnames[] =
 	{NUMBER, "Number"},
 	{BITSTRING, "Bitstring"},
 	{BOOLEAN, "Boolean"},
-	{ID, "ID"},
+	{NT_ID, "ID"},
 	{TID, "TID"}
 } ;
 
@@ -141,26 +153,27 @@ static void node2string( FILE* f, archi_ast_node *n )
 	char str[256] ;
 
 	const char* name = ntnames_lookup( n->node_type ) ;
-	if( name == NULL ) assert(0) ;
+	DEBUG_ASSERT( name ) ;
 	
 	switch( n->node_type ){
-		case CODE:
-			sprintf( str, "%ld", *((long*)n->data) ) ; break ;
-		case REGS:
-			sprintf( str, "%d", *((int32_t*)n->data) ) ; break ;
-		case BITS:
-			sprintf( str, "%ld", *((long*)n->data) ) ; break ;
-		case ID:
-			sprintf( str, "%s", (const char*)n->data ) ; break ;
-		case TID:
+		case NT_CODE:
+			sprintf( str, "%d", n->attr.code ) ; break ;
+		case NT_REGS:
+			sprintf( str, "%d", n->attr.nregs ) ; break ;
+		case NT_BITS:
+			sprintf( str, "%d", n->attr.bits ) ; break ;
+		case NT_ID:
+			sprintf( str, "%s", n->attr.id ) ; break ;
+/*		case TID:
 			sprintf( str, "%s %s", n->data_type, (const char*)n->data ) ; break ;
 		case NUMBER:
 			sprintf( str, "%s", (const char*)n->data ) ; break ;
 		case BITSTRING:{
 			size_t l = strlen( (const char *)n->data ) ;
 			sprintf( str, "%s", strncat( str, ((const char*)n->data)+1, l-2) ) ; break ;}
-		default:
+*/		default:
 			sprintf( str, "%s", "" ) ; break ;
+
 	}
 	
 	const char* string = "\"n: %p\\np: %p\\nfc: %p\\nlc: %p\\nns: %p\\nps: %p\\n%s\\n%s\\nlnr:%d\"" ;					

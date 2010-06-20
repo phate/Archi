@@ -1,5 +1,5 @@
 #include "ehandling.h"
-#include "nodes.h"
+#include "ast/node.h"
 
 #include <stdlib.h>
 #include <stdio.h>

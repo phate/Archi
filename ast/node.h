@@ -1,11 +1,13 @@
-#ifndef NODE_H_
-#define NODE_H_
+#ifndef ARCHI_NODE_H_
+#define ARCHI_NODE_H_
 
-#include "ehandling.h"
+#include "../ehandling.h"
+#include "attributes.h"
+
+#include <talloc.h>
 
 #include <stdint.h>
 
-//change them
 #define FOREACH_CHILD( p, c ) for( c = p->first_child; c != NULL; c = c->next_sibling )
 #define FOREACH_SIBLING( p, c ) for( c = p; c != NULL; c = c->next_sibling ) 
 
@@ -13,17 +15,17 @@
 #define SET_LAST_CHILD( p, c ) do{ p->last_child = c ; c->parent = p ; }while(0)
 #define ARE_SIBLINGS( ls, rs ) do{ls->next_sibling = rs ; rs->prev_sibling = ls ;}while(0)
 
-typedef enum{	ARCHDEF,
-							REGSECT,
+typedef enum{	NT_ARCHDEF,
+							NT_REGSECT,
 							INSTRSECT,					
 							AUXSECT,
 	
-							REGDEF,
-							CODE,
+							NT_REGDEF,
+							NT_CODE,
 	
-							REGCLDEF,
-							REGS,
-							BITS,
+							NT_REGCLDEF,
+							NT_REGS,
+							NT_BITS,
 							
 							INSTRDEF,
 							INPUT,
@@ -57,7 +59,7 @@ typedef enum{	ARCHDEF,
 							BITSTRING,
 							BOOLEAN,
 
-							ID,
+							NT_ID,
 							TID
 						 } archi_ast_nodetype ;
 
@@ -69,21 +71,11 @@ typedef struct archi_ast_node_{
 	struct archi_ast_node_* next_sibling ;
 	struct archi_ast_node_* prev_sibling ;
 	struct archi_ast_node_* parent ;
-	void* data ;
-	uint32_t linenr ;
+	node_attributes attr ;
+  uint32_t linenr ;
 	archi_emsg* emsg_list ;
 } archi_ast_node ;
 
-typedef struct archi_reg_attributes_{
-	int32_t code ;
-	const char *name ;
-} archi_reg_attributes ;
-
-typedef struct archi_regcl_attributes_{
-	int32_t bits ;
-	archi_ast_node *regs ;
-	const char *name ;
-} archi_regcl_attributes ;
 /*
 typedef struct instrprop_{
 	node *input ;
@@ -100,14 +92,11 @@ typedef struct fctprop_{
 } fctprop ;
 */
 
-void archi_reg_attributes_init( archi_reg_attributes *attr ) ;
-void archi_regcl_attributes_init( archi_regcl_attributes *attr ) ;
-
 //instrprop* create_instrprop() ;
 //fctprop* create_fctprop() ;
 
-archi_ast_node* archi_ast_node_create( archi_ast_nodetype ntype, char *dtype, void *data, unsigned int linenr ) ;
-void archi_ast_node_destroy( archi_ast_node *p ) ;
+archi_ast_node* archi_ast_node_talloc( TALLOC_CTX *ctx ) ;
+void archi_ast_node_init( archi_ast_node *n, archi_ast_nodetype ntype, const char *dtype, unsigned int linenr ) ;
 
 void archi_view_ast( archi_ast_node *n ) ;
 

@@ -1,67 +1,49 @@
-#include "analyze.h"
+#include "typecheck.h"
+#include "../ehandling.h"
+#include "trim.h"
+#include "regsect.h"
+#include "../debug.h"
 
 #include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 #include <assert.h>
-/*
-static void insert_node( symtab stab, node *n, const char* name, const char* prefix )
-{
 
-	MANGLE_NAME( key, prefix, name ) ;
+static void archi_node_insert( archi_symtab *st, const char *key, archi_ast_node *n )
+{
+  archi_ast_node *l = archi_symtab_lookup( st, key ) ;
+  if( l == NULL ){
+    archi_symtab_insert( st, key, n ) ;
+    return ;
+  }
 	
-	node *l = lookup( stab, key ) ;
-	if( l == NULL ){
-		insert( stab, key, n ) ;
-		return ;
-	}
-	
-	if( !strcmp( l->dtype, n->dtype ) )
-		add_emsg( n, "redeclaration of '%s'", key ) ;
+  if( !strcmp( l->data_type, n->data_type ) )
+		archi_add_emsg( n, "redeclaration of '%s'", key ) ;
 	else 
-		add_emsg( n, "conflicting type for '%s'", key ) ;
+		archi_add_emsg( n, "conflicting type for '%s'", key ) ;
 
-	add_emsg( n, "previous declaration of '%s' was in line %d", key, l->linenr ) ;
-
+	archi_add_emsg( n, "previous declaration of '%s' was in line %d", key, l->linenr ) ;
 }
 
-static void fill_symtab_( symtab stab, node *n, const char* prefix )
+static void archi_symtab_toplevel_fill( archi_symtab *st, archi_ast_node *n )
 {
-	switch( n->ntype ){
-		case FCTDEF:
-			n->dtype = strdup( n->first_child->dtype ) ;
-		case REGDEF:
-		case REGCLDEF:
-		case INSTRDEF:
-			insert_node( stab, n, n->first_child->data, prefix ) ;	
-			break ;
-		case ARGS:
-		case INPUT:
-		case OUTPUT:
-		case IMMEDIATE:{
-			node *c ;
-			FOREACH_CHILD( n, c ) insert_node( stab, c, c->data, prefix ) ;
-			break ;}
-		default: break ;
-	}
-	
-	node *c ;
-	FOREACH_CHILD(n,c){
-		const char* pref = "" ;
-		switch( n->ntype ){
-			case INSTRDEF: pref = ((instrprop*)n->data)->name ; break ;
-			case FCTDEF: pref = ((fctprop*)n->data)->name ; break ;
-			default: break ; 
-		}
+  switch( n->node_type ){
+    case NT_REGDEF:
+      archi_node_insert( st, n->attr.reg->id, n ) ;
+      break ;
+    case NT_REGCLDEF:
+      archi_node_insert( st, n->attr.regcl->id, n ) ;
+      break ;
+    default: break ;
+  }
 
-		fill_symtab_( stab, c, pref ) ;
-	}
+  archi_ast_node *c ;
+  FOREACH_CHILD(n, c){
+    archi_symtab_toplevel_fill( st, c ) ;
+  }
 }
 
-void fill_symtab( symtab stab, node *n )
-{
-	fill_symtab_( stab, n, "" ) ;
-}
-
+/*
 static void msg_missing_property( node *n, const char* prop, const char* name )
 {
 	add_emsg( n, "property '%s' was not defined in '%s'", prop, name ) ;
@@ -341,18 +323,20 @@ static void tc_instrsect( symtab stab, node *n )
 	}
 }
 */
-void archi_typecheck( /*symtab stab, */archi_ast_node *n )
+void archi_typecheck( archi_symtab *st, archi_ast_node *n )
 {
-  assert( n->node_type == ARCHDEF ) ;
-/*
+  DEBUG_ASSERT( st && n && n->node_type == NT_ARCHDEF ) ;
+
+  archi_ast_trim( n ) ; 
+  archi_symtab_toplevel_fill( st, n ) ;
+
 	archi_ast_node *c ;
 	FOREACH_CHILD( n, c ){
 		switch( c->node_type ){
-			case REGSECT: tc_regsect( stab, c ) ; break ;
-			case INSTRSECT:	tc_instrsect( stab, c ) ; break ;
-			case AUXSECT:		tc_auxsect( stab, c ) ; break ;
-			default: assert(0) ;
+			case NT_REGSECT: archi_regsect_typecheck( st, c ) ; break ;
+	//		case INSTRSECT:	tc_instrsect( stab, c ) ; break ;
+	//		case AUXSECT:		tc_auxsect( stab, c ) ; break ;
+			default: DEBUG_ASSERT( 0 ) ;
 		}
 	}
-*/
 }

@@ -6,6 +6,15 @@
 #define EMSG_MULTIPLE_ATTRIBUTE( node, attr ) \
   archi_add_emsg( node, "attribute '%s' is declared more than once", attr )
 
+#define EMSG_MISSING_ATTRIBUTE( node, attr ) \
+  archi_add_emsg( node, "attribute '%s' was not defined", attr )
+
+#define EMSG_MISSING_REGISTER( node, reg ) \
+  archi_add_emsg( node, "register '%s' was not defined", reg )
+
+#define EMSG_WRONG_TYPE( node, id, type ) \
+  archi_add_emsg( node, "'%s' is not of type '%s'", id, type )
+
 struct archi_ast_node_ ;
 
 typedef struct archi_emsg_ archi_emsg ;

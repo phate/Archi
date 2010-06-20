@@ -1,5 +1,7 @@
 %{
-#include "nodes.h"
+#include "ast/node.h"
+
+#include <talloc.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -30,7 +32,8 @@ void add_children( archi_ast_node *p, archi_ast_node *fc )
 
 archi_ast_node* create_expression( archi_ast_nodetype ntype, archi_ast_node *e1, archi_ast_node *e2 )
 {
-	archi_ast_node *n = archi_ast_node_create( ntype, NULL, NULL, e1->linenr ) ;
+  archi_ast_node *n = archi_ast_node_talloc( ast ) ;
+  archi_ast_node_init( n, ntype, NULL, e1->linenr ) ;
 	ARE_SIBLINGS( e1, e2 ) ;
 	add_children( n, e1 ) ;
 
@@ -46,12 +49,13 @@ archi_ast_node* create_expression( archi_ast_nodetype ntype, archi_ast_node *e1,
 %token TIF TTHEN TELSE TSHIFTL TSHIFTR TLTEQ TGTEQ TLAND TLOR TCONCAT TEQ TNEQ 
 
 %%
-ArchDesc			:	Sections												{ ast = archi_ast_node_create( ARCHDEF, NULL, NULL, linenr ) ;
+ArchDesc			:	Sections												{ archi_ast_node_init( ast, NT_ARCHDEF, NULL, linenr ) ;
 																									add_children( ast, $1 ) ;}
 							;
 Sections			: RegSect TSECTSEP
 								/*InstrSect TSECTSEP AuxSect*/		{ archi_ast_node *rs, *is, *au ;
-																									rs = archi_ast_node_create( REGSECT, NULL, NULL, linenr ) ;
+                                                    rs = archi_ast_node_talloc( ast ) ;
+																								    archi_ast_node_init( rs, NT_REGSECT, NULL, linenr ) ;
 																									//is = create_node( INSTRSECT, NULL, NULL, linenr ) ;
 																									//au = create_node( AUXSECT, NULL, NULL, linenr ) ;
 																									add_children( rs, $1 ) ;
@@ -76,34 +80,37 @@ RegSectDef		: TREGCL RegClDef									{ $$ = $2 ;}
 RegDef				:	RegDefIdent ',' RegDef					{ ARE_SIBLINGS( $1, $3 ) ; $$ = $1 ; }
 							| RegDefIdent											{ $$ = $1 ; }						
 							;
-RegDefIdent		: Id '{' RegBody '}'							{ archi_reg_attributes *attr = malloc( sizeof(archi_reg_attributes) ) ;
-                                                  archi_reg_attributes_init( attr ) ;
-                                                  $$ = archi_ast_node_create( REGDEF, strdup("Reg"), attr, $1->linenr ) ;
-																									ARE_SIBLINGS( $1, $3 ) ;
-																									add_children( $$, $1 ) ;}
+RegDefIdent		: Id '{' RegBody '}'							{ $$ = archi_ast_node_talloc( ast ) ;
+                                                  archi_ast_node_init( $$, NT_REGDEF, "Reg", $1->linenr ) ;
+                                                  $$->attr.reg = talloc( $$, archi_regdef_attributes ) ;
+                                                  archi_regdef_attributes_init( $$->attr.reg ) ;
+                                                  ARE_SIBLINGS( $1, $3 ) ;
+                                                  add_children( $$, $1 ) ; }
 							;
-RegBody				: TREG_CODE '=' TNUM							{ int32_t* i = malloc( sizeof(int32_t) ) ;
-																									*i = strtol( yytext, 0, 10 ) ;
-																									$$ = archi_ast_node_create( CODE, NULL, i, linenr ) ;}
+RegBody				: TREG_CODE '=' TNUM							{ $$ = archi_ast_node_talloc( ast ) ;
+                                                  archi_ast_node_init( $$, NT_CODE, NULL, linenr ) ;
+                                                  $$->attr.code = strtol( yytext, 0, 10 ) ; }        
 							;
 RegClDef			: RegClDefIdent ',' RegClDef			{ ARE_SIBLINGS( $1, $3 ) ; $$ = $1 ; }
 							| RegClDefIdent										{ $$ = $1 ; }
 							;
-RegClDefIdent :	Id '{' RegClBody '}'						{ archi_regcl_attributes *attr = malloc( sizeof(archi_regcl_attributes) ) ;
-                                                  archi_regcl_attributes_init( attr ) ;
-                                                  $$ = archi_ast_node_create( REGCLDEF, strdup("RegClass"), attr, $1->linenr ) ;
-																									ARE_SIBLINGS( $1, $3 ) ;
-																								  add_children( $$, $1 ) ;}
+RegClDefIdent :	Id '{' RegClBody '}'						{ $$ = archi_ast_node_talloc( ast ) ;
+                                                  archi_ast_node_init( $$, NT_REGCLDEF, "RegClass", $1->linenr ) ;
+                                                  $$->attr.regcl = talloc( $$, archi_regcldef_attributes ) ;
+                                                  archi_regcldef_attributes_init( $$->attr.regcl ) ;
+                                                  ARE_SIBLINGS( $1, $3 ) ;
+                                                  add_children( $$, $1 ) ; }                                                  
 							;
 RegClBody			: RegClBody ',' RegClProp					{ ARE_SIBLINGS($3, $1) ; $$ = $3 ; }
 							| RegClProp												{ $$ = $1 ; }
 							;
-RegClProp			: TREGCL_BITS '=' TNUM						{ uint32_t* i = malloc( sizeof(uint32_t) ) ;
-																								  *i = strtol( yytext, 0, 10 ) ;
-																								  $$ = archi_ast_node_create( BITS, NULL, i, linenr ) ; }
-							| TREGCL_REGS '=' '[' IdList ']'	{	int32_t *i = malloc(sizeof(int32_t)) ; *i = -1 ;
-																									$$ = archi_ast_node_create( REGS, NULL, i, linenr ) ;
-																									add_children( $$, $4 ) ;}
+RegClProp			: TREGCL_BITS '=' TNUM						{ $$ = archi_ast_node_talloc( ast ) ;
+                                                  archi_ast_node_init( $$, NT_BITS, NULL, linenr ) ;
+                                                  $$->attr.bits = strtol( yytext, 0, 10 ) ; }
+							| TREGCL_REGS '=' '[' IdList ']'	{	$$ = archi_ast_node_talloc( ast ) ;
+                                                  archi_ast_node_init( $$, NT_REGS, NULL, linenr ) ;
+                                                  $$->attr.nregs = ARCHI_REGCL_NREGS_NOT_DEFINED ;
+                                                  add_children( $$, $4 ) ; }  
 							;
 /*
 InstrSect			: InstrSectDef ';' InstrSect				{ node* n ;
@@ -153,7 +160,9 @@ TId						: TIDENT														{buffer[1] = strdup(yytext) ;}
 IdList				: Id ',' IdList											{ ARE_SIBLINGS( $1, $3 ) ; $$ = $1 ; }
 							| Id																{ $$ = $1 ; }
 							;
-Id						: TIDENT														{ $$ = archi_ast_node_create( ID, NULL, strdup(yytext), linenr ) ; }
+Id						: TIDENT														{ $$ = archi_ast_node_talloc( ast ) ;
+                                                    archi_ast_node_init( $$, NT_ID, NULL, linenr ) ;
+                                                    $$->attr.id = talloc_strdup( $$, yytext) ;}
 							; 
 /*
 AuxSect				: FctDef AuxSect										{ $$ = $1 ; if( $2 != NULL ){ ARE_SIBLINGS($$, $2) ;}}
@@ -237,9 +246,11 @@ ExpList				: Exp ',' ExpList										{ ARE_SIBLINGS( $1, $3 ) ; $$ = $1 ; }
 */
 %%
 
-archi_ast_node* parse()
+archi_ast_node* archi_parse()
 {
-	yyparse() ;
+	ast = archi_ast_node_talloc( NULL ) ;
+
+  yyparse() ;
 
 	return ast ;
 }
@@ -247,5 +258,6 @@ archi_ast_node* parse()
 int yyerror( char* message )
 {
 	fprintf( stderr, "%d: %s -> %s\n", linenr, message, yytext ) ;
-	return 0 ;
+	TALLOC_FREE(ast) ;
+  return 0 ;
 }

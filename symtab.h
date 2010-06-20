@@ -1,7 +1,7 @@
 #ifndef ARCHI_SYMTAB_H_
 #define ARCHI_SYMTAB_H_
 
-#include "nodes.h"
+#include "ast/node.h"
 
 /*
 #define ARCHI_ENTRY_CNT 211
@@ -25,12 +25,13 @@ typedef struct archi_symtab_{
 } archi_symtab ;
 
 void archi_symtab_init( archi_symtab *st ) ;
-void archi_symtab_destroy( archi_symtab *st ) ;
 
 archi_ast_node* archi_symtab_lookup( archi_symtab *st, const char* key ) ;
 void archi_symtab_insert( archi_symtab *st, const char* key, archi_ast_node* n ) ;
 
-void archi_symtab_push_scope( archi_symtab *symtab ) ;
-void archi_symtab_pop_scope( archi_symtab *symtab ) ;
+void archi_symtab_push_scope( archi_symtab *st ) ;
+void archi_symtab_pop_scope( archi_symtab *st ) ;
+
+void archi_symtab_print( archi_symtab *st ) ;
 
 #endif

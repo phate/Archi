@@ -1,34 +1,38 @@
 #include "parser.h"
-#include "nodes.h"
-#include "analyze.h"
+#include "ast/node.h"
 #include "symtab.h"
-#include "trim.h"
+#include "tc/typecheck.h"
 #include "cgen.h"
 #include "ehandling.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 
-extern archi_ast_node* parse() ;
+extern archi_ast_node* archi_parse() ;
 extern FILE *yyin ;
+
 FILE *ad = NULL ;
 FILE *hf = NULL ;
 FILE *sf = NULL ;
+archi_symtab *symtab = NULL ;
+archi_ast_node *ast = NULL ;
 
-static void cleanup()
+static void archi_cleanup()
 {
-	//TODO: more todo than just closing handles
-	fclose( ad ) ;
-	fclose( hf ) ;
-	fclose( sf ) ;
+  if( ad != NULL ) fclose( ad ) ;
+	if( hf != NULL ) fclose( hf ) ;
+	if( sf != NULL ) fclose( sf ) ;
+
+  TALLOC_FREE( ast ) ;
+  TALLOC_FREE( symtab ) ;
 }
 
-static FILE* open_file( const char *filename, const char *mode )
+static FILE* archi_file_open( const char *filename, const char *mode )
 {
 	FILE *f = fopen( filename, mode ) ;
 	if( f == NULL ){
-		fprintf( stderr, "Cannot open file: %s", filename ) ;
-		cleanup() ;
+		fprintf( stderr, "Cannot open file: %s\n", filename ) ;
+		archi_cleanup() ;
 		exit( EXIT_FAILURE ) ; 
 	}
 
@@ -44,34 +48,43 @@ static void process_input( int argc, char* argv[] )
 		exit( EXIT_FAILURE ) ;
 	}
 */
-	ad = open_file( argv[1], "r" ) ;
+	ad = archi_file_open( "arch/ppc.ca"/*argv[1]*/, "r" ) ;
 //	hf = open_file( argv[2], "w" ) ;
 //	sf = open_file( argv[3], "w" ) ;	
 } 
+
+static void archi_init( int argc, char* argv[] ){
+	process_input( argc, argv ) ;
+	yyin = ad ;
+
+  symtab = talloc( NULL, archi_symtab ) ;
+  archi_symtab_init( symtab ) ; 
+}
 
 static void report_errors( archi_ast_node *n )
 {
 	uint32_t cnt = archi_print_emsgs( n ) ;
 	if( cnt != 0 ){
-		cleanup() ;
+		archi_cleanup() ;
 	 	exit( EXIT_FAILURE ) ;
 	}
 }
 
 int main( int argc, char* argv[] )
 {
-	process_input( argc, argv ) ;
-	yyin = ad ;
-
-	archi_ast_node* ast ;
-	//symtab stab = create_symtab() ;
+  archi_init( argc, argv ) ;
 	
-	ast = parse() ;
+	ast = archi_parse() ;
 	if( ast == NULL ){
-		cleanup() ;
+		archi_cleanup() ;
 		exit( EXIT_FAILURE ) ;
 	}
 	archi_view_ast(ast) ;
+
+  archi_typecheck( symtab, ast ) ;
+  archi_view_ast( ast ) ;
+  archi_symtab_print( symtab ) ;  
+  report_errors( ast ) ;
 /*
 	trim_tree( ast ) ;
 	fill_symtab( stab, ast ) ;
@@ -83,8 +96,11 @@ int main( int argc, char* argv[] )
 	report_errors( ast ) ;
 
   generate_code( ast, stdout, stdout ) ;
-
-	cleanup() ;
 */
+
+//  talloc_report_full( ast, stdout ) ;
+
+	archi_cleanup() ;
+
 	return 0 ;
 }
