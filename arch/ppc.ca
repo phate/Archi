@@ -4,24 +4,24 @@ Reg hallo{code=45} ;
 
 #Reg bldium{code=56} ;
 
-RegClass
-	intregs{
-		bits=32,
-    bits=24,
-		regs=[eax,fpregs,c,d,e,f]
-},
-fpregs{
+#RegClass
+#	intregs{
+#		bits=32,
+#    bits=24,
+#		regs=[eax,fpregs,c,d,e,f]
+#};
+RegClass fpregs{
 		bits=64,
-		regs=[r0,r1,r2,r3,r4]
+		regs=[r,f4,f6,w]
 },
 	statusregs{
-		bits=32
-		#regs=[f0,f4,f6]
+		bits=32,
+		regs=[r,f4,f6]
 } ;
-RegClass blub{
-	bits = 24	
-	#regs=[w,e,r]
-} ;
+#RegClass blub{
+#	bits = 24,	
+#	regs=[w,e,r]
+#} ;
 #RegClass
 #hallo{
 #	bits=32,

@@ -15,6 +15,10 @@
 #define EMSG_WRONG_TYPE( node, id, type ) \
   archi_add_emsg( node, "'%s' is not of type '%s'", id, type )
 
+#define EMSG_REGCLS_NOT_HIERARCHICAL( regcl0, regcl1 ) \
+  archi_add_emsg( regcl0, "register classes '%s' and '%s' are not hierarchical", \
+  regcl0->attr.regcl->id, regcl1->attr.regcl->id )
+
 struct archi_ast_node_ ;
 
 typedef struct archi_emsg_ archi_emsg ;

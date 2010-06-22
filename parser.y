@@ -56,7 +56,8 @@ Sections			: RegSect TSECTSEP
 								/*InstrSect TSECTSEP AuxSect*/		{ archi_ast_node *rs, *is, *au ;
                                                     rs = archi_ast_node_talloc( ast ) ;
 																								    archi_ast_node_init( rs, NT_REGSECT, NULL, linenr ) ;
-																									//is = create_node( INSTRSECT, NULL, NULL, linenr ) ;
+                                                    rs->attr.nregcls = ARCHI_NREGCLS_NOT_DEFINED ; 
+                                                  //is = create_node( INSTRSECT, NULL, NULL, linenr ) ;
 																									//au = create_node( AUXSECT, NULL, NULL, linenr ) ;
 																									add_children( rs, $1 ) ;
 																									//add_children( is, $3 ) ;

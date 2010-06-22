@@ -72,12 +72,15 @@ static void archi_regsect_trim( archi_ast_node *n )
 {
 	DEBUG_ASSERT( n && n->node_type == NT_REGSECT ) ;
 
+  int32_t nregcls = 0 ;
 	archi_ast_node *c ;
 	FOREACH_CHILD(n, c){
 		if( c->node_type == NT_REGDEF ) archi_regdef_trim( c ) ;
-		else if( c->node_type == NT_REGCLDEF ) archi_regcldef_trim( c ) ; 
+		else if( c->node_type == NT_REGCLDEF ){ archi_regcldef_trim( c ) ; nregcls++ ; }
 		else DEBUG_ASSERT(0) ;
 	}
+
+  n->attr.nregcls = nregcls ;
 }
 /*
 static void archi_instrdef_trim( archi_ast_node *n )

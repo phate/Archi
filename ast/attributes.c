@@ -12,5 +12,6 @@ void archi_regcldef_attributes_init( archi_regcldef_attributes *attr )
 {
   attr->bits = ARCHI_REGCL_BITS_NOT_DEFINED ;
   attr->regs = ARCHI_REGCL_REGS_NOT_DEFINED ;
+  attr->pregcl = ARCHI_REGCL_PREGCL_NOT_DEFINED ;
   attr->id = NULL ;
 }
