@@ -19,6 +19,9 @@
   archi_add_emsg( regcl0, "register classes '%s' and '%s' are not hierarchical", \
   regcl0->attr.regcl->id, regcl1->attr.regcl->id )
 
+#define EMSG_REGISTER_NOT_USED( node, id ) \
+  archi_add_emsg( node, "register '%s' was not used in a register class", id )
+
 struct archi_ast_node_ ;
 
 typedef struct archi_emsg_ archi_emsg ;

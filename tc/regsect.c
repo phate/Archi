@@ -4,13 +4,6 @@
 
 #include <string.h>
 
-static void archi_regdef_typecheck( archi_ast_node *n )
-{
-  DEBUG_ASSERT( n && n->node_type == NT_REGDEF ) ;
-
-  if( n->attr.reg->code == ARCHI_REG_CODE_NOT_DEFINED ) EMSG_MISSING_ATTRIBUTE( n, "code" ) ;
-}
-
 static void archi_regcl_regs_typecheck( archi_symtab *st, archi_ast_node *n )
 {
   DEBUG_ASSERT( st && n && n->node_type == NT_REGS ) ;
@@ -21,15 +14,6 @@ static void archi_regcl_regs_typecheck( archi_symtab *st, archi_ast_node *n )
     if( l == NULL ) EMSG_MISSING_REGISTER( s, s->attr.id ) ;
     else if( strcmp(l->data_type, "Reg") ) EMSG_WRONG_TYPE( s, s->attr.id, "Reg" ) ;
   }
-}
-
-static void archi_regcldef_typecheck( archi_symtab *st, archi_ast_node *n )
-{
-  DEBUG_ASSERT( st && n && n->node_type == NT_REGCLDEF ) ;
-
-  if( n->attr.regcl->bits == ARCHI_REGCL_BITS_NOT_DEFINED ) EMSG_MISSING_ATTRIBUTE( n, "bits" ) ;
-  if( n->attr.regcl->regs == ARCHI_REGCL_REGS_NOT_DEFINED ) EMSG_MISSING_ATTRIBUTE( n, "regs" ) ;
-  else archi_regcl_regs_typecheck( st, n->attr.regcl->regs ) ;
 }
 
 static void archi_regcls_sort( archi_ast_node* regcls[], uint32_t nregcls )
@@ -76,7 +60,7 @@ static int32_t archi_regcls_subset( archi_ast_node *regcl0, archi_ast_node *regc
   return 0 ; 
 }
 
-static void archi_regcls_hierarchical( archi_ast_node* regcls[], uint32_t nregcls )
+static void archi_regcls_hierarchical( archi_symtab *st, archi_ast_node* regcls[], uint32_t nregcls )
 {
   archi_regcls_sort( regcls, nregcls ) ;
 
@@ -86,16 +70,21 @@ static void archi_regcls_hierarchical( archi_ast_node* regcls[], uint32_t nregcl
       uint32_t fnregs = regcls[f]->attr.regcl->regs->attr.nregs ; 
       if( archi_regcls_disjoint( regcls[i], regcls[f] ) ){
         if( !archi_regcls_subset( regcls[i], regcls[f] ) && inregs != fnregs ){
-        ;}
-        //else if( !archi_regcls_subset( regcls[i], regcls[f] ) && inregs != fnregs ){
-        //;}
+          regcls[i]->attr.regcl->pregcl = regcls[f] ;
+          break ;
+        }
         else EMSG_REGCLS_NOT_HIERARCHICAL( regcls[i], regcls[f] ) ;
       }      
     }
-  } 
+    
+    archi_ast_node *c ;
+    FOREACH_CHILD( regcls[i]->attr.regcl->regs, c ){
+      archi_ast_node* l = archi_symtab_lookup( st, c->attr.id ) ;
+      if( l != NULL && !strcmp(l->data_type, "Reg") && l->attr.reg->regcl == NULL ) l->attr.reg->regcl = regcls[i] ;
+    }
+  }
 }
 
-//TODO: check whether all registers have been used in the register classes
 void archi_regsect_typecheck( archi_symtab *st, archi_ast_node *n )
 {
   DEBUG_ASSERT( st && n && n->node_type == NT_REGSECT ) ;
@@ -106,17 +95,27 @@ void archi_regsect_typecheck( archi_symtab *st, archi_ast_node *n )
   archi_ast_node *regcls[n->attr.nregcls] ;
   FOREACH_CHILD( n, c ){
     switch( c->node_type ){
-      case NT_REGDEF:    archi_regdef_typecheck( c ) ; break ;
-      case NT_REGCLDEF:
+      case NT_REGDEF:    
+        if( c->attr.reg->code == -1 ) EMSG_MISSING_ATTRIBUTE( c, "code" ) ;
+        break ;  
+    case NT_REGCLDEF:
         regcls[i++] = c ;
-        archi_regcldef_typecheck( st, c ) ;
-        if( c->attr.regcl->regs == ARCHI_REGCL_REGS_NOT_DEFINED )
+        if( c->attr.regcl->bits == -1 ) EMSG_MISSING_ATTRIBUTE( c, "bits" ) ;
+        if( c->attr.regcl->regs == NULL ){
           regcl_regs_defined = 0 ;
+          EMSG_MISSING_ATTRIBUTE( c, "regs" ) ;
+        }
+        else archi_regcl_regs_typecheck( st, c->attr.regcl->regs ) ;
         break ;
       default: DEBUG_ASSERT( 0 ) ;
     }
   }
+  
+  if( regcl_regs_defined == 1 ) archi_regcls_hierarchical( st, regcls, n->attr.nregcls ) ;
 
-  if( regcl_regs_defined == 1 ) archi_regcls_hierarchical( regcls, n->attr.nregcls ) ;
+  FOREACH_CHILD( n, c ){
+    if( c->node_type == NT_REGDEF && c->attr.reg->regcl == NULL )
+      EMSG_REGISTER_NOT_USED( c, c->attr.reg->id ) ;
+  }
 }
 

@@ -56,7 +56,7 @@ Sections			: RegSect TSECTSEP
 								/*InstrSect TSECTSEP AuxSect*/		{ archi_ast_node *rs, *is, *au ;
                                                     rs = archi_ast_node_talloc( ast ) ;
 																								    archi_ast_node_init( rs, NT_REGSECT, NULL, linenr ) ;
-                                                    rs->attr.nregcls = ARCHI_NREGCLS_NOT_DEFINED ; 
+                                                    rs->attr.nregcls = -1 ; 
                                                   //is = create_node( INSTRSECT, NULL, NULL, linenr ) ;
 																									//au = create_node( AUXSECT, NULL, NULL, linenr ) ;
 																									add_children( rs, $1 ) ;
@@ -110,7 +110,7 @@ RegClProp			: TREGCL_BITS '=' TNUM						{ $$ = archi_ast_node_talloc( ast ) ;
                                                   $$->attr.bits = strtol( yytext, 0, 10 ) ; }
 							| TREGCL_REGS '=' '[' IdList ']'	{	$$ = archi_ast_node_talloc( ast ) ;
                                                   archi_ast_node_init( $$, NT_REGS, NULL, linenr ) ;
-                                                  $$->attr.nregs = ARCHI_REGCL_NREGS_NOT_DEFINED ;
+                                                  $$->attr.nregs = -1 ;
                                                   add_children( $$, $4 ) ; }  
 							;
 /*

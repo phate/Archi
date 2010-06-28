@@ -1,6 +1,23 @@
-Reg eax{code=2},ebx{code=3},eck{code=45} ;
-Reg bla{code=100},ikl{code=101} ;
-Reg hallo{code=45} ;
+Reg cc  { code = 0 } ;
+Reg eax { code = 0 } ;
+Reg ecx { code = 1 } ;
+Reg ebx { code = 2 } ;
+Reg edx { code = 3 } ;
+Reg esp { code = 4 } ;
+Reg ebp { code = 5 } ;
+Reg esi { code = 6 } ;
+Reg edi { code = 7 } ;
+
+RegClass flags    { bits = 16, regs = [cc] } ;
+RegClass gpr      { bits = 32, regs = [eax, ecx, ebx, edx, esp, ebp, esi, edi] } ;
+RegClass gpr_byte { bits = 32, regs = [eax, ecx, ebx, edx] } ;
+RegClass gpr_eax  { bits = 32, regs = [eax] } ;
+RegClass gpr_edx  { bits = 32, regs = [edx] } ;
+RegClass gpr_esp  { bits = 32, regs = [esp] } ; 
+
+#Reg eax{code=2},ebx{code=3},eck{code=45} ;
+#Reg bla{code=100},ikl{code=101} ;
+#Reg r{code=45} ;
 
 #Reg bldium{code=56} ;
 
@@ -10,18 +27,23 @@ Reg hallo{code=45} ;
 #    bits=24,
 #		regs=[eax,fpregs,c,d,e,f]
 #};
-RegClass fpregs{
-		bits=64,
-		regs=[r,f4,f6,w]
-},
-	statusregs{
-		bits=32,
-		regs=[r,f4,f6]
-} ;
+#RegClass fpregs{
+#		bits=64,
+#		regs=[r,f4,f6,fpregs,zu]
+#},
+#	statusregs{
+#		bits=32,
+#		regs=[r,f4,f6]
+#} ;
 #RegClass blub{
 #	bits = 24,	
-#	regs=[w,e,r]
+#	regs=[r,bla,ikl]
 #} ;
+#RegClass gpc{
+#  bits = 32,
+#  regs=[r,bla]
+#} ;
+
 #RegClass
 #hallo{
 #	bits=32,

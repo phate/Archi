@@ -1,6 +1,7 @@
 #include "cgen.h"
+#include "regsect.h"
+#include "../debug.h"
 
-#include <assert.h>
 /*
 static void gc_regdef( node *n, FILE *hf, FILE *sf )
 {
@@ -44,9 +45,17 @@ static void gc_auxsect( node *c )
 }
 */
 
-void generate_code( archi_ast_node *n, FILE *hf, FILE *sf )
+void archi_code_generate( archi_ast_node *n, FILE *hf, FILE *sf )
 {
-  assert(0) ;
+  DEBUG_ASSERT( n && n->node_type == NT_ARCHDEF ) ;
+
+  archi_ast_node *c ;
+  FOREACH_CHILD( n, c ){
+    switch( c->node_type ){
+      case NT_REGSECT: archi_regsect_generate( c, hf, sf ) ; break ;
+      default: DEBUG_ASSERT(0) ;
+    }
+  }
 /*	node *c ;
 	FOREACH_CHILD( n, c ){
 		switch( n->ntype ){

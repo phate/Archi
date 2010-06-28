@@ -2,7 +2,7 @@
 #include "ast/node.h"
 #include "symtab.h"
 #include "tc/typecheck.h"
-#include "cgen.h"
+#include "cgen/cgen.h"
 #include "ehandling.h"
 
 #include <stdio.h>
@@ -85,6 +85,8 @@ int main( int argc, char* argv[] )
   archi_view_ast( ast ) ;
   archi_symtab_print( symtab ) ;  
   report_errors( ast ) ;
+
+  archi_code_generate( ast, stdout, stdout ) ;
 /*
 	trim_tree( ast ) ;
 	fill_symtab( stab, ast ) ;
@@ -102,5 +104,5 @@ int main( int argc, char* argv[] )
 
 	archi_cleanup() ;
 
-	return 0 ;
+	return EXIT_SUCCESS ;
 }

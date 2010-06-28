@@ -3,18 +3,12 @@
 
 #include <stdint.h>
 
-#define ARCHI_REG_CODE_NOT_DEFINED -1
-#define ARCHI_REGCL_BITS_NOT_DEFINED -1
-#define ARCHI_REGCL_REGS_NOT_DEFINED NULL
-#define ARCHI_REGCL_NREGS_NOT_DEFINED -1
-#define ARCHI_REGCL_PREGCL_NOT_DEFINED NULL
-#define ARCHI_NREGCLS_NOT_DEFINED -1 
-
 struct archi_ast_node_ ;
 
 typedef struct archi_regdef_attributes_{
   int32_t code ;
   const char *id ;
+  struct archi_ast_node_ *regcl ;
 } archi_regdef_attributes ;
 
 void archi_regdef_attributes_init( archi_regdef_attributes *attr ) ;

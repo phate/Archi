@@ -15,7 +15,7 @@ static void archi_regdef_trim( archi_ast_node* n )
 	while( c != NULL ){
 		free_node = 0 ;
     if( c->node_type == NT_CODE ){
-      if( n->attr.reg->code == ARCHI_REG_CODE_NOT_DEFINED ){
+      if( n->attr.reg->code == -1 ){
         n->attr.reg->code = c->attr.code ;
         free_node = 1 ; 
       }
@@ -41,7 +41,7 @@ static void archi_regcldef_trim( archi_ast_node *n )
 	while( c != NULL ){
     free_node = 0 ;
 		if( c->node_type == NT_BITS ){
-			if( n->attr.regcl->bits == ARCHI_REGCL_BITS_NOT_DEFINED ){
+			if( n->attr.regcl->bits == -1 ){
         n->attr.regcl->bits = c->attr.bits ;
         free_node = 1 ;
       }
