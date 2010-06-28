@@ -60,6 +60,37 @@ static int32_t archi_regcls_subset( archi_ast_node *regcl0, archi_ast_node *regc
   return 0 ; 
 }
 
+//removes all the regs from regcl1 that are defined in regcl0
+static void archi_regcl_regs_remove_( archi_ast_node *regcl0, archi_ast_node *regcl1 )
+{
+  archi_ast_node *nc ;
+  archi_ast_node *c1 ; 
+  archi_ast_node *c0 = regcl0->attr.regcl->regs->first_child ;
+  while( c0 != NULL ){
+    c1 = regcl1->attr.regcl->regs->first_child ;
+    while( c1 != NULL ){
+      nc = c1->next_sibling ;
+      if( !strcmp(c0->attr.id, c1->attr.id) ){
+        archi_ast_node_disconnect( c1 ) ;
+        TALLOC_FREE( c1 ) ;
+      }
+      c1 = nc ;
+    }
+    c0 = c0->next_sibling ;
+  }
+}
+
+static void archi_regcl_regs_remove( archi_ast_node *regcl )
+{
+  archi_ast_node *c ;
+  FOREACH_CHILD( regcl, c ){
+    if( c->node_type == NT_REGCLDEF ){
+      archi_regcl_regs_remove_( c, regcl ) ;
+      archi_regcl_regs_remove( c ) ;
+    }
+  }
+}
+
 static void archi_regcls_hierarchical( archi_symtab *st, archi_ast_node* regcls[], uint32_t nregcls )
 {
   archi_regcls_sort( regcls, nregcls ) ;
@@ -71,6 +102,8 @@ static void archi_regcls_hierarchical( archi_symtab *st, archi_ast_node* regcls[
       if( archi_regcls_disjoint( regcls[i], regcls[f] ) ){
         if( !archi_regcls_subset( regcls[i], regcls[f] ) && inregs != fnregs ){
           regcls[i]->attr.regcl->pregcl = regcls[f] ;
+          archi_ast_node_disconnect( regcls[i] ) ;
+          archi_ast_node_first_child_add( regcls[f], regcls[i] ) ; 
           break ;
         }
         else EMSG_REGCLS_NOT_HIERARCHICAL( regcls[i], regcls[f] ) ;
@@ -81,6 +114,12 @@ static void archi_regcls_hierarchical( archi_symtab *st, archi_ast_node* regcls[
     FOREACH_CHILD( regcls[i]->attr.regcl->regs, c ){
       archi_ast_node* l = archi_symtab_lookup( st, c->attr.id ) ;
       if( l != NULL && !strcmp(l->data_type, "Reg") && l->attr.reg->regcl == NULL ) l->attr.reg->regcl = regcls[i] ;
+    }
+  }
+
+  for( uint32_t i = 0; i < nregcls; i++ ){
+    if( regcls[i]->attr.regcl->pregcl == NULL ){
+      archi_regcl_regs_remove( regcls[i] ) ;
     }
   }
 }
@@ -118,4 +157,3 @@ void archi_regsect_typecheck( archi_symtab *st, archi_ast_node *n )
       EMSG_REGISTER_NOT_USED( c, c->attr.reg->id ) ;
   }
 }
-

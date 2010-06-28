@@ -98,6 +98,9 @@ typedef struct fctprop_{
 archi_ast_node* archi_ast_node_talloc( TALLOC_CTX *ctx ) ;
 void archi_ast_node_init( archi_ast_node *n, archi_ast_nodetype ntype, const char *dtype, unsigned int linenr ) ;
 
+void archi_ast_node_disconnect( archi_ast_node *n ) ;
+void archi_ast_node_first_child_add( archi_ast_node *p, archi_ast_node *c ) ;
+
 void archi_view_ast( archi_ast_node *n ) ;
 
 #endif

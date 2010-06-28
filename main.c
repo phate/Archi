@@ -86,7 +86,7 @@ int main( int argc, char* argv[] )
   archi_symtab_print( symtab ) ;  
   report_errors( ast ) ;
 
-  archi_code_generate( ast, stdout, stdout ) ;
+  archi_code_generate( symtab, ast, stdout, stdout ) ;
 /*
 	trim_tree( ast ) ;
 	fill_symtab( stab, ast ) ;

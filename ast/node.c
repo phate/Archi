@@ -93,6 +93,31 @@ void archi_ast_node_init( archi_ast_node *n, archi_ast_nodetype ntype, const cha
   //FIXME: initialize union
 }
 
+void archi_ast_node_disconnect( archi_ast_node *n )
+{
+  if( n->prev_sibling ) n->prev_sibling->next_sibling = n->next_sibling ;
+  if( n->next_sibling ) n->next_sibling->prev_sibling = n->prev_sibling ;
+
+  if( n->parent != NULL ){
+    if( n->parent->first_child == n ) n->parent->first_child = n->next_sibling ;
+    if( n->parent->last_child == n ) n->parent->last_child = n->prev_sibling ;
+  }
+
+  n->parent = NULL ;
+  n->prev_sibling = NULL ;
+  n->next_sibling = NULL ;
+}
+
+void archi_ast_node_first_child_add( archi_ast_node *p, archi_ast_node *c )
+{
+  DEBUG_ASSERT( c->prev_sibling == NULL ) ;
+
+  p->first_child->prev_sibling = c ;
+  c->next_sibling = p->first_child ;
+  p->first_child = c ;
+  c->parent = p ; 
+}
+
 static struct ntname { archi_ast_nodetype type; const char* name; } ntnames[] =
 {
 	{NT_ARCHDEF, "ArchDef"},
