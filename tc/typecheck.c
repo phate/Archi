@@ -29,10 +29,10 @@ static void archi_symtab_toplevel_fill( archi_symtab *st, archi_ast_node *n )
 {
   switch( n->node_type ){
     case NT_REGDEF:
-      archi_node_insert( st, n->attr.reg->id, n ) ;
+      archi_node_insert( st, n->attr.nt_regdef.id, n ) ;
       break ;
     case NT_REGCLDEF:
-      archi_node_insert( st, n->attr.regcl->id, n ) ;
+      archi_node_insert( st, n->attr.nt_regcldef.id, n ) ;
       break ;
     default: break ;
   }

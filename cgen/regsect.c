@@ -8,7 +8,7 @@ static void archi_reg_defs_generate_( archi_ast_node *n, FILE *hf, uint32_t *i )
     if( c->node_type == NT_REGCLDEF ) archi_reg_defs_generate_( c, hf, i );
     if( c->node_type == NT_REGS ){
       FOREACH_CHILD( c, cc ){
-        fprintf( hf, "\tjive_arch_%s = %d,\n", cc->attr.id, (*i)++ ) ;
+        fprintf( hf, "\tjive_arch_%s = %d,\n", cc->attr.nt_id.id, (*i)++ ) ;
       }
     }
   }
@@ -29,7 +29,7 @@ static void archi_reg_defs_generate( archi_ast_node *n, FILE *hf )
 
 static void archi_regcl_defs_generate_( archi_ast_node *n, FILE *hf, uint32_t *i )
 {
-  fprintf( hf, "\tjive_arch_%s = %d,\n", n->attr.regcl->id, (*i)++ ) ;
+  fprintf( hf, "\tjive_arch_%s = %d,\n", n->attr.nt_regcldef.id, (*i)++ ) ;
   
   archi_ast_node *c ;
   FOREACH_CHILD( n, c ){
@@ -58,18 +58,18 @@ static void archi_reg_code_generate_( archi_symtab *st, archi_ast_node *n, FILE 
     if( c->node_type == NT_REGCLDEF ) archi_reg_code_generate_( st, c, sf ) ;    
   }
 
-  FOREACH_CHILD( n->attr.regcl->regs, c ){
-    archi_ast_node *l = archi_symtab_lookup( st, c->attr.id ) ;
-    fprintf( sf, "\t[jive_arch_%s] = {\n", l->attr.reg->id ) ;
-    fprintf( sf, "\t\t.name = \"%s\",\n", l->attr.reg->id ) ;
-    fprintf( sf, "\t\t.regcls = &jive_arch_regcls[jive_arch_%s],\n", l->attr.reg->regcl->attr.regcl->id ) ;
-    fprintf( sf, "\t\t.code = %d,\n", l->attr.reg->code ) ;
-    fprintf( sf, "\t\t.index = jive_arch_%s,\n", l->attr.reg->id ) ;
+  FOREACH_CHILD( n->attr.nt_regcldef.regs, c ){
+    archi_ast_node *l = archi_symtab_lookup( st, c->attr.nt_id.id ) ;
+    fprintf( sf, "\t[jive_arch_%s] = {\n", l->attr.nt_regdef.id ) ;
+    fprintf( sf, "\t\t.name = \"%s\",\n", l->attr.nt_regdef.id ) ;
+    fprintf( sf, "\t\t.regcls = &jive_arch_regcls[jive_arch_%s],\n", l->attr.nt_regdef.regcl->attr.nt_regcldef.id ) ;
+    fprintf( sf, "\t\t.code = %d,\n", l->attr.nt_regdef.code ) ;
+    fprintf( sf, "\t\t.index = jive_arch_%s,\n", l->attr.nt_regdef.id ) ;
     fprintf( sf, "\t\t.class_mask = " ) ;
-    archi_ast_node *r = l->attr.reg->regcl ;
+    archi_ast_node *r = l->attr.nt_regdef.regcl ;
     while( r ){
-      fprintf( sf, "(1 << jive_arch_%s)", r->attr.regcl->id ) ;
-      r = r->attr.regcl->pregcl ;
+      fprintf( sf, "(1 << jive_arch_%s)", r->attr.nt_regcldef.id ) ;
+      r = r->attr.nt_regcldef.pregcl ;
       if( r ) fprintf( sf, " | " ) ;
     }
     fprintf( sf, "\n\t},\n" ) ;
@@ -96,25 +96,25 @@ static  archi_ast_node* archi_regcl_regs_index_node_find( archi_ast_node *n )
       return archi_regcl_regs_index_node_find( c ) ;
   }
 
-  return n->attr.regcl->regs->first_child ;
+  return n->attr.nt_regcldef.regs->first_child ;
 } 
 
 static void archi_regcl_code_generate_( archi_ast_node *n, FILE *sf )
 {
-  fprintf( sf, "\t[jive_arch_%s] = {\n", n->attr.regcl->id ) ;
-  fprintf( sf, "\t\t.name = \"%s\",\n", n->attr.regcl->id ) ;
-  fprintf( sf, "\t\t.nbits = %d,\n", n->attr.regcl->bits ) ;
-  fprintf( sf, "\t\t.regs = &jive_arch_regs[jive_arch_%s],\n", archi_regcl_regs_index_node_find(n)->attr.id ) ;
-  fprintf( sf, "\t\t.nregs = %d,\n", n->attr.regcl->regs->attr.nregs ) ;
-  fprintf( sf, "\t\t.index = jive_arch_%s,\n", n->attr.regcl->id ) ;
-  if( n->attr.regcl->pregcl )
-    fprintf( sf, "\t\t.parent = &jive_arch_regcls[jive_arch_%s],\n", n->attr.regcl->pregcl->attr.regcl->id ) ;
+  fprintf( sf, "\t[jive_arch_%s] = {\n", n->attr.nt_regcldef.id ) ;
+  fprintf( sf, "\t\t.name = \"%s\",\n", n->attr.nt_regcldef.id ) ;
+  fprintf( sf, "\t\t.nbits = %d,\n", n->attr.nt_regcldef.bits ) ;
+  fprintf( sf, "\t\t.regs = &jive_arch_regs[jive_arch_%s],\n", archi_regcl_regs_index_node_find(n)->attr.nt_id.id ) ;
+  fprintf( sf, "\t\t.nregs = %d,\n", n->attr.nt_regcldef.regs->attr.nt_regs.nregs ) ;
+  fprintf( sf, "\t\t.index = jive_arch_%s,\n", n->attr.nt_regcldef.id ) ;
+  if( n->attr.nt_regcldef.pregcl )
+    fprintf( sf, "\t\t.parent = &jive_arch_regcls[jive_arch_%s],\n", n->attr.nt_regcldef.pregcl->attr.nt_regcldef.id ) ;
   else fprintf( sf, "\t\t.parent = 0,\n" ) ;
   fprintf( sf, "\t\t.class_mask = " ) ;
   archi_ast_node *l = n ;
   while( l ){
-    fprintf( sf, "(1 << jive_arch_%s)", l->attr.regcl->id ) ;
-    l = l->attr.regcl->pregcl ;
+    fprintf( sf, "(1 << jive_arch_%s)", l->attr.nt_regcldef.id ) ;
+    l = l->attr.nt_regcldef.pregcl ;
     if( l ) fprintf( sf, " | " ) ;
   }
   fprintf( sf, "\n\t},\n" ) ;

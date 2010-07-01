@@ -1,8 +1,5 @@
-Reg cc  { code = 0 } ;
-Reg eax { code = 0 } ;
-Reg ecx { code = 1 } ;
-Reg ebx { code = 2 } ;
-Reg edx { code = 3 } ;
+Reg cc  { code = 0 } , eax { code = 0 } ;
+Reg ecx { code = 1 } , ebx { code = 2 } , edx { code = 3 } ;
 Reg esp { code = 4 } ;
 Reg ebp { code = 5 } ;
 Reg esi { code = 6 } ;

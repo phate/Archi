@@ -87,8 +87,10 @@ int main( int argc, char* argv[] )
   report_errors( ast ) ;
 
   archi_code_generate( symtab, ast, stdout, stdout ) ;
-/*
-	trim_tree( ast ) ;
+
+
+/*	
+  trim_tree( ast ) ;
 	fill_symtab( stab, ast ) ;
 	report_errors( ast ) ;
 	

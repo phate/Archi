@@ -93,8 +93,18 @@ void archi_ast_node_init( archi_ast_node *n, archi_ast_nodetype ntype, const cha
   //FIXME: initialize union
 }
 
+archi_ast_node* archi_ast_node_create( TALLOC_CTX *ctx, archi_ast_nodetype ntype, const char* dtype, unsigned int linenr )
+{
+  archi_ast_node *n = archi_ast_node_talloc( ctx ) ;
+  archi_ast_node_init( n, ntype, dtype, linenr ) ;
+
+  return n ;
+}
+
 void archi_ast_node_disconnect( archi_ast_node *n )
 {
+  DEBUG_ASSERT( n ) ;
+
   if( n->prev_sibling ) n->prev_sibling->next_sibling = n->next_sibling ;
   if( n->next_sibling ) n->next_sibling->prev_sibling = n->prev_sibling ;
 
@@ -108,32 +118,90 @@ void archi_ast_node_disconnect( archi_ast_node *n )
   n->next_sibling = NULL ;
 }
 
-void archi_ast_node_first_child_add( archi_ast_node *p, archi_ast_node *c )
+void archi_ast_node_first_child_set( archi_ast_node *p, archi_ast_node *fc )
 {
-  DEBUG_ASSERT( c->prev_sibling == NULL ) ;
+  DEBUG_ASSERT( p && fc ) ;
+ 
+  if( p->first_child ){
+    p->first_child->prev_sibling = fc ;
+    fc->next_sibling = p->first_child ;
+  }
+  else p->last_child = fc ;
 
-  p->first_child->prev_sibling = c ;
-  c->next_sibling = p->first_child ;
-  p->first_child = c ;
-  c->parent = p ; 
+  p->first_child = fc ;
+}
+
+void archi_ast_node_first_child_dset( archi_ast_node *p, archi_ast_node *fc )
+{
+  archi_ast_node_disconnect( fc ) ;
+  archi_ast_node_first_child_set( p, fc ) ; 
+}
+
+void archi_ast_node_last_child_set( archi_ast_node *p, archi_ast_node *lc )
+{
+  DEBUG_ASSERT( p && lc ) ;
+  
+  if( p->last_child ){
+      p->last_child->next_sibling = lc ;
+      lc->prev_sibling = p->last_child ;
+  }
+  else p->first_child = lc ;
+
+  p->last_child = lc ;
+}
+
+void archi_ast_node_last_child_dset( archi_ast_node *p, archi_ast_node *lc )
+{
+  archi_ast_node_disconnect( lc ) ;
+  archi_ast_node_last_child_set( p, lc ) ;
+}
+
+void archi_ast_node_next_sibling_set( archi_ast_node *n, archi_ast_node *ns )
+{
+  DEBUG_ASSERT( n && ns ) ;
+
+  ns->prev_sibling = n ; 
+  ns->parent = n->parent ;
+  n->next_sibling = ns ;
+}
+
+void archi_ast_node_next_sibling_dset( archi_ast_node *n, archi_ast_node *ns )
+{
+  archi_ast_node_disconnect( ns ) ;
+  archi_ast_node_next_sibling_set( n, ns ) ;
+}
+
+void archi_ast_node_prev_sibling_set( archi_ast_node *n, archi_ast_node *ps )
+{
+  DEBUG_ASSERT( n && ps ) ;
+
+  ps->next_sibling = n ;
+  ps->parent = n->parent ;
+  n->prev_sibling = ps ;
+}
+
+void archi_ast_node_prev_sibling_dset( archi_ast_node *n, archi_ast_node *ps )
+{
+  archi_ast_node_disconnect( ps ) ;
+  archi_ast_node_prev_sibling_set( n, ps ) ;
 }
 
 static struct ntname { archi_ast_nodetype type; const char* name; } ntnames[] =
 {
 	{NT_ARCHDEF, "ArchDef"},
 	{NT_REGSECT, "RegSect"},
-	{INSTRSECT, "InstrSect"},
+	{NT_INSTRSECT, "InstrSect"},
 	{AUXSECT, "AuxSect"},
 	{NT_REGDEF, "RegDef"},
 	{NT_CODE, "Code"},
 	{NT_REGCLDEF, "RegClDef"},
 	{NT_REGS, "Regs"},
 	{NT_BITS, "Bits"},
-	{INSTRDEF, "InstrDef"},
-	{INPUT, "Input"},
-	{OUTPUT, "Output"},
-	{IMMEDIATE, "Immediate"},
-	{ENCODING, "Encoding"},
+	{NT_INSTRDEF, "InstrDef"},
+	{NT_INPUT, "Input"},
+	{NT_OUTPUT, "Output"},
+	//{IMMEDIATE, "Immediate"},
+	//{ENCODING, "Encoding"},
 	{FCTDEF, "FctDef"},
 	{ARGS, "Args"},
 	{IFTHENELSE, "ITE"},
@@ -160,7 +228,7 @@ static struct ntname { archi_ast_nodetype type; const char* name; } ntnames[] =
 	{BITSTRING, "Bitstring"},
 	{BOOLEAN, "Boolean"},
 	{NT_ID, "ID"},
-	{TID, "TID"}
+	{NT_TID, "TID"}
 } ;
 
 static const char* ntnames_lookup( archi_ast_nodetype type )
@@ -173,6 +241,8 @@ static const char* ntnames_lookup( archi_ast_nodetype type )
 	return NULL ;
 }
 
+
+//FIXME: fixed size array
 static void node2string( FILE* f, archi_ast_node *n )
 {
 	char str[256] ;
@@ -182,16 +252,16 @@ static void node2string( FILE* f, archi_ast_node *n )
 	
 	switch( n->node_type ){
 		case NT_CODE:
-			sprintf( str, "%d", n->attr.code ) ; break ;
+			sprintf( str, "%d", n->attr.nt_code.code ) ; break ;
 		case NT_REGS:
-			sprintf( str, "%d", n->attr.nregs ) ; break ;
+			sprintf( str, "%d", n->attr.nt_regs.nregs ) ; break ;
 		case NT_BITS:
-			sprintf( str, "%d", n->attr.bits ) ; break ;
+			sprintf( str, "%d", n->attr.nt_bits.bits ) ; break ;
 		case NT_ID:
-			sprintf( str, "%s", n->attr.id ) ; break ;
-/*		case TID:
-			sprintf( str, "%s %s", n->data_type, (const char*)n->data ) ; break ;
-		case NUMBER:
+			sprintf( str, "%s", n->attr.nt_id.id ) ; break ;
+		case NT_TID:
+			sprintf( str, "%s %s", n->data_type, n->attr.nt_tid.id ) ; break ;
+/*		case NUMBER:
 			sprintf( str, "%s", (const char*)n->data ) ; break ;
 		case BITSTRING:{
 			size_t l = strlen( (const char *)n->data ) ;

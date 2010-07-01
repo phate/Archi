@@ -15,14 +15,14 @@ static void archi_regdef_trim( archi_ast_node* n )
 	while( c != NULL ){
 		free_node = 0 ;
     if( c->node_type == NT_CODE ){
-      if( n->attr.reg->code == -1 ){
-        n->attr.reg->code = c->attr.code ;
+      if( n->attr.nt_regdef.code == -1 ){
+        n->attr.nt_regdef.code = c->attr.nt_code.code ;
         free_node = 1 ; 
       }
       else EMSG_MULTIPLE_ATTRIBUTE( n, "code" ) ;
 		}
 		else if( c->node_type == NT_ID ){
-			n->attr.reg->id = talloc_strdup( n->attr.reg, c->attr.id ) ;
+			n->attr.nt_regdef.id = talloc_strdup( n, c->attr.nt_id.id ) ;
       free_node = 1 ;
     }
 
@@ -41,24 +41,24 @@ static void archi_regcldef_trim( archi_ast_node *n )
 	while( c != NULL ){
     free_node = 0 ;
 		if( c->node_type == NT_BITS ){
-			if( n->attr.regcl->bits == -1 ){
-        n->attr.regcl->bits = c->attr.bits ;
+			if( n->attr.nt_regcldef.bits == -1 ){
+        n->attr.nt_regcldef.bits = c->attr.nt_bits.bits ;
         free_node = 1 ;
       }
 			else EMSG_MULTIPLE_ATTRIBUTE( n, "bits" ) ;
 		}
 		else if( c->node_type == NT_REGS ){
-			if( n->attr.regcl->regs == NULL ){
-        n->attr.regcl->regs = c ;
+			if( n->attr.nt_regcldef.regs == NULL ){
+        n->attr.nt_regcldef.regs = c ;
 			  int32_t i = 0 ;
 			  archi_ast_node *cc ;
-			  FOREACH_CHILD( n->attr.regcl->regs, cc ) i++ ;
-			  c->attr.nregs = i ;
+			  FOREACH_CHILD( n->attr.nt_regcldef.regs, cc ) i++ ;
+			  c->attr.nt_regs.nregs = i ;
       }
 		  else EMSG_MULTIPLE_ATTRIBUTE( n, "regs" ) ;
     }
 		else if( c->node_type == NT_ID ){
-			n->attr.regcl->id = talloc_strdup( n->attr.regcl, c->attr.id ) ;
+			n->attr.nt_regcldef.id = talloc_strdup( n, c->attr.nt_id.id ) ;
       free_node = 1 ;
     }
     
@@ -80,7 +80,7 @@ static void archi_regsect_trim( archi_ast_node *n )
 		else DEBUG_ASSERT(0) ;
 	}
 
-  n->attr.nregcls = nregcls ;
+  n->attr.nt_regsect.nregcls = nregcls ;
 }
 /*
 static void archi_instrdef_trim( archi_ast_node *n )

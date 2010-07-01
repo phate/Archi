@@ -15,9 +15,10 @@
 #define EMSG_WRONG_TYPE( node, id, type ) \
   archi_add_emsg( node, "'%s' is not of type '%s'", id, type )
 
+//FIXME: pass the ids as parameter and not just the register classes
 #define EMSG_REGCLS_NOT_HIERARCHICAL( regcl0, regcl1 ) \
   archi_add_emsg( regcl0, "register classes '%s' and '%s' are not hierarchical", \
-  regcl0->attr.regcl->id, regcl1->attr.regcl->id )
+  regcl0->attr.nt_regcldef.id, regcl1->attr.nt_regcldef.id )
 
 #define EMSG_REGISTER_NOT_USED( node, id ) \
   archi_add_emsg( node, "register '%s' was not used in a register class", id )
