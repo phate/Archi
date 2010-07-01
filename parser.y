@@ -120,7 +120,8 @@ InstrDef			: InstrDefIdent ',' InstrDef				{ archi_ast_node_next_sibling_set( $1
 							| InstrDefIdent											{ $$ = $1 ; }
 							;
 InstrDefIdent : Id '{' InstrBody '}'							{ $$ = archi_ast_node_create( ast, NT_INSTRDEF, "Instruction", $1->linenr ) ;
-																									  archi_ast_node_next_sibling_set( $1, $3 ) ;
+																									  archi_nt_instrdef_attributes_init( &($$->attr.nt_instrdef) ) ;
+                                                    archi_ast_node_next_sibling_set( $1, $3 ) ;
 																										archi_children_add( $$, $1 ) ;}
 							;
 InstrBody			: InstrProp ',' InstrBody						{ archi_ast_node_next_sibling_set( $1, $3 ) ; $$ = $1 ; }

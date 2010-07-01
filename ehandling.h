@@ -12,6 +12,9 @@
 #define EMSG_MISSING_REGISTER( node, reg ) \
   archi_add_emsg( node, "register '%s' was not defined", reg )
 
+#define EMSG_MISSING_REGISTER_CLASS( node, id ) \
+  archi_add_emsg( node, "register class '%s' was not defined", id )
+
 #define EMSG_WRONG_TYPE( node, id, type ) \
   archi_add_emsg( node, "'%s' is not of type '%s'", id, type )
 
@@ -22,6 +25,12 @@
 
 #define EMSG_REGISTER_NOT_USED( node, id ) \
   archi_add_emsg( node, "register '%s' was not used in a register class", id )
+
+#define EMSG_REDECLARATION( node, id ) \
+  archi_add_emsg( node, "redeclaration of '%s'", id )
+
+#define EMSG_PREVIOUS_DECLARATION( node, id, linenr ) \
+  archi_add_emsg( node, "previous declaration of '%s' was in line %d", id, linenr ) 
 
 struct archi_ast_node_ ;
 

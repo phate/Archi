@@ -49,7 +49,7 @@ RegClass gpr_esp  { bits = 32, regs = [esp] } ;
 %%
 
 Instr store{
-input = [int blub, eax hallo, int args],
+input = [Int blub, Int blub, gpr b, gpr_esp c, foobar f],
 output = []
 } ;
 #load{

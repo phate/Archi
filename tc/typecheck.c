@@ -2,6 +2,7 @@
 #include "../ehandling.h"
 #include "trim.h"
 #include "regsect.h"
+#include "instrsect.h"
 #include "../debug.h"
 
 #include <stdlib.h>
@@ -18,11 +19,11 @@ static void archi_node_insert( archi_symtab *st, const char *key, archi_ast_node
   }
 	
   if( !strcmp( l->data_type, n->data_type ) )
-		archi_add_emsg( n, "redeclaration of '%s'", key ) ;
+		EMSG_REDECLARATION( n, key ) ; 
 	else 
 		archi_add_emsg( n, "conflicting type for '%s'", key ) ;
 
-	archi_add_emsg( n, "previous declaration of '%s' was in line %d", key, l->linenr ) ;
+	EMSG_PREVIOUS_DECLARATION( n, key, l->linenr ) ;
 }
 
 static void archi_symtab_toplevel_fill( archi_symtab *st, archi_ast_node *n )
@@ -33,6 +34,9 @@ static void archi_symtab_toplevel_fill( archi_symtab *st, archi_ast_node *n )
       break ;
     case NT_REGCLDEF:
       archi_node_insert( st, n->attr.nt_regcldef.id, n ) ;
+      break ;
+    case NT_INSTRDEF:
+      archi_node_insert( st, n->attr.nt_instrdef.id, n ) ;
       break ;
     default: break ;
   }
@@ -333,8 +337,8 @@ void archi_typecheck( archi_symtab *st, archi_ast_node *n )
 	archi_ast_node *c ;
 	FOREACH_CHILD( n, c ){
 		switch( c->node_type ){
-			case NT_REGSECT: archi_regsect_typecheck( st, c ) ; break ;
-	//		case INSTRSECT:	tc_instrsect( stab, c ) ; break ;
+			case NT_REGSECT:    archi_regsect_typecheck( st, c ) ; break ;
+			case NT_INSTRSECT:  archi_instrsect_typecheck( st, c ) ; break ;
 	//		case AUXSECT:		tc_auxsect( stab, c ) ; break ;
 			default: DEBUG_ASSERT( 0 ) ;
 		}

@@ -1,6 +1,8 @@
 #ifndef ARCHI_DEBUG_H_
 #define ARCHI_DEBUG_H_
 
+#include "stdio.h"
+
 #define DEBUG_ASSERT(expr) \
   do {\
     if (!(expr)) {\

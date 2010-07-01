@@ -82,49 +82,50 @@ static void archi_regsect_trim( archi_ast_node *n )
 
   n->attr.nt_regsect.nregcls = nregcls ;
 }
-/*
+
 static void archi_instrdef_trim( archi_ast_node *n )
 {
-	assert(0) ;
-  assert( n->node_type == INSTRDEF ) ;
-*/
-/*
-	archi_ast_node *c ;
-	instrprop *p = (instrprop*)n->data ;
-	FOREACH_CHILD( n, c ){
-		if( c->ntype == INPUT ){
-			if( p->input == NULL ) p->input = c ;
-      else EMSG_MISSING_PROPERTY( n, "input" ) ;
+	DEBUG_ASSERT( n && n->node_type == NT_INSTRDEF ) ;
+
+  uint32_t free_node ;
+  archi_ast_node *c = n->first_child ;
+	while( c != NULL ){
+    free_node = 0 ;
+		if( c->node_type == NT_INPUT ){
+			if( n->attr.nt_instrdef.input == NULL )
+        n->attr.nt_instrdef.input = c ;
+      else EMSG_MULTIPLE_ATTRIBUTE( n, "input" ) ;
     }
-		else if( c->ntype == OUTPUT ){
-			if( p->output == NULL ) p->output = c ;
-      else EMSG_MISSING_PROPERTY( n, "output" ) ;
+		else if( c->node_type == NT_OUTPUT ){
+			if( n->attr.nt_instrdef.output == NULL ) n->attr.nt_instrdef.output = c ;
+      else EMSG_MULTIPLE_ATTRIBUTE( n, "output" ) ;
     }
-		else if( c->ntype == IMMEDIATE ){
-			if( p->immediates == NULL ) p->immediates = c ;
-      else EMSG_MISSING_PROPERTY( n, "immediates" ) ;
-    }
-		else if( c->ntype == ENCODING )
+		/*else if( c->ntype == ENCODING )
 			if( p->encoding == NULL ) p->encoding = c ;
       else EMSG_MISSING_PROPERTY( n, "encoding" ) ;
-		else if( c->ntype == ID )
-			p->name = (const char*)c->data ;
-	}
+		*/
+    else if( c->node_type == NT_ID ){
+		  n->attr.nt_instrdef.id = talloc_strdup( n, c->attr.nt_id.id ) ;	
+	    free_node = 1 ;
+    }
 
+    archi_ast_node *nc = c->next_sibling ;
+    if( free_node ) TALLOC_FREE( c ) ; 
+    c = nc ;
+  }
 }
-*/
-/*
+
 static void archi_instrsect_trim( archi_ast_node *n )
 {
-	assert( n->node_type == INSTRSECT ) ;
+  DEBUG_ASSERT( n && n->node_type == NT_INSTRSECT ) ;
 
 	archi_ast_node *c ;
 	FOREACH_CHILD(n, c){
-		if( c->node_type == INSTRDEF ) archi_instrdef_trim( c ) ; 
-		else assert(0) ;
+		if( c->node_type == NT_INSTRDEF ) archi_instrdef_trim( c ) ; 
+		else DEBUG_ASSERT(0) ;
 	}
 }
-
+/*
 static void archi_fctdef_trim( archi_ast_node *n )
 {
   assert(0) ;
@@ -161,8 +162,8 @@ void archi_ast_trim( archi_ast_node *n )
 	archi_ast_node *c ;
 	FOREACH_CHILD(n, c){
 		switch( c->node_type ){
-			case NT_REGSECT: 	archi_regsect_trim( c ) ; break ;
-//			case INSTRSECT:	archi_instrsect_trim( c ) ; break ;
+			case NT_REGSECT:    archi_regsect_trim( c ) ; break ;
+			case NT_INSTRSECT:  archi_instrsect_trim( c ) ; break ;
 //			case AUXSECT:		archi_auxsect_trim( c ) ; break ;
 			default: DEBUG_ASSERT(0) ;
 		}	
