@@ -44,8 +44,8 @@ archi_ast_node* create_expression( archi_ast_nodetype ntype, archi_ast_node *e1,
 
 %token T_REGDEF T_CODE 
 %token T_REGCLDEF T_BITS T_REGS
-%token TINSTR TINSTR_INPUT TINSTR_OUTPUT TINSTR_IMM TINSTR_ENCODING
-%token T_ID T_SEP T_NUM TTRUE TFALSE TBITSTR TINT TBOOL TBITS
+%token T_INSTRDEF T_INPUT T_OUTPUT TINSTR_ENCODING
+%token T_ID T_SEP T_NUM TTRUE TFALSE T_BITSTR T_INT T_BOOL T_BSTR
 %token TIF TTHEN TELSE TSHIFTL TSHIFTR TLTEQ TGTEQ TLAND TLOR TCONCAT TEQ TNEQ 
 
 %%
@@ -53,15 +53,15 @@ ArchDesc			:	Sections												{ archi_ast_node_init( ast, NT_ARCHDEF, NULL, l
 																									archi_children_add( ast, $1 ) ;}
 							;
 Sections			: RegSect T_SEP
-								/*InstrSect TSECTSEP AuxSect*/		{ archi_ast_node *rs, *is, *au ;
+								InstrSect /*TSECTSEP AuxSect*/		{ archi_ast_node *rs, *is, *au ;
                                                     rs = archi_ast_node_create( ast, NT_REGSECT, NULL, linenr ) ;
                                                     rs->attr.nt_regsect.nregcls = -1 ; 
-                                                    //is = archi_ast_node_create( ast, NT_INSTRSECT, NULL, linenr ) ;
+                                                    is = archi_ast_node_create( ast, NT_INSTRSECT, NULL, linenr ) ;
 																									//au = create_node( AUXSECT, NULL, NULL, linenr ) ;
 																									archi_children_add( rs, $1 ) ;
-																									//archi_children_add( is, $3 ) ;
+																									archi_children_add( is, $3 ) ;
 																									//add_children( au, $5 ) ;
-																									//archi_ast_node_next_sibling_set( rs, is ) ; 
+																									archi_ast_node_next_sibling_set( rs, is ) ; 
 																									//ARE_SIBLINGS( is, au ) ;
 																									$$ = rs ;}
 							;
@@ -105,33 +105,31 @@ RegClProp			: T_BITS '=' T_NUM						    { $$ = archi_ast_node_create( ast, NT_BI
                                                   $$->attr.nt_regs.nregs = -1 ;
                                                   archi_children_add( $$, $4 ) ; }  
 							;
-
-/*
-InstrSect			: InstrSectDef ';' InstrSect				{ archi_ast_node* n ;
-																										FOREACH_SIBLING( $1, n ){
-																											if( n->next_sibling == NULL ){
-																												ARE_SIBLINGS( n, $3 ) ;
+InstrSect			: InstrSectDef ';' InstrSect				{ archi_ast_node* s ;
+																										FOREACH_NEXT_SIBLING( $1, s ){
+																											if( s->next_sibling == NULL ){
+																												archi_ast_node_next_sibling_set( s, $3 ) ;
 																												break ;
 																											}
 																										}}
 							| InstrSectDef ';'									{ $$ = $1 ; }
 							;
-InstrSectDef	: TINSTR InstrDef										{ $$ = $2 ; }
+InstrSectDef	: T_INSTRDEF InstrDef						    { $$ = $2 ; }
 							;
-InstrDef			: InstrDefIdent ',' InstrDef				{ ARE_SIBLINGS( $1, $3 ) ; $$ = $1 ; }
+InstrDef			: InstrDefIdent ',' InstrDef				{ archi_ast_node_next_sibling_set( $1, $3 ) ; $$ = $1 ; }
 							| InstrDefIdent											{ $$ = $1 ; }
 							;
 InstrDefIdent : Id '{' InstrBody '}'							{ $$ = archi_ast_node_create( ast, NT_INSTRDEF, "Instruction", $1->linenr ) ;
-																									  ARE_SIBLINGS( $1, $3 ) ;
-																										add_children( $$, $1 ) ;}
+																									  archi_ast_node_next_sibling_set( $1, $3 ) ;
+																										archi_children_add( $$, $1 ) ;}
 							;
-InstrBody			: InstrProp ',' InstrBody						{ ARE_SIBLINGS($1, $3) ; $$ = $1 ; }
+InstrBody			: InstrProp ',' InstrBody						{ archi_ast_node_next_sibling_set( $1, $3 ) ; $$ = $1 ; }
 							| InstrProp													{ $$ = $1 ; }
 							;
-InstrProp			: TINSTR_INPUT '=' '[' ETIdList ']'	{ $$ = archi_ast_node_create( ast, NT_INPUT, NULL, linenr ) ;
-																										add_children( $$, $4 ) ;}
-							| TINSTR_OUTPUT '=' '[' ETIdList ']'{ $$ = archi_ast_node_create( ast, NT_OUTPUT, NULL, linenr ) ;
-																										add_children( $$, $4 ) ;}
+InstrProp			: T_INPUT '=' '[' ETIdList ']'	    { $$ = archi_ast_node_create( ast, NT_INPUT, NULL, linenr ) ;
+																										archi_children_add( $$, $4 ) ;}
+							| T_OUTPUT '=' '[' ETIdList ']'     { $$ = archi_ast_node_create( ast, NT_OUTPUT, NULL, linenr ) ;
+																										archi_children_add( $$, $4 ) ;}
 //							| TINSTR_IMM '=' '[' ETIdList ']'		{ $$ = create_node( IMMEDIATE, NULL, NULL, linenr ) ;
 //																										add_children( $$, $4 ) ;}
 //							|	TINSTR_ENCODING '=' Exp						{ $$ = create_node( ENCODING, NULL, NULL, linenr ) ;
@@ -140,21 +138,20 @@ InstrProp			: TINSTR_INPUT '=' '[' ETIdList ']'	{ $$ = archi_ast_node_create( as
 ETIdList			: TIdList														{ $$ = $1 ; }
 							|																		{ $$ = NULL ; }
 							;
-TIdList				: TId ',' TIdList										{ ARE_SIBLINGS($1, $3) ; $$ = $1 ; }
+TIdList				: TId ',' TIdList										{ archi_ast_node_next_sibling_set($1, $3) ; $$ = $1 ; }
 							| TId																{ $$ = $1 ; }
 							;
-TId						: TIDENT														{ buffer[1] = strdup(yytext) ; }
-								TIDENT														{ $$ = archi_ast_node_create( ast, NT_TID, buffer[1], linenr ) ;
+TId						: T_ID														  { buffer[1] = strdup(yytext) ; }
+								T_ID														  { $$ = archi_ast_node_create( ast, NT_TID, buffer[1], linenr ) ;
                                                     $$->attr.nt_tid.id = talloc_strdup( $$, yytext ) ; }
                                                     
-							| TINT TIDENT												{ $$ = archi_ast_node_create( ast, NT_TID, "Int", linenr ) ;
+							| T_INT T_ID											  { $$ = archi_ast_node_create( ast, NT_TID, "Int", linenr ) ;
                                                     $$->attr.nt_tid.id = talloc_strdup( $$, yytext ) ; }
-							| TBOOL TIDENT											{ $$ = archi_ast_node_create( ast, NT_TID, "Bool", linenr ) ;
+							| T_BOOL T_ID											  { $$ = archi_ast_node_create( ast, NT_TID, "Bool", linenr ) ;
                                                     $$->attr.nt_tid.id = talloc_strdup( $$, yytext ) ; }
-							| TBITS TIDENT											{ $$ = archi_ast_node_create( ast, NT_TID, "Bits", linenr ) ;
+							| T_BSTR T_ID											  { $$ = archi_ast_node_create( ast, NT_TID, "Bits", linenr ) ;
 							                                      $$->attr.nt_tid.id = talloc_strdup( $$, yytext ) ; }
               ;
-*/
 IdList				: Id ',' IdList											{ archi_ast_node_next_sibling_set( $1, $3 ) ; $$ = $1 ; }
 							| Id																{ $$ = $1 ; }
 							;

@@ -23,22 +23,21 @@ whitespace [ \t]+
 "RegClass"	{ return T_REGCLDEF; }
 "bits"			{ return T_BITS; }
 "regs"			{ return T_REGS; }
-"Instr"			{ return TINSTR; }
-"input"			{ return TINSTR_INPUT; }
-"output"		{ return TINSTR_OUTPUT; }
-"immediate"	{ return TINSTR_IMM; }
+"Instr"			{ return T_INSTRDEF; }
+"input"			{ return T_INPUT; }
+"output"		{ return T_OUTPUT; }
 "encoding"	{ return TINSTR_ENCODING; }
 "if"				{ return TIF; }
 "then"			{ return TTHEN; }
 "else"			{ return TELSE; }
 
-"Int"				{ return TINT; }
-"Bool"			{ return TBOOL; }
-"Bits"			{ return TBITS; }
+"Int"				{ return T_INT; }
+"Bool"			{ return T_BOOL; }
+"Bits"			{ return T_BSTR; }
 "true"			{ return TTRUE; }
 "false"			{ return TFALSE; }
 
-{bitstr}		{ return TBITSTR; }
+{bitstr}		{ return T_BITSTR; }
 {number}		{ return T_NUM; }
 {identifier}	{ return T_ID; }
 {comment} 	{ linenr++ ; }

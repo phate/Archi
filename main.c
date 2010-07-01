@@ -80,15 +80,14 @@ int main( int argc, char* argv[] )
 		exit( EXIT_FAILURE ) ;
 	}
 	archi_view_ast(ast) ;
-
+/*
   archi_typecheck( symtab, ast ) ;
   archi_view_ast( ast ) ;
   archi_symtab_print( symtab ) ;  
   report_errors( ast ) ;
 
   archi_code_generate( symtab, ast, stdout, stdout ) ;
-
-
+*/
 /*	
   trim_tree( ast ) ;
 	fill_symtab( stab, ast ) ;
