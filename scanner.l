@@ -18,11 +18,11 @@ newline \n
 whitespace [ \t]+
 
 %%
-"Reg" 			{ return TREG; }
-"code"			{ return TREG_CODE; }
-"RegClass"	{ return TREGCL; }
-"bits"			{ return TREGCL_BITS; }
-"regs"			{ return TREGCL_REGS; }
+"Reg" 			{ return T_REGDEF; }
+"code"			{ return T_CODE; }
+"RegClass"	{ return T_REGCLDEF; }
+"bits"			{ return T_BITS; }
+"regs"			{ return T_REGS; }
 "Instr"			{ return TINSTR; }
 "input"			{ return TINSTR_INPUT; }
 "output"		{ return TINSTR_OUTPUT; }
@@ -39,8 +39,8 @@ whitespace [ \t]+
 "false"			{ return TFALSE; }
 
 {bitstr}		{ return TBITSTR; }
-{number}		{ return TNUM; }
-{identifier}	{ return TIDENT; }
+{number}		{ return T_NUM; }
+{identifier}	{ return T_ID; }
 {comment} 	{ linenr++ ; }
 {whitespace}	{ /* skip whitespace */ }
 {newline}	{ linenr++ ;  }
@@ -73,6 +73,6 @@ whitespace [ \t]+
 "["		{ return('['); }
 "]"		{ return(']'); }
 ";"		{ return(';'); }
-"%%"	{ return TSECTSEP; }
+"%%"	{ return T_SEP; }
 . 		{ yyerror("syntax error") ; exit( EXIT_FAILURE ) ; }
 %%

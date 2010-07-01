@@ -42,17 +42,17 @@ archi_ast_node* create_expression( archi_ast_nodetype ntype, archi_ast_node *e1,
 */
 %}
 
-%token TREG TREG_CODE 
-%token TREGCL TREGCL_BITS TREGCL_REGS
+%token T_REGDEF T_CODE 
+%token T_REGCLDEF T_BITS T_REGS
 %token TINSTR TINSTR_INPUT TINSTR_OUTPUT TINSTR_IMM TINSTR_ENCODING
-%token TIDENT TNUM TTRUE TFALSE TBITSTR TINT TBOOL TBITS TSECTSEP
+%token T_ID T_SEP T_NUM TTRUE TFALSE TBITSTR TINT TBOOL TBITS
 %token TIF TTHEN TELSE TSHIFTL TSHIFTR TLTEQ TGTEQ TLAND TLOR TCONCAT TEQ TNEQ 
 
 %%
 ArchDesc			:	Sections												{ archi_ast_node_init( ast, NT_ARCHDEF, NULL, linenr ) ;
 																									archi_children_add( ast, $1 ) ;}
 							;
-Sections			: RegSect TSECTSEP
+Sections			: RegSect T_SEP
 								/*InstrSect TSECTSEP AuxSect*/		{ archi_ast_node *rs, *is, *au ;
                                                     rs = archi_ast_node_create( ast, NT_REGSECT, NULL, linenr ) ;
                                                     rs->attr.nt_regsect.nregcls = -1 ; 
@@ -74,8 +74,8 @@ RegSect				: RegSectDef ';' RegSect					{ archi_ast_node *s ;
 																									}}
 							| RegSectDef ';'									{ $$ = $1 ; }
 							;
-RegSectDef		: TREGCL RegClDef									{ $$ = $2 ;}
-            	| TREG RegDef											{ $$ = $2 ;}
+RegSectDef		: T_REGCLDEF RegClDef						  { $$ = $2 ;}
+            	| T_REGDEF RegDef									{ $$ = $2 ;}
 							;
 RegDef				:	RegDefIdent ',' RegDef					{ archi_ast_node_next_sibling_set( $1, $3 ) ; $$ = $1 ; }
 							| RegDefIdent											{ $$ = $1 ; }						
@@ -85,7 +85,7 @@ RegDefIdent		: Id '{' RegBody '}'							{ $$ = archi_ast_node_create( ast, NT_RE
                                                   archi_ast_node_next_sibling_set( $1, $3 ) ;
                                                   archi_children_add( $$, $1 ) ; }
 							;
-RegBody				: TREG_CODE '=' TNUM							{ $$ = archi_ast_node_create( ast, NT_CODE, NULL, linenr ) ;
+RegBody				: T_CODE '=' T_NUM							  { $$ = archi_ast_node_create( ast, NT_CODE, NULL, linenr ) ;
                                                   $$->attr.nt_code.code = strtol( yytext, 0, 10 ) ; }        
 							;
 RegClDef			: RegClDefIdent ',' RegClDef			{ archi_ast_node_next_sibling_set( $1, $3 ) ; $$ = $1 ; }
@@ -99,9 +99,9 @@ RegClDefIdent :	Id '{' RegClBody '}'						{ $$ = archi_ast_node_create( ast, NT_
 RegClBody			: RegClBody ',' RegClProp					{ archi_ast_node_next_sibling_set($3, $1) ; $$ = $3 ; }
 							| RegClProp												{ $$ = $1 ; }
 							;
-RegClProp			: TREGCL_BITS '=' TNUM						{ $$ = archi_ast_node_create( ast, NT_BITS, NULL, linenr ) ;
+RegClProp			: T_BITS '=' T_NUM						    { $$ = archi_ast_node_create( ast, NT_BITS, NULL, linenr ) ;
                                                   $$->attr.nt_bits.bits = strtol( yytext, 0, 10 ) ; }
-							| TREGCL_REGS '=' '[' IdList ']'	{	$$ = archi_ast_node_create( ast, NT_REGS, NULL, linenr ) ;
+							| T_REGS '=' '[' IdList ']'	      {	$$ = archi_ast_node_create( ast, NT_REGS, NULL, linenr ) ;
                                                   $$->attr.nt_regs.nregs = -1 ;
                                                   archi_children_add( $$, $4 ) ; }  
 							;
@@ -158,7 +158,7 @@ TId						: TIDENT														{ buffer[1] = strdup(yytext) ; }
 IdList				: Id ',' IdList											{ archi_ast_node_next_sibling_set( $1, $3 ) ; $$ = $1 ; }
 							| Id																{ $$ = $1 ; }
 							;
-Id						: TIDENT														{ $$ = archi_ast_node_create( ast, NT_ID, NULL, linenr ) ;
+Id						: T_ID														  { $$ = archi_ast_node_create( ast, NT_ID, NULL, linenr ) ;
                                                     $$->attr.nt_id.id = talloc_strdup( $$, yytext ) ; }
 							; 
 /*
