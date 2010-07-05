@@ -139,7 +139,7 @@ static void archi_regcl_code_generate( archi_ast_node *n, FILE *sf )
 
 void archi_regsect_generate( archi_symtab *st, archi_ast_node *n, FILE *hf, FILE *sf )
 {
-  DEBUG_ASSERT( hf && sf && n && n->node_type == NT_REGSECT ) ;
+  DEBUG_ASSERT( hf && sf && st && n && n->node_type == NT_REGSECT ) ;
 
   archi_reg_defs_generate( n, hf ) ;
   archi_regcl_defs_generate( n, hf ) ;
