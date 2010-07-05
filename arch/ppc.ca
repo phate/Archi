@@ -49,8 +49,8 @@ RegClass gpr_esp  { bits = 32, regs = [esp] } ;
 %%
 
 Instr store{
-input = [Int blub, Int blub, gpr b, gpr_esp c, foobar f],
-output = [gpr blub, Int ka, hallo jesu]
+input = [Int blub, Int d, gpr b, gpr_esp c],
+output = [gpr e]
 } ;
 #load{
 #output = [],

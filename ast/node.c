@@ -186,68 +186,16 @@ void archi_ast_node_prev_sibling_dset( archi_ast_node *n, archi_ast_node *ps )
   archi_ast_node_prev_sibling_set( n, ps ) ;
 }
 
-static struct ntname { archi_ast_nodetype type; const char* name; } ntnames[] =
-{
-	{NT_ARCHDEF, "ArchDef"},
-	{NT_REGSECT, "RegSect"},
-	{NT_INSTRSECT, "InstrSect"},
-	{AUXSECT, "AuxSect"},
-	{NT_REGDEF, "RegDef"},
-	{NT_CODE, "Code"},
-	{NT_REGCLDEF, "RegClDef"},
-	{NT_REGS, "Regs"},
-	{NT_BITS, "Bits"},
-	{NT_INSTRDEF, "InstrDef"},
-	{NT_INPUT, "Input"},
-	{NT_OUTPUT, "Output"},
-	//{IMMEDIATE, "Immediate"},
-	//{ENCODING, "Encoding"},
-	{FCTDEF, "FctDef"},
-	{ARGS, "Args"},
-	{IFTHENELSE, "ITE"},
-	{LOGICALOR, "||"},
-	{LOGICALAND, "&&"},
-	{NOTEQUAL, "!="},
-	{EQUAL, "=="},
-	{LESSTHAN, "<"},
-	{GREATERTHAN, ">"},
-	{LESSTHANEQUAL, "<="},
-	{GREATERTHANEQUAL, ">="},
-	{SHIFTRIGHT, ">>"},
-	{SHIFTLEFT, "<<"},
-	{PLUS, "+"},
-	{MINUS, "-"},
-	{TIMES, "*"},
-	{DIVIDE, "/"},
-	{MOD, "%"},
-	{CONCATENATION, "++"},
-	{BITSLICE, "[ ]"},
-	{PROPSELECTION, "."},
-	{FCTCALL, "FctCall()"},
-	{NUMBER, "Number"},
-	{BITSTRING, "Bitstring"},
-	{BOOLEAN, "Boolean"},
-	{NT_ID, "ID"},
-	{NT_TID, "TID"}
-} ;
-
-static const char* ntnames_lookup( archi_ast_nodetype type )
-{
-
-	for( int i = 0, f = 0; f < sizeof(ntnames); f += sizeof(struct ntname), i++ ){
-		if( type == ntnames[i].type ) return ntnames[i].name ;
-	}
-
-	return NULL ;
-}
-
+#define X(a) #a,
+static const char* nodetype_name[] = { ARCHI_AST_NODETYPE } ;
+#undef X
 
 //FIXME: fixed size array
 static void node2string( FILE* f, archi_ast_node *n )
 {
 	char str[256] ;
 
-	const char* name = ntnames_lookup( n->node_type ) ;
+	const char* name = nodetype_name[n->node_type] ;
 	DEBUG_ASSERT( name ) ;
 	
 	switch( n->node_type ){

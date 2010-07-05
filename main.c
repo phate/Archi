@@ -79,7 +79,7 @@ int main( int argc, char* argv[] )
 		archi_cleanup() ;
 		exit( EXIT_FAILURE ) ;
 	}
-//	archi_view_ast(ast) ;
+	archi_view_ast(ast) ;
 
   archi_typecheck( symtab, ast ) ;
  // archi_view_ast( ast ) ;

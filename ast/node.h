@@ -3,6 +3,7 @@
 
 #include "../ehandling.h"
 #include "attributes.h"
+#include "node_types.h"
 
 #include <talloc.h>
 
@@ -16,6 +17,11 @@
 //#define SET_LAST_CHILD( p, c ) do{ p->last_child = c ; c->parent = p ; }while(0)
 //#define ARE_SIBLINGS( ls, rs ) do{ls->next_sibling = rs ; rs->prev_sibling = ls ;}while(0)
 
+#define X(a) a,
+typedef enum{ ARCHI_AST_NODETYPE } archi_ast_nodetype ;
+#undef X
+
+/*
 typedef enum{	NT_ARCHDEF,
 							NT_REGSECT,
 							NT_INSTRSECT,					
@@ -63,6 +69,7 @@ typedef enum{	NT_ARCHDEF,
 							NT_ID,
 							NT_TID
 						 } archi_ast_nodetype ;
+*/
 
 typedef struct archi_ast_node_{
 	archi_ast_nodetype node_type ;
