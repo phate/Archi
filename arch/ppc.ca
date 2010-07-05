@@ -50,7 +50,7 @@ RegClass gpr_esp  { bits = 32, regs = [esp] } ;
 
 Instr store{
 input = [Int blub, Int blub, gpr b, gpr_esp c, foobar f],
-output = []
+output = [gpr blub, Int ka, hallo jesu]
 } ;
 #load{
 #output = [],

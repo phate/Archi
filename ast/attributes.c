@@ -30,3 +30,11 @@ void archi_nt_instrdef_attributes_init( archi_nt_instrdef_attributes *attr )
   attr->input = NULL ;
   attr->output = NULL ;
 }
+
+void archi_nt_input_attributes_init( archi_nt_input_attributes *attr )
+{
+  DEBUG_ASSERT( attr ) ;
+
+  attr->nints = -1 ;
+  attr->nregs = -1 ; 
+}

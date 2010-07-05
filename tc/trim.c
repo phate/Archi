@@ -92,12 +92,25 @@ static void archi_instrdef_trim( archi_ast_node *n )
 	while( c != NULL ){
     free_node = 0 ;
 		if( c->node_type == NT_INPUT ){
-			if( n->attr.nt_instrdef.input == NULL )
+			if( n->attr.nt_instrdef.input == NULL ){
+        int32_t nints = 0 ;
+        int32_t nregs = 0 ;
+        archi_ast_node *cc ;
+        FOREACH_CHILD( c, cc ){ !strcmp(cc->data_type, "Int") ? nints++ : nregs  ;}
+        c->attr.nt_input.nints = nints ;
+        c->attr.nt_input.nregs = nregs ;
         n->attr.nt_instrdef.input = c ;
+      }
       else EMSG_MULTIPLE_ATTRIBUTE( n, "input" ) ;
     }
 		else if( c->node_type == NT_OUTPUT ){
-			if( n->attr.nt_instrdef.output == NULL ) n->attr.nt_instrdef.output = c ;
+			if( n->attr.nt_instrdef.output == NULL ){
+        int32_t i = 0 ;
+        archi_ast_node *cc ;
+        FOREACH_CHILD( c, cc ){ i++ ;}
+        c->attr.nt_output.nregs = i ;
+        n->attr.nt_instrdef.output = c ;
+      }
       else EMSG_MULTIPLE_ATTRIBUTE( n, "output" ) ;
     }
 		/*else if( c->ntype == ENCODING )

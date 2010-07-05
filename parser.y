@@ -128,8 +128,10 @@ InstrBody			: InstrProp ',' InstrBody						{ archi_ast_node_next_sibling_set( $1
 							| InstrProp													{ $$ = $1 ; }
 							;
 InstrProp			: T_INPUT '=' '[' ETIdList ']'	    { $$ = archi_ast_node_create( ast, NT_INPUT, NULL, linenr ) ;
+                                                    archi_nt_input_attributes_init( &($$->attr.nt_input) ) ;
 																										archi_children_add( $$, $4 ) ;}
 							| T_OUTPUT '=' '[' ETIdList ']'     { $$ = archi_ast_node_create( ast, NT_OUTPUT, NULL, linenr ) ;
+                                                    $$->attr.nt_output.nregs = -1 ;
 																										archi_children_add( $$, $4 ) ;}
 //							| TINSTR_IMM '=' '[' ETIdList ']'		{ $$ = create_node( IMMEDIATE, NULL, NULL, linenr ) ;
 //																										add_children( $$, $4 ) ;}
