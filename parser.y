@@ -45,7 +45,7 @@ archi_ast_node* create_expression( archi_ast_nodetype ntype, archi_ast_node *e1,
 %token T_REGDEF T_CODE 
 %token T_REGCLDEF T_BITS T_REGS
 %token T_INSTRDEF T_INPUT T_OUTPUT TINSTR_ENCODING
-%token T_ID T_SEP T_NUM TTRUE TFALSE T_BITSTR T_INT T_BOOL T_BSTR
+%token T_ID T_SEP T_NUM TTRUE TFALSE T_BSTR T_DTINT T_DTBOOL T_DTBSTR
 %token TIF TTHEN TELSE TSHIFTL TSHIFTR TLTEQ TGTEQ TLAND TLOR TCONCAT TEQ TNEQ 
 
 %%
@@ -148,11 +148,11 @@ TId						: T_ID														  { buffer[1] = strdup(yytext) ; }
 								T_ID														  { $$ = archi_ast_node_create( ast, NT_TID, buffer[1], linenr ) ;
                                                     $$->attr.nt_tid.id = talloc_strdup( $$, yytext ) ; }
                                                     
-							| T_INT T_ID											  { $$ = archi_ast_node_create( ast, NT_TID, "Int", linenr ) ;
+							| T_DTINT T_ID										  { $$ = archi_ast_node_create( ast, NT_TID, "Int", linenr ) ;
                                                     $$->attr.nt_tid.id = talloc_strdup( $$, yytext ) ; }
-							| T_BOOL T_ID											  { $$ = archi_ast_node_create( ast, NT_TID, "Bool", linenr ) ;
+							| T_DTBOOL T_ID										  { $$ = archi_ast_node_create( ast, NT_TID, "Bool", linenr ) ;
                                                     $$->attr.nt_tid.id = talloc_strdup( $$, yytext ) ; }
-							| T_BSTR T_ID											  { $$ = archi_ast_node_create( ast, NT_TID, "Bits", linenr ) ;
+							| T_DTBSTR T_ID									    { $$ = archi_ast_node_create( ast, NT_TID, "Bits", linenr ) ;
 							                                      $$->attr.nt_tid.id = talloc_strdup( $$, yytext ) ; }
               ;
 IdList				: Id ',' IdList											{ archi_ast_node_next_sibling_set( $1, $3 ) ; $$ = $1 ; }

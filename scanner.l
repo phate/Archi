@@ -31,13 +31,13 @@ whitespace [ \t]+
 "then"			{ return TTHEN; }
 "else"			{ return TELSE; }
 
-"Int"				{ return T_INT; }
-"Bool"			{ return T_BOOL; }
-"Bits"			{ return T_BSTR; }
+"Int"				{ return T_DTINT; }
+"Bool"			{ return T_DTBOOL; }
+"Bits"			{ return T_DTBSTR; }
 "true"			{ return TTRUE; }
 "false"			{ return TFALSE; }
 
-{bitstr}		{ return T_BITSTR; }
+{bitstr}		{ return T_BSTR; }
 {number}		{ return T_NUM; }
 {identifier}	{ return T_ID; }
 {comment} 	{ linenr++ ; }
