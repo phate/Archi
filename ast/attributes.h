@@ -26,6 +26,7 @@ typedef struct archi_nt_instrdef_attributes_{
   const char *id ;
   struct archi_ast_node_ *input ;
   struct archi_ast_node_ *output ;
+  struct archi_ast_node_ *encoding ;
 } archi_nt_instrdef_attributes ;
 
 void archi_nt_instrdef_attributes_init( archi_nt_instrdef_attributes *attr ) ;
@@ -36,6 +37,13 @@ typedef struct archi_nt_input_attributes_{
 } archi_nt_input_attributes ;
 
 void archi_nt_input_attributes_init( archi_nt_input_attributes *attr ) ;
+
+typedef struct archi_nt_bstr_attributes_{
+  const char* bstr ;
+  int32_t len ;
+} archi_nt_bstr_attributes ;
+
+void archi_nt_bstr_attributes_init( archi_nt_bstr_attributes *attr ) ;
 
 typedef struct archi_nt_bits_attributes_{
   int32_t bits ;
@@ -65,6 +73,10 @@ typedef struct archi_nt_tid_attributes_{
   const char* id ;
 } archi_nt_tid_attributes ;
 
+typedef struct archi_nt_concat_attributes_{
+  int32_t len ;
+} archi_nt_concat_attributes ;
+
 typedef union node_attributes_{
   archi_nt_regdef_attributes nt_regdef ;
   archi_nt_regcldef_attributes nt_regcldef ;
@@ -75,6 +87,8 @@ typedef union node_attributes_{
   archi_nt_regsect_attributes nt_regsect ;
   archi_nt_input_attributes nt_input ;
   archi_nt_output_attributes nt_output ;
+  archi_nt_concat_attributes nt_concat ;
+  archi_nt_bstr_attributes nt_bstr ;
   archi_nt_id_attributes nt_id ;
   archi_nt_tid_attributes nt_tid ; 
 } node_attributes ;

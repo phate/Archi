@@ -114,10 +114,12 @@ static void archi_instrdef_trim( archi_ast_node *n )
       }
       else EMSG_MULTIPLE_ATTRIBUTE( n, "output" ) ;
     }
-		/*else if( c->ntype == ENCODING )
-			if( p->encoding == NULL ) p->encoding = c ;
-      else EMSG_MISSING_PROPERTY( n, "encoding" ) ;
-		*/
+		else if( c->node_type == NT_ENCODING ){
+			if( n->attr.nt_instrdef.encoding == NULL ){
+        n->attr.nt_instrdef.encoding = c ;
+      }
+      else EMSG_MULTIPLE_ATTRIBUTE( n, "encoding" ) ;
+		}
     else if( c->node_type == NT_ID ){
 		  n->attr.nt_instrdef.id = talloc_strdup( n, c->attr.nt_id.id ) ;	
 	    free_node = 1 ;

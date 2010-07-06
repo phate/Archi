@@ -17,18 +17,22 @@ RegClass gpr_esp  { bits = 32, regs = [esp] } ;
 Instr
   ret{
     input = [],
-    output = []
+    output = [],
+    encoding = '00' ++ '11' ++ '10' ++ '10' 
   },
   load_imm{
     input = [Int i],
-    output = [gpr r]
+    output = [gpr r],
+    encoding = '01010101'
   },
   load32_disp{
     input = [gpr base, Int offset],
-    output = [gpr r]
+    output = [gpr r],
+    encoding = '10101111'
   },
   int_add{
     input = [gpr x, gpr y],
-    output = [gpr r, flags f]
+    output = [gpr r, flags f],
+    encoding = '01010111'
 } ;
 

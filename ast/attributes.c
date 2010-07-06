@@ -29,6 +29,7 @@ void archi_nt_instrdef_attributes_init( archi_nt_instrdef_attributes *attr )
   attr->id = NULL ;
   attr->input = NULL ;
   attr->output = NULL ;
+  attr->encoding = NULL ;
 }
 
 void archi_nt_input_attributes_init( archi_nt_input_attributes *attr )
@@ -37,4 +38,12 @@ void archi_nt_input_attributes_init( archi_nt_input_attributes *attr )
 
   attr->nints = -1 ;
   attr->nregs = -1 ; 
+}
+
+void archi_nt_bstr_attributes_init( archi_nt_bstr_attributes *attr )
+{
+  DEBUG_ASSERT( attr ) ;
+
+  attr->bstr = NULL ;
+  attr->len = -1 ;
 }

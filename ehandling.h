@@ -18,6 +18,12 @@
 #define EMSG_WRONG_TYPE( node, id, type ) \
   archi_add_emsg( node, "'%s' is not of type '%s'", id, type )
 
+#define EMSG_TYPE_MISMATCH( node, atype, etype ) \
+  archi_add_emsg( node, "expected type '%s', got type '%s'", etype, atype )
+
+#define EMSG_ENCODING_LENGTH( node ) \
+  archi_add_emsg( node, "encoding length must be a multiple of eight" )
+
 //FIXME: pass the ids as parameter and not just the register classes
 #define EMSG_REGCLS_NOT_HIERARCHICAL( regcl0, regcl1 ) \
   archi_add_emsg( regcl0, "register classes '%s' and '%s' are not hierarchical", \

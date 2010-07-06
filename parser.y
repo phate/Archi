@@ -29,24 +29,23 @@ static void archi_children_add( archi_ast_node *p, archi_ast_node *fc )
   }
 
 }
-/*
-archi_ast_node* create_expression( archi_ast_nodetype ntype, archi_ast_node *e1, archi_ast_node *e2 )
+
+archi_ast_node* archi_expression_create( archi_ast_nodetype ntype, archi_ast_node *e1, archi_ast_node *e2 )
 {
-  archi_ast_node *n = archi_ast_node_talloc( ast ) ;
-  archi_ast_node_init( n, ntype, NULL, e1->linenr ) ;
-	ARE_SIBLINGS( e1, e2 ) ;
-	add_children( n, e1 ) ;
+  archi_ast_node *n = archi_ast_node_create( ast, ntype, NULL, e1->linenr ) ;
+	archi_ast_node_next_sibling_set( e1, e2 ) ;
+	archi_children_add( n, e1 ) ;
 
 	return n ;	
 }
-*/
+
 %}
 
 %token T_REGDEF T_CODE 
 %token T_REGCLDEF T_BITS T_REGS
-%token T_INSTRDEF T_INPUT T_OUTPUT TINSTR_ENCODING
+%token T_INSTRDEF T_INPUT T_OUTPUT T_ENCODING
 %token T_ID T_SEP T_NUM TTRUE TFALSE T_BSTR T_DTINT T_DTBOOL T_DTBSTR
-%token TIF TTHEN TELSE TSHIFTL TSHIFTR TLTEQ TGTEQ TLAND TLOR TCONCAT TEQ TNEQ 
+%token TIF TTHEN TELSE TSHIFTL TSHIFTR TLTEQ TGTEQ TLAND TLOR T_CONCAT TEQ TNEQ 
 
 %%
 ArchDesc			:	Sections												{ archi_ast_node_init( ast, NT_ARCHDEF, NULL, linenr ) ;
@@ -135,8 +134,8 @@ InstrProp			: T_INPUT '=' '[' ETIdList ']'	    { $$ = archi_ast_node_create( ast
 																										archi_children_add( $$, $4 ) ;}
 //							| TINSTR_IMM '=' '[' ETIdList ']'		{ $$ = create_node( IMMEDIATE, NULL, NULL, linenr ) ;
 //																										add_children( $$, $4 ) ;}
-//							|	TINSTR_ENCODING '=' Exp						{ $$ = create_node( ENCODING, NULL, NULL, linenr ) ;
-//																										add_children( $$, $3 ) ;}	
+							|	T_ENCODING '=' Exp8						    { $$ = archi_ast_node_create( ast, NT_ENCODING, NULL, linenr ) ;
+																										archi_children_add( $$, $3 ) ;}	
 							;
 ETIdList			: TIdList														{ $$ = $1 ; }
 							|																		{ $$ = NULL ; }
@@ -206,9 +205,12 @@ Exp7					: Exp7 '*' Exp8											{ $$ = create_expression( TIMES, $1, $3 ) ; }
 							| Exp7 '%' Exp8											{ $$ = create_expression( MOD, $1, $3 ) ; }
 							| Exp8															{ $$ = $1 ; }
 							;
-Exp8					: Exp8 TCONCAT Exp9									{ $$ = create_expression( CONCATENATION, $1, $3 ) ; }
-							| Exp9															{ $$ = $1 ; }
+*/
+Exp8					: Exp8 T_CONCAT Exp12								{ $$ = archi_expression_create( NT_CONCAT, $1, $3 ) ;
+                                                    $$->attr.nt_concat.len = -1 ;}
+							| Exp12															{ $$ = $1 ; }
 							;
+/*
 Exp9					: Exp10 '[' Exp ':' Exp ']'					{ $$ = create_node( BITSLICE, NULL, NULL, linenr ) ;
 																										ARE_SIBLINGS( $1, $3 ) ; ARE_SIBLINGS( $3, $5 ) ;
 																										add_children( $$, $1 ) ;}
@@ -226,15 +228,18 @@ Exp11					: Id '(' EExpList ')'								{ if( $3 == NULL ){
 							;
 Exp12					: Id																{ $$ = $1 ; }
 							| TNUM															{ $$ = create_node(NUMBER, strdup("Int"),strdup(yytext),linenr);}
-							| TBITSTR														{ $$ = create_node( BITSTRING, strdup("Bits"),
-                                                    strdup(yytext), linenr) ; }
-							| TTRUE															{ $$ = create_node( BOOLEAN, strdup("Bool"),
+*/
+Exp12					: T_BSTR														{ $$ = archi_ast_node_create( ast, NT_BSTR, "Bits", linenr ) ;
+                                                    archi_nt_bstr_attributes_init( &($$->attr.nt_bstr) ) ;
+                                                    $$->attr.nt_bstr.bstr = talloc_strndup( $$, yytext+1, strlen(yytext)-2 ) ;
+                                                    $$->attr.nt_bstr.len = strlen(yytext)-2 ;}
+/*							| TTRUE															{ $$ = create_node( BOOLEAN, strdup("Bool"),
                                                     strdup("true"), linenr ) ; }
 							| TFALSE														{ $$ = create_node( BOOLEAN, strdup("Bool"),
                                                     strdup("false"), linenr ) ; }
-							| '(' Exp ')'												{ $$ = $2 ; }
+*/						| '(' Exp8 ')'										  { $$ = $2 ; }
 							;
-EExpList			: ExpList														{ $$ = $1 ; }
+/*EExpList			: ExpList														{ $$ = $1 ; }
 							|																		{ $$ = NULL ; }
 							;
 ExpList				: Exp ',' ExpList										{ ARE_SIBLINGS( $1, $3 ) ; $$ = $1 ; }								

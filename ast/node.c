@@ -211,10 +211,9 @@ static void node2string( FILE* f, archi_ast_node *n )
 			sprintf( str, "%s %s", n->data_type, n->attr.nt_tid.id ) ; break ;
 /*		case NUMBER:
 			sprintf( str, "%s", (const char*)n->data ) ; break ;
-		case BITSTRING:{
-			size_t l = strlen( (const char *)n->data ) ;
-			sprintf( str, "%s", strncat( str, ((const char*)n->data)+1, l-2) ) ; break ;}
-*/		default:
+*/  case NT_BSTR:
+			sprintf( str, "%s", n->attr.nt_bstr.bstr ) ; break ;
+		default:
 			sprintf( str, "%s", "" ) ; break ;
 
 	}

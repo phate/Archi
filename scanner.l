@@ -7,7 +7,7 @@ unsigned int linenr = 1 ;
 extern int yyerror( char* message ) ;
 %}
 
-bitstr \"(0|1)*\"
+bitstr \'(0|1)*\'
 digit [0-9]+
 number {digit}+
 letter [a-zA-Z]
@@ -26,7 +26,7 @@ whitespace [ \t]+
 "Instr"			{ return T_INSTRDEF; }
 "input"			{ return T_INPUT; }
 "output"		{ return T_OUTPUT; }
-"encoding"	{ return TINSTR_ENCODING; }
+"encoding"	{ return T_ENCODING; }
 "if"				{ return TIF; }
 "then"			{ return TTHEN; }
 "else"			{ return TELSE; }
@@ -46,7 +46,7 @@ whitespace [ \t]+
 
 "!="	{ return TNEQ; }
 "=="	{ return TEQ; }
-"++"	{ return TCONCAT; }
+"++"	{ return T_CONCAT; }
 "||"	{ return TLOR; }
 "&&"	{ return TLAND; }
 ">>"	{ return TSHIFTR; }

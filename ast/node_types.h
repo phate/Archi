@@ -13,6 +13,9 @@
   X( NT_INSTRDEF ) \
   X( NT_INPUT ) \
   X( NT_OUTPUT ) \
+  X( NT_ENCODING ) \
+  X( NT_CONCAT ) \
+  X( NT_BSTR ) \
   X( NT_ID ) \
   X( NT_TID ) \
 
