@@ -97,7 +97,7 @@ static void archi_instrdef_trim( archi_ast_node *n )
         int32_t nints = 0 ;
         int32_t nregs = 0 ;
         archi_ast_node *cc ;
-        FOREACH_CHILD( c, cc ){ !strcmp(cc->data_type, "Int") ? nints++ : nregs  ;}
+        FOREACH_CHILD( c, cc ){ !strcmp(cc->data_type, "Int") ? nints++ : nregs++  ;}
         c->attr.nt_input.nints = nints ;
         c->attr.nt_input.nregs = nregs ;
         n->attr.nt_instrdef.input = c ;

@@ -12,65 +12,23 @@ RegClass gpr_eax  { bits = 32, regs = [eax] } ;
 RegClass gpr_edx  { bits = 32, regs = [edx] } ;
 RegClass gpr_esp  { bits = 32, regs = [esp] } ; 
 
-#Reg eax{code=2},ebx{code=3},eck{code=45} ;
-#Reg bla{code=100},ikl{code=101} ;
-#Reg r{code=45} ;
-
-#Reg bldium{code=56} ;
-
-#RegClass
-#	intregs{
-#		bits=32,
-#    bits=24,
-#		regs=[eax,fpregs,c,d,e,f]
-#};
-#RegClass fpregs{
-#		bits=64,
-#		regs=[r,f4,f6,fpregs,zu]
-#},
-#	statusregs{
-#		bits=32,
-#		regs=[r,f4,f6]
-#} ;
-#RegClass blub{
-#	bits = 24,	
-#	regs=[r,bla,ikl]
-#} ;
-#RegClass gpc{
-#  bits = 32,
-#  regs=[r,bla]
-#} ;
-
-#RegClass
-#hallo{
-#	bits=32,
-#	regs=[i,e,r]
-#} ;
 %%
 
-Instr store{
-input = [Int blub, Int d, gpr b, gpr_esp c],
-output = [gpr e]
+Instr
+  ret{
+    input = [],
+    output = []
+  },
+  load_imm{
+    input = [Int i],
+    output = [gpr r]
+  },
+  load32_disp{
+    input = [gpr base, Int offset],
+    output = [gpr r]
+  },
+  int_add{
+    input = [gpr x, gpr y],
+    output = [gpr r, flags f]
 } ;
-#load{
-#output = [],
-#immediate = [tum hallo]
-#},
-#add{
-#input = [hass jo],
-#output = [int bla],
-#immediate = [blub tra]	
-#} ;
 
-#Instr sub{
-#input = [int bla],
-#output = [blub ha],
-#immediate = [Int k],
-#encoding = ha.code[1:3]
-#} ;
-
-#%%
-
-#Int fct(Int b) = b.code
-
-#Int foobar() = 45

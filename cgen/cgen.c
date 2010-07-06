@@ -1,5 +1,6 @@
 #include "cgen.h"
 #include "regsect.h"
+#include "instrsect.h"
 #include "../debug.h"
 
 /*
@@ -53,6 +54,7 @@ void archi_code_generate( archi_symtab *st, archi_ast_node *n, FILE *hf, FILE *s
   FOREACH_CHILD( n, c ){
     switch( c->node_type ){
       case NT_REGSECT: archi_regsect_generate( st, c, hf, sf ) ; break ;
+      case NT_INSTRSECT: archi_instrsect_generate( c, hf, sf ) ; break ;
       default: DEBUG_ASSERT(0) ;
     }
   }
