@@ -1,6 +1,8 @@
 #include "instrsect.h"
 #include "../debug.h"
 
+#include <string.h>
+
 static void archi_instr_defs_generate( archi_ast_node *n, FILE *hf )
 {
   fprintf( hf, "typedef enum {\n" ) ;
@@ -24,19 +26,19 @@ static int32_t archi_instr_encoding_generate_( archi_ast_node *n, FILE *sf, int3
       int32_t p = 0 ;
       while( p < n->attr.nt_bstr.len ){
         int32_t bmissing = 8 - blen ;
-        if( bmissing == 8 ) fprintf( sf, "\tjive_buffer_putbyte( target, " ) ;
+        if( bmissing == 8 ) fprintf( sf, "\tif( !jive_buffer_putbyte( target, " ) ;
 
         if( bstrlen < bmissing ){
           fprintf( sf, "0x%lX << %d | ", strtol(n->attr.nt_bstr.bstr+p, 0, 2), 8-bstrlen-blen ) ;
           return blen+bstrlen ; 
         }
         if( bstrlen == bmissing ){
-          fprintf( sf, "0x%lX ) ;\n", strtol(n->attr.nt_bstr.bstr+p, 0, 2) ) ;
+          fprintf( sf, "0x%lX ) )\n\t\treturn jive_encode_out_of_memory ;\n", strtol(n->attr.nt_bstr.bstr+p, 0, 2) ) ;
           return 0 ;
         }
         if( bstrlen > bmissing ){
           const char *bstr = talloc_strndup( n, n->attr.nt_bstr.bstr+p, bmissing ) ;
-          fprintf( sf, "0x%lX ) ;\n", strtol(bstr, 0, 2) ) ;
+          fprintf( sf, "0x%lX ) )\n\t\treturn jive_encode_out_of_memory ;\n", strtol(bstr, 0, 2) ) ;
           p += bmissing ;
           bstrlen -= bmissing ;
           blen = 0 ;
@@ -53,6 +55,28 @@ static int32_t archi_instr_encoding_generate_( archi_ast_node *n, FILE *sf, int3
   return 0 ;
 }
 
+static void archi_instr_io_generate( archi_ast_node *n, FILE *sf )
+{
+  DEBUG_ASSERT( n && (n->node_type == NT_INPUT || n->node_type == NT_OUTPUT) ) ;
+
+  int32_t nints = 0 ;
+  int32_t nregs = 0 ;
+  archi_ast_node *c ;
+  FOREACH_CHILD( n, c ){
+    if( n->node_type == NT_INPUT ){
+      if( !strcmp(c->data_type, "Int") )
+        fprintf( sf, "\tuint32_t %s = cpu_to_le32(immediates[%d]) ;\n", c->attr.nt_tid.id, nints++ ) ;
+      else
+        fprintf( sf, "\tint %s = inputs[%d]->code ;\n", c->attr.nt_tid.id, nregs++ ) ;
+    }
+    else{
+      fprintf( sf, "\tint %s = outputs[%d]->code ;\n", c->attr.nt_tid.id, nregs++ ) ;
+    }
+  }
+
+  fprintf(sf, "\n" ) ;
+} 
+
 static void archi_instr_encoding_generate( archi_ast_node *n, FILE *sf )
 {
   DEBUG_ASSERT( sf && n && n->node_type == NT_INSTRDEF ) ;
@@ -64,9 +88,11 @@ static void archi_instr_encoding_generate( archi_ast_node *n, FILE *sf )
   fprintf( sf, "\tconst jive_cpureg *outputs[],\n" ) ;
   fprintf( sf, "\tconst long immediates[])\n{\n" ) ;
 
+  archi_instr_io_generate( n->attr.nt_instrdef.input, sf ) ;
+  archi_instr_io_generate( n->attr.nt_instrdef.output, sf ) ;
   archi_instr_encoding_generate_( n->attr.nt_instrdef.encoding->first_child, sf, 0 ) ;
 
-  fprintf( sf, "}\n\n" ) ;
+  fprintf( sf, "\n\treturn jive_encode_ok ;\n}\n\n" ) ;
 }
 
 static void archi_instr_code_generate( archi_ast_node *n, FILE *sf )
@@ -77,7 +103,7 @@ static void archi_instr_code_generate( archi_ast_node *n, FILE *sf )
   FOREACH_CHILD( n, c ){
     fprintf( sf, "\t[jive_arch_%s] = {\n", c->attr.nt_instrdef.id ) ;
     fprintf( sf, "\t\t.name = \"%s\",\n", c->attr.nt_instrdef.id ) ;
-    fprintf( sf, "\t\t.encode = 0,\n" ) ;
+    fprintf( sf, "\t\t.encode = &jive_arch_%s_generate,\n", c->attr.nt_instrdef.id ) ;
     fprintf( sf, "\t\t.mnemonic = 0,\n" ) ;
     fprintf( sf, "\t\t.inregs = 0,\n" ) ;
     fprintf( sf, "\t\t.outregs = 0,\n" ) ;
