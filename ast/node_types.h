@@ -14,8 +14,11 @@
   X( NT_INPUT ) \
   X( NT_OUTPUT ) \
   X( NT_ENCODING ) \
+  X( NT_BSLC ) \
+  X( NT_DOT ) \
   X( NT_CONCAT ) \
   X( NT_BSTR ) \
+  X( NT_NUM ) \
   X( NT_ID ) \
   X( NT_TID ) \
 

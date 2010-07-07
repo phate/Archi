@@ -9,6 +9,9 @@
 #define EMSG_MISSING_ATTRIBUTE( node, attr ) \
   archi_add_emsg( node, "attribute '%s' was not defined", attr )
 
+#define EMSG_NOT_AN_ATTRIBUTE( node ) \
+  archi_add_emsg( node, "expected identifier" ) ;
+
 #define EMSG_MISSING_REGISTER( node, reg ) \
   archi_add_emsg( node, "register '%s' was not defined", reg )
 
@@ -23,6 +26,9 @@
 
 #define EMSG_ENCODING_LENGTH( node ) \
   archi_add_emsg( node, "encoding length must be a multiple of eight" )
+
+#define EMSG_MISSING_ID( node, id ) \
+  archi_add_emsg( node, "'%s' was not defined", id ) 
 
 //FIXME: pass the ids as parameter and not just the register classes
 #define EMSG_REGCLS_NOT_HIERARCHICAL( regcl0, regcl1 ) \

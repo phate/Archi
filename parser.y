@@ -45,7 +45,7 @@ archi_ast_node* archi_expression_create( archi_ast_nodetype ntype, archi_ast_nod
 %token T_REGCLDEF T_BITS T_REGS
 %token T_INSTRDEF T_INPUT T_OUTPUT T_ENCODING
 %token T_ID T_SEP T_NUM TTRUE TFALSE T_BSTR T_DTINT T_DTBOOL T_DTBSTR
-%token TIF TTHEN TELSE TSHIFTL TSHIFTR TLTEQ TGTEQ TLAND TLOR T_CONCAT TEQ TNEQ 
+%token TIF TTHEN TELSE TSHIFTL TSHIFTR TLTEQ TGTEQ TLAND TLOR T_DOT T_CONCAT TEQ TNEQ 
 
 %%
 ArchDesc			:	Sections												{ archi_ast_node_init( ast, NT_ARCHDEF, NULL, linenr ) ;
@@ -206,30 +206,30 @@ Exp7					: Exp7 '*' Exp8											{ $$ = create_expression( TIMES, $1, $3 ) ; }
 							| Exp8															{ $$ = $1 ; }
 							;
 */
-Exp8					: Exp8 T_CONCAT Exp12								{ $$ = archi_expression_create( NT_CONCAT, $1, $3 ) ;
+Exp8					: Exp8 T_CONCAT Exp9								{ $$ = archi_expression_create( NT_CONCAT, $1, $3 ) ;
                                                     $$->attr.nt_concat.len = -1 ;}
-							| Exp12															{ $$ = $1 ; }
+							| Exp9															{ $$ = $1 ; }
 							;
-/*
-Exp9					: Exp10 '[' Exp ':' Exp ']'					{ $$ = create_node( BITSLICE, NULL, NULL, linenr ) ;
-																										ARE_SIBLINGS( $1, $3 ) ; ARE_SIBLINGS( $3, $5 ) ;
-																										add_children( $$, $1 ) ;}
+Exp9					: Exp10 '[' Exp8 ':' Exp8 ']'		    { $$ = archi_ast_node_create( ast, NT_BSLC, NULL, linenr ) ;
+                                                    archi_ast_node_next_sibling_set( $1, $3 ) ;
+                                                    archi_ast_node_next_sibling_set( $3, $5 ) ;
+																										archi_children_add( $$, $1 ) ;}
 							| Exp10															{ $$ = $1 ; }
 							;
-Exp10					: Id '.' TREG_CODE									{ node *n = create_node( TID, "Int", "code", linenr ) ;
-																										$$ = create_expression( PROPSELECTION, $1, n ) ; }
-							| Exp11															{ $$ = $1 ; }
+Exp10					: Exp12 '.' Exp10									  { $$ = archi_expression_create( NT_DOT, $1, $3 ) ; }
+							| Exp12															{ $$ = $1 ; }
 							;
-Exp11					: Id '(' EExpList ')'								{ if( $3 == NULL ){
+/*Exp11					: Id '(' EExpList ')'								{ if( $3 == NULL ){
 																											$$ = create_node( FCTCALL, NULL, NULL, $1->linenr ) ;
 																											add_children( $$, $1 ) ;}
 																										else $$ = create_expression( FCTCALL, $1, $3 ) ; }
 							| Exp12															{ $$ = $1 ; }
 							;
-Exp12					: Id																{ $$ = $1 ; }
-							| TNUM															{ $$ = create_node(NUMBER, strdup("Int"),strdup(yytext),linenr);}
 */
-Exp12					: T_BSTR														{ $$ = archi_ast_node_create( ast, NT_BSTR, "Bits", linenr ) ;
+Exp12					: Id																{ $$ = $1 ; }
+							| T_NUM															{ $$ = archi_ast_node_create( ast, NT_NUM, "Int", linenr ) ;
+                                                    $$->attr.nt_num.num = strtol( yytext, 0, 10 ) ;}
+					    | T_BSTR														{ $$ = archi_ast_node_create( ast, NT_BSTR, "Bits", linenr ) ;
                                                     archi_nt_bstr_attributes_init( &($$->attr.nt_bstr) ) ;
                                                     $$->attr.nt_bstr.bstr = talloc_strndup( $$, yytext+1, strlen(yytext)-2 ) ;
                                                     $$->attr.nt_bstr.len = strlen(yytext)-2 ;}

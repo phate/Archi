@@ -1,38 +1,38 @@
-Reg cc  { code = 0 } , eax { code = 0 } ;
-Reg ecx { code = 1 } , ebx { code = 2 } , edx { code = 3 } ;
-Reg esp { code = 4 } ;
-Reg ebp { code = 5 } ;
-Reg esi { code = 6 } ;
-Reg edi { code = 7 } ;
+Reg cc  { Code = 0 } , eax { Code = 0 } ;
+Reg ecx { Code = 1 } , ebx { Code = 2 } , edx { Code = 3 } ;
+Reg esp { Code = 4 } ;
+Reg ebp { Code = 5 } ;
+Reg esi { Code = 6 } ;
+Reg edi { Code = 7 } ;
 
-RegClass flags    { bits = 16, regs = [cc] } ;
-RegClass gpr      { bits = 32, regs = [eax, ecx, ebx, edx, esp, ebp, esi, edi] } ;
-RegClass gpr_byte { bits = 32, regs = [eax, ecx, ebx, edx] } ;
-RegClass gpr_eax  { bits = 32, regs = [eax] } ;
-RegClass gpr_edx  { bits = 32, regs = [edx] } ;
-RegClass gpr_esp  { bits = 32, regs = [esp] } ; 
+RegClass flags    { Bits = 16, Regs = [cc] } ;
+RegClass gpr      { Bits = 32, Regs = [eax, ecx, ebx, edx, esp, ebp, esi, edi] } ;
+RegClass gpr_byte { Bits = 32, Regs = [eax, ecx, ebx, edx] } ;
+RegClass gpr_eax  { Bits = 32, Regs = [eax] } ;
+RegClass gpr_edx  { Bits = 32, Regs = [edx] } ;
+RegClass gpr_esp  { Bits = 32, Regs = [esp] } ; 
 
 %%
 
 Instr
   ret{
-    input = [],
-    output = [],
-    encoding = '00' ++ '11' ++ '10' ++ '10' 
+    Input = [gpr k],
+    Output = [],
+    Encoding = k.4
   },
   load_imm{
-    input = [Int i],
-    output = [gpr r],
-    encoding = '01010101'
+    Input = [Int i],
+    Output = [gpr r],
+    Encoding = '01010101'
   },
   load32_disp{
-    input = [gpr base, Int offset],
-    output = [gpr r],
-    encoding = '10101111'
+    Input = [gpr base, Int offset],
+    Output = [gpr r],
+    Encoding = '10101111'
   },
   int_add{
-    input = [gpr x, gpr y],
-    output = [gpr r, flags f],
-    encoding = '01010111'
+    Input = [gpr x, gpr y],
+    Output = [gpr r, flags f],
+    Encoding = '01010111'
 } ;
 

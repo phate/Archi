@@ -19,14 +19,14 @@ whitespace [ \t]+
 
 %%
 "Reg" 			{ return T_REGDEF; }
-"code"			{ return T_CODE; }
+"Code"			{ return T_CODE; }
 "RegClass"	{ return T_REGCLDEF; }
-"bits"			{ return T_BITS; }
-"regs"			{ return T_REGS; }
+"Bits"			{ return T_BITS; }
+"Regs"			{ return T_REGS; }
 "Instr"			{ return T_INSTRDEF; }
-"input"			{ return T_INPUT; }
-"output"		{ return T_OUTPUT; }
-"encoding"	{ return T_ENCODING; }
+"Input"			{ return T_INPUT; }
+"Output"		{ return T_OUTPUT; }
+"Encoding"	{ return T_ENCODING; }
 "if"				{ return TIF; }
 "then"			{ return TTHEN; }
 "else"			{ return TELSE; }
