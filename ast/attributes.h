@@ -45,6 +45,13 @@ typedef struct archi_nt_bstr_attributes_{
 
 void archi_nt_bstr_attributes_init( archi_nt_bstr_attributes *attr ) ;
 
+typedef struct archi_nt_bslc_attributes_{
+  int32_t start ;
+  int32_t length ;
+} archi_nt_bslc_attributes ;
+
+void archi_nt_bslc_attributes_init( archi_nt_bslc_attributes *attr ) ;
+
 typedef struct archi_nt_bits_attributes_{
   int32_t bits ;
 } archi_nt_bits_attributes ;
@@ -81,6 +88,7 @@ typedef struct archi_nt_num_attributes_{
   int32_t num ;
 } archi_nt_num_attributes ;
 
+
 typedef union node_attributes_{
   archi_nt_regdef_attributes nt_regdef ;
   archi_nt_regcldef_attributes nt_regcldef ;
@@ -92,10 +100,12 @@ typedef union node_attributes_{
   archi_nt_input_attributes nt_input ;
   archi_nt_output_attributes nt_output ;
   archi_nt_concat_attributes nt_concat ;
+  archi_nt_bslc_attributes nt_bslc ;
   archi_nt_bstr_attributes nt_bstr ;
   archi_nt_num_attributes nt_num ;
   archi_nt_id_attributes nt_id ;
   archi_nt_tid_attributes nt_tid ; 
+
 } node_attributes ;
 
 #endif

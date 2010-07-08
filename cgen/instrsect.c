@@ -1,6 +1,7 @@
 #include "instrsect.h"
 #include "../debug.h"
 
+#include <math.h>
 #include <string.h>
 
 static void archi_instr_defs_generate( archi_ast_node *n, FILE *hf )
@@ -15,6 +16,19 @@ static void archi_instr_defs_generate( archi_ast_node *n, FILE *hf )
   }
 
   fprintf( hf, "} jive_arch_instruction_index ;\n\n" ) ;
+}
+
+static void archi_simple_print( archi_ast_node *n, FILE *sf )
+{
+  switch( n->node_type ){
+    case NT_NUM:
+      fprintf( sf, "%d", n->attr.nt_num.num ) ; break ;
+    case NT_BSTR:
+      fprintf( sf, "%lX", strtol(n->attr.nt_bstr.bstr, 0, 2) ) ; break ;
+    case NT_ID:
+      fprintf( sf, "%s", n->attr.nt_id.id ) ; break ;
+    default: DEBUG_ASSERT(0) ;
+  }
 }
 
 static int32_t archi_instr_encoding_generate_( archi_ast_node *n, FILE *sf, int32_t blen )
@@ -49,10 +63,40 @@ static int32_t archi_instr_encoding_generate_( archi_ast_node *n, FILE *sf, int3
       int32_t l = archi_instr_encoding_generate_( n->first_child, sf, blen ) ; 
       return archi_instr_encoding_generate_( n->last_child, sf, l ) ;
     break ;}
+    case NT_BSLC:{
+      int32_t bslclen = n->attr.nt_bslc.length ;
+    
+      int32_t p = 0 ;
+      while( p < n->attr.nt_bslc.length ){
+        int32_t bmissing = 8 - blen ;
+        if( bmissing == 8 ) fprintf( sf, "\tif( !jive_buffer_putbyte( target, " ) ;
+
+        if( bslclen < bmissing ){
+          fprintf( sf, "(((" ) ;
+          archi_simple_print( n->first_child, sf ) ;
+          fprintf( sf, ") >> %d) & %lX) << %d | ", n->attr.nt_bslc.start, (long)pow(2, n->attr.nt_bslc.length)-1, bmissing-bslclen ) ;
+          return blen+bslclen ;
+        }
+        if( bslclen == bmissing ){
+          fprintf( sf, "(((" ) ;
+          archi_simple_print( n->first_child, sf ) ;
+          fprintf( sf, ") >> %d) & %lX) )\n\t\treturn jive_encode_out_of_memory ;\n", n->attr.nt_bslc.start, (long)pow(2, n->attr.nt_bslc.length)-1 ) ;
+          return 0 ; 
+        }
+        if( bslclen > bmissing ){
+          fprintf( sf, "(((" ) ;
+          archi_simple_print( n->first_child, sf ) ;
+          fprintf( sf, ") >> %d) & %lX) )\n\t\treturn jive_encode_out_of_memory ;\n", n->attr.nt_bslc.start+bslclen-bmissing, (long)pow(2, bmissing)-1 ) ;
+          p += bmissing ;
+          bslclen -= bmissing ;
+          blen = 0 ;
+        }
+      }
+    break ;}
     default: DEBUG_ASSERT(0) ; return 0 ;
   }
 
-  return 0 ;
+  return blen ;
 }
 
 static void archi_instr_io_generate( archi_ast_node *n, FILE *sf )

@@ -249,6 +249,9 @@ void archi_ast_node_prev_sibling_set( archi_ast_node *n, archi_ast_node *ps ) ;
 void archi_ast_node_prev_sibling_dset( archi_ast_node *n, archi_ast_node *ps ) ;
 
 
+void archi_ast_node_replace( archi_ast_node *o, archi_ast_node *n ) ;
+void archi_ast_node_dreplace( archi_ast_node *o, archi_ast_node *n ) ;
+
 void archi_view_ast( archi_ast_node *n ) ;
 
 #endif

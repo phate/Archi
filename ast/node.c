@@ -186,6 +186,28 @@ void archi_ast_node_prev_sibling_dset( archi_ast_node *n, archi_ast_node *ps )
   archi_ast_node_prev_sibling_set( n, ps ) ;
 }
 
+void archi_ast_node_replace( archi_ast_node *o, archi_ast_node *n )
+{
+  archi_ast_node *ns = o->next_sibling ;
+  archi_ast_node *ps = o->prev_sibling ;
+  archi_ast_node *p = o->parent ;
+  
+  TALLOC_FREE( o ) ;
+  
+  n->parent = p ;
+  n->next_sibling = ns ;
+  n->prev_sibling = ps ;
+
+  if( ps == NULL ) p->first_child = n ;
+  if( ns == NULL ) p->last_child = n ;
+}
+
+void archi_ast_node_dreplace( archi_ast_node *o, archi_ast_node *n )
+{
+  archi_ast_node_disconnect( n ) ;
+  archi_ast_node_replace( o, n ) ; 
+}
+
 #define X(a) #a,
 static const char* nodetype_name[] = { ARCHI_AST_NODETYPE } ;
 #undef X

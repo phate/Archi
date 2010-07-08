@@ -84,6 +84,34 @@ static void archi_regsect_trim( archi_ast_node *n )
   n->attr.nt_regsect.nregcls = nregcls ;
 }
 
+
+static void archi_bslc_trim( archi_ast_node *n )
+{
+  DEBUG_ASSERT( n && n->node_type == NT_BSLC ) ;
+
+  if( n->first_child->next_sibling->node_type != NT_NUM )
+    EMSG_COMPILE_TIME_CONSTANT( n->first_child->next_sibling ) ;
+  else{
+    n->attr.nt_bslc.start = n->first_child->next_sibling->attr.nt_num.num ;
+    TALLOC_FREE( n->first_child->next_sibling ) ;
+  }
+  
+  if( n->last_child->node_type != NT_NUM )
+    EMSG_COMPILE_TIME_CONSTANT( n->last_child ) ;
+  else{
+    n->attr.nt_bslc.length = n->last_child->attr.nt_num.num ;
+    TALLOC_FREE( n->last_child ) ;
+  }
+}
+
+static void archi_instrdef_encoding_trim( archi_ast_node *n )
+{
+  archi_ast_node *c ;
+  FOREACH_CHILD( n, c ) archi_instrdef_encoding_trim( c ) ;  
+
+  if( n->node_type == NT_BSLC ) archi_bslc_trim( n ) ;  
+}
+
 static void archi_instrdef_trim( archi_ast_node *n )
 {
 	DEBUG_ASSERT( n && n->node_type == NT_INSTRDEF ) ;
@@ -129,6 +157,8 @@ static void archi_instrdef_trim( archi_ast_node *n )
     if( free_node ) TALLOC_FREE( c ) ; 
     c = nc ;
   }
+
+  archi_instrdef_encoding_trim( n->attr.nt_instrdef.encoding ) ;
 }
 
 static void archi_instrsect_trim( archi_ast_node *n )

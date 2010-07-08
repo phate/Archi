@@ -343,4 +343,5 @@ void archi_typecheck( archi_symtab *st, archi_ast_node *n )
 			default: DEBUG_ASSERT( 0 ) ;
 		}
 	}
+
 }

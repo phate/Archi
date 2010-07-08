@@ -52,6 +52,11 @@ static const char* archi_expression_infer( archi_symtab *st, archi_ast_node *n )
       archi_expression_typecheck( st, n->first_child, "Bits" ) ;
       archi_expression_typecheck( st, n->last_child, "Bits" ) ;
       return "Bits" ;}
+    case NT_BSLC:{
+      archi_expression_typecheck( st, n->first_child, "Bits" ) ;
+//      archi_expression_typecheck( st, n->first_child->next_sibling, "Int" ) ;
+//      archi_expression_typecheck( st, n->last_child, "Int" ) ;
+      return "Bits" ;}
     case NT_DOT:{
       const char* type = archi_expression_infer( st, n->first_child ) ;
       if( !strcmp(type, "Int") || !strcmp(type, "Bits") )
@@ -85,15 +90,22 @@ static int32_t archi_instrdef_encoding_length( archi_ast_node *n )
       return n->attr.nt_bstr.len ;
     case NT_CONCAT:{
       n->attr.nt_concat.len = archi_instrdef_encoding_length( n->first_child ) ;
-      n->attr.nt_concat.len += archi_instrdef_encoding_length( n->last_child ) ;
+      if( n->attr.nt_concat.len != -1 ){
+        int32_t length = n->attr.nt_concat.len ;
+        n->attr.nt_concat.len = archi_instrdef_encoding_length( n->last_child ) ;
+        if( n->attr.nt_concat.len != -1 ) n->attr.nt_concat.len += length ;
+      }
       return n->attr.nt_concat.len ;}
+    case NT_BSLC:{
+      return n->attr.nt_bslc.length ;}
     case NT_DOT:{
-      //FIXME: this is not correct, print error message that we have an infinite long bitstring
-      return 0 ;}
+      return -1 ;}
     default: DEBUG_ASSERT(0) ; return -1 ;
   }
 }
 
+//FIXME: check whether bitslices indeces are compile time constants
+//FIXME: check whether the start+length of the bitslice is smaller than the bitstring it gets in
 static void archi_instrdef_encoding_typecheck( archi_symtab *st, archi_ast_node *n )
 {
   DEBUG_ASSERT( n && n->node_type == NT_ENCODING ) ;
@@ -101,8 +113,8 @@ static void archi_instrdef_encoding_typecheck( archi_symtab *st, archi_ast_node 
   archi_expression_typecheck( st, n->first_child, "Bits" ) ; 
 
   int32_t len = archi_instrdef_encoding_length( n->first_child ) ;
-  if( len % 8 != 0 )
-    EMSG_ENCODING_LENGTH( n ) ;    
+  if( len == -1 || len % 8 != 0 )
+    EMSG_ENCODING_LENGTH( n ) ;
 }
 
 static void archi_instrdef_io_tid_typecheck( archi_symtab *st, archi_ast_node *n )

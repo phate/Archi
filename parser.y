@@ -211,6 +211,7 @@ Exp8					: Exp8 T_CONCAT Exp9								{ $$ = archi_expression_create( NT_CONCAT, 
 							| Exp9															{ $$ = $1 ; }
 							;
 Exp9					: Exp10 '[' Exp8 ':' Exp8 ']'		    { $$ = archi_ast_node_create( ast, NT_BSLC, NULL, linenr ) ;
+                                                    archi_nt_bslc_attributes_init( &($$->attr.nt_bslc) ) ;
                                                     archi_ast_node_next_sibling_set( $1, $3 ) ;
                                                     archi_ast_node_next_sibling_set( $3, $5 ) ;
 																										archi_children_add( $$, $1 ) ;}

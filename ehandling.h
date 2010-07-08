@@ -27,6 +27,9 @@
 #define EMSG_ENCODING_LENGTH( node ) \
   archi_add_emsg( node, "encoding length must be a multiple of eight" )
 
+#define EMSG_COMPILE_TIME_CONSTANT( node ) \
+  archi_add_emsg( node, "not a compile time constant" )
+
 #define EMSG_MISSING_ID( node, id ) \
   archi_add_emsg( node, "'%s' was not defined", id ) 
 

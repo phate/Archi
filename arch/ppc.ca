@@ -18,7 +18,7 @@ Instr
   ret{
     Input = [gpr k],
     Output = [],
-    Encoding = k.4
+    Encoding = '01011101'[2:5] ++ '11100000000'
   },
   load_imm{
     Input = [Int i],
