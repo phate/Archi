@@ -74,19 +74,19 @@ static int32_t archi_instr_encoding_generate_( archi_ast_node *n, FILE *sf, int3
         if( bslclen < bmissing ){
           fprintf( sf, "(((" ) ;
           archi_simple_print( n->first_child, sf ) ;
-          fprintf( sf, ") >> %d) & %lX) << %d | ", n->attr.nt_bslc.start, (long)pow(2, n->attr.nt_bslc.length)-1, bmissing-bslclen ) ;
+          fprintf( sf, ") >> %d) & 0x%lX) << %d | ", n->attr.nt_bslc.start, (long)pow(2, bslclen)-1, bmissing-bslclen ) ;
           return blen+bslclen ;
         }
         if( bslclen == bmissing ){
           fprintf( sf, "(((" ) ;
           archi_simple_print( n->first_child, sf ) ;
-          fprintf( sf, ") >> %d) & %lX) )\n\t\treturn jive_encode_out_of_memory ;\n", n->attr.nt_bslc.start, (long)pow(2, n->attr.nt_bslc.length)-1 ) ;
+          fprintf( sf, ") >> %d) & 0x%lX) )\n\t\treturn jive_encode_out_of_memory ;\n", n->attr.nt_bslc.start, (long)pow(2, bslclen)-1 ) ;
           return 0 ; 
         }
         if( bslclen > bmissing ){
           fprintf( sf, "(((" ) ;
           archi_simple_print( n->first_child, sf ) ;
-          fprintf( sf, ") >> %d) & %lX) )\n\t\treturn jive_encode_out_of_memory ;\n", n->attr.nt_bslc.start+bslclen-bmissing, (long)pow(2, bmissing)-1 ) ;
+          fprintf( sf, ") >> %d) & 0x%lX) )\n\t\treturn jive_encode_out_of_memory ;\n", n->attr.nt_bslc.start+bslclen-bmissing, (long)pow(2, bmissing)-1 ) ;
           p += bmissing ;
           bslclen -= bmissing ;
           blen = 0 ;

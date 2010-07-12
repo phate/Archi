@@ -1,38 +1,67 @@
-Reg cc  { Code = 0 } , eax { Code = 0 } ;
-Reg ecx { Code = 1 } , ebx { Code = 2 } , edx { Code = 3 } ;
-Reg esp { Code = 4 } ;
-Reg ebp { Code = 5 } ;
-Reg esi { Code = 6 } ;
-Reg edi { Code = 7 } ;
+#Reg cc  { Code = 0 } , eax { Code = 0 } ;
+#Reg ecx { Code = 1 } , ebx { Code = 2 } , edx { Code = 3 } ;
+#Reg esp { Code = 4 } ;
+#Reg ebp { Code = 5 } ;
+#Reg esi { Code = 6 } ;
+#Reg edi { Code = 7 } ;
 
-RegClass flags    { Bits = 16, Regs = [cc] } ;
-RegClass gpr      { Bits = 32, Regs = [eax, ecx, ebx, edx, esp, ebp, esi, edi] } ;
-RegClass gpr_byte { Bits = 32, Regs = [eax, ecx, ebx, edx] } ;
-RegClass gpr_eax  { Bits = 32, Regs = [eax] } ;
-RegClass gpr_edx  { Bits = 32, Regs = [edx] } ;
-RegClass gpr_esp  { Bits = 32, Regs = [esp] } ; 
+#RegClass flags    { Bits = 16, Regs = [cc] } ;
+#RegClass gpr      { Bits = 32, Regs = [eax, ecx, ebx, edx, esp, ebp, esi, edi] } ;
+#RegClass gpr_byte { Bits = 32, Regs = [eax, ecx, ebx, edx] } ;
+#RegClass gpr_eax  { Bits = 32, Regs = [eax] } ;
+#RegClass gpr_edx  { Bits = 32, Regs = [edx] } ;
+#RegClass gpr_esp  { Bits = 32, Regs = [esp] } ; 
+
+Reg r3 { Code = 3 } ;
+Reg r4 { Code = 4 } ;
+Reg r5 { Code = 5 } ;
+Reg r6 { Code = 6 } ;
+Reg r7 { Code = 7 } ;
+Reg r8 { Code = 8 } ;
+Reg r9 { Code = 9 } ;
+
+RegClass gpr { Bits = 32, Regs = [r3,r4,r5,r6,r7,r8,r9] } ;
 
 %%
 
-Instr
-  ret{
-    Input = [gpr k],
-    Output = [],
-    Encoding = '01011101'[2:5] ++ '11100000000'
-  },
-  load_imm{
-    Input = [Int i],
-    Output = [gpr r],
-    Encoding = '01010101'
-  },
-  load32_disp{
-    Input = [gpr base, Int offset],
-    Output = [gpr r],
-    Encoding = '10101111'
-  },
-  int_add{
-    Input = [gpr x, gpr y],
-    Output = [gpr r, flags f],
-    Encoding = '01010111'
+
+Instr addi{
+  Input = [r3 ra, Int si],
+  Output = [gpr rt],
+  Encoding =  14.bstr[0:6] ++ rt.code.bstr[0:5] ++ ra.code.bstr[0:5] ++ si.bstr[0:16]
 } ;
+
+Instr ori{
+  Input = [gpr ra, Int ui],
+  Output = [gpr rs],
+  Encoding = 24.bstr[0:6] ++ rs.code.bstr[0:5] ++ ra.code.bstr[0:5] ++ ui.bstr[0:16]
+} ;
+
+Instr and0{
+  Input = [gpr rs, gpr rb],
+  Output = [gpr ra],
+  Encoding = 31.bstr[0:6] ++ rs.code.bstr[0:5] ++ ra.code.bstr[0:5] ++ rb.code.bstr[0:5] ++ 28.bstr[0:10] ++ '0'
+} ;
+
+#Instr
+#  ret{
+#    Input = [gpr k],
+#    Output = [],
+#    Encoding = k.code.bstr[0:5] ++ '010'
+#  },
+#  load_imm{
+#    Input = [Int i],
+#    Output = [gpr r],
+#    Encoding = '01010101'
+#  },
+#  load32_disp{
+#    Input = [gpr base, Int offset],
+#    Output = [gpr r],
+#    Encoding = '10101111'
+#  },
+#  int_add{
+#    Input = [gpr x, gpr y],
+#    Output = [gpr r, flags f],
+#    Encoding = '01010111'
+#} ;
 

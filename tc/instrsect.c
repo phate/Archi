@@ -54,8 +54,6 @@ static const char* archi_expression_infer( archi_symtab *st, archi_ast_node *n )
       return "Bits" ;}
     case NT_BSLC:{
       archi_expression_typecheck( st, n->first_child, "Bits" ) ;
-//      archi_expression_typecheck( st, n->first_child->next_sibling, "Int" ) ;
-//      archi_expression_typecheck( st, n->last_child, "Int" ) ;
       return "Bits" ;}
     case NT_DOT:{
       const char* type = archi_expression_infer( st, n->first_child ) ;
@@ -64,8 +62,9 @@ static const char* archi_expression_infer( archi_symtab *st, archi_ast_node *n )
       else{
         archi_ast_node *l = archi_symtab_lookup( st, type ) ;
         if( l == NULL ) DEBUG_ASSERT(0) ; //this should never happen
-        if( !strcmp(l->data_type, "RegClass") )
+        if( !strcmp(l->data_type, "RegClass") ) //FIXME: what if l-data_type is not a RegClass
           return archi_nt_dot_attribute_typecheck( n->last_child, "RegClass" ) ;
+        else return "Bits" ; //bad fix, do it right
       }
       DEBUG_ASSERT(0) ;}
     default: DEBUG_ASSERT(0) ; break ; 
@@ -104,7 +103,7 @@ static int32_t archi_instrdef_encoding_length( archi_ast_node *n )
   }
 }
 
-//FIXME: check whether bitslices indeces are compile time constants
+//FIXME: check whether bitslices indeces are compile time constants( do that in trim)
 //FIXME: check whether the start+length of the bitslice is smaller than the bitstring it gets in
 static void archi_instrdef_encoding_typecheck( archi_symtab *st, archi_ast_node *n )
 {
@@ -124,9 +123,13 @@ static void archi_instrdef_io_tid_typecheck( archi_symtab *st, archi_ast_node *n
   archi_ast_node *l = archi_symtab_lookup( st, n->data_type ) ;
   if( l == NULL ){
     EMSG_MISSING_REGISTER_CLASS( n, n->data_type ) ;
+    return ;
   }
-  else if( strcmp(l->data_type, "RegClass") )
+
+  if( strcmp(l->data_type, "RegClass") ){
     EMSG_WRONG_TYPE( n, n->attr.nt_tid.id, "RegClass" ) ;
+    return ;
+  }
 
   l = archi_symtab_lookup( st, n->attr.nt_tid.id ) ;
   if( l != NULL ){
@@ -166,6 +169,21 @@ static void archi_instrdef_input_typecheck( archi_symtab *st, archi_ast_node *n 
   }
 }
 
+static int32_t archi_instrdef_io_usage_typecheck( const char* id, archi_ast_node *n )
+{
+  DEBUG_ASSERT( id && n ) ;
+
+  if( n->node_type == NT_ID && !strcmp(n->attr.nt_id.id,id) ) return 1 ;
+
+  archi_ast_node *c ;
+  FOREACH_CHILD( n, c ){
+    int32_t r = archi_instrdef_io_usage_typecheck( id, c ) ;
+    if( r == 1 ) return r ;
+  }
+
+  return 0 ;
+}
+
 static void archi_instrdef_typecheck( archi_symtab *st, archi_ast_node *n )
 {
   DEBUG_ASSERT( st && n && n->node_type == NT_INSTRDEF ) ;
@@ -181,6 +199,17 @@ static void archi_instrdef_typecheck( archi_symtab *st, archi_ast_node *n )
   if( n->attr.nt_instrdef.encoding == NULL )
     EMSG_MISSING_ATTRIBUTE( n, "encoding" ) ;
   else archi_instrdef_encoding_typecheck( st, n->attr.nt_instrdef.encoding ) ;
+
+  archi_ast_node *c ;
+  FOREACH_CHILD( n->attr.nt_instrdef.input, c ){
+    if( !archi_instrdef_io_usage_typecheck( c->attr.nt_tid.id, n->attr.nt_instrdef.encoding ) )
+      EMSG_ID_NOT_USED( c, c->attr.nt_tid.id ) ;
+  }
+
+  FOREACH_CHILD( n->attr.nt_instrdef.output, c ){
+    if( !archi_instrdef_io_usage_typecheck( c->attr.nt_tid.id, n->attr.nt_instrdef.encoding ) )
+      EMSG_ID_NOT_USED( c, c->attr.nt_tid.id ) ;
+  }      
 }
 
 void archi_instrsect_typecheck( archi_symtab *st, archi_ast_node *n )

@@ -17,4 +17,4 @@ parser.c: parser.y
 	$(YACC) $(YFLAGS) -o $@ $^
 
 clean:
-	$(RM)  cgen/*.o tc/*.o ast/*.o *.o scanner.c parser.c parser.h a.out
+	$(RM)  opt/*.o cgen/*.o tc/*.o ast/*.o *.o scanner.c parser.c parser.h a.out
