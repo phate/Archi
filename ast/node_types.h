@@ -20,6 +20,7 @@
   X( NT_OPATTERN ) \
   X( NT_IPATTERN ) \
   X( NT_NODEDEF ) \
+  X( NT_JVINSTRDEF ) \
   X( NT_BSLC ) \
   X( NT_DOT ) \
   X( NT_CONCAT ) \

@@ -18,12 +18,15 @@ static void archi_typecheck_init( archi_symtab *st, archi_ast_node *n )
   archi_ast_node_first_child_set( n, is ) ;
 
   #define JIVE_PREDEF_INSTR \
-    X( JVBitconstant ) \
-    X( JVAdd )
+    X( JVBitconstant, 0, 1 ) \
+    X( JVAdd, 2, 1 )
   
   archi_ast_node *tmp ;
-  #define X( jv_instr ) \
-    tmp = archi_ast_node_create( n, NT_INSTRDEF, #jv_instr, 0 ) ; \
+  #define X( jv_instr, ni, no ) \
+    tmp = archi_ast_node_create( n, NT_JVINSTRDEF, "Instruction", 0 ) ; \
+    tmp->attr.nt_jvinstrdef.id = talloc_strdup( tmp, #jv_instr ) ; \
+    tmp->attr.nt_jvinstrdef.ninputs = ni ; \
+    tmp->attr.nt_jvinstrdef.noutputs = no ; \
     archi_ast_node_first_child_set( is, tmp ) ;
 
     JIVE_PREDEF_INSTR
@@ -58,6 +61,9 @@ static void archi_symtab_toplevel_fill( archi_symtab *st, archi_ast_node *n )
       break ;
     case NT_INSTRDEF:
       archi_node_insert( st, n->attr.nt_instrdef.id, n ) ;
+      break ;
+    case NT_JVINSTRDEF:
+      archi_node_insert( st, n->attr.nt_jvinstrdef.id, n ) ;
       break ;
     default: break ;
   }
@@ -356,6 +362,9 @@ void archi_typecheck( archi_symtab *st, archi_ast_node *n )
 
   archi_ast_trim( n ) ; 
   archi_symtab_toplevel_fill( st, n ) ;
+
+  archi_view_ast( n ) ;
+  archi_symtab_print( st ) ;
 
 	archi_ast_node *c ;
 	FOREACH_CHILD( n, c ){

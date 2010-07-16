@@ -210,6 +210,8 @@ void archi_ast_trim( archi_ast_node *n )
 		switch( c->node_type ){
 			case NT_REGSECT:    archi_regsect_trim( c ) ; break ;
 			case NT_INSTRSECT:  archi_instrsect_trim( c ) ; break ;
+      case NT_INTERNALSECT: break ;
+      case NT_PATTERNSECT: break ;
 //			case AUXSECT:		archi_auxsect_trim( c ) ; break ;
 			default: DEBUG_ASSERT(0) ;
 		}	
