@@ -128,6 +128,7 @@ void archi_ast_node_first_child_set( archi_ast_node *p, archi_ast_node *fc )
   }
   else p->last_child = fc ;
 
+  fc->parent = p ;
   p->first_child = fc ;
 }
 
@@ -147,6 +148,7 @@ void archi_ast_node_last_child_set( archi_ast_node *p, archi_ast_node *lc )
   }
   else p->first_child = lc ;
 
+  lc->parent = p ;
   p->last_child = lc ;
 }
 
