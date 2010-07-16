@@ -31,6 +31,14 @@ typedef struct archi_nt_instrdef_attributes_{
 
 void archi_nt_instrdef_attributes_init( archi_nt_instrdef_attributes *attr ) ;
 
+typedef struct archi_nt_matchdef_attributes_{
+  const char* id ;
+  struct archi_ast_node_ *input ;
+  struct archi_ast_node_ *output ;
+} archi_nt_matchdef_attributes ;
+
+void archi_nt_matchdef_attributes_init( archi_nt_matchdef_attributes *attr ) ;
+
 typedef struct archi_nt_input_attributes_{
   int32_t nints ;
   int32_t nregs ;
@@ -93,6 +101,7 @@ typedef union node_attributes_{
   archi_nt_regdef_attributes nt_regdef ;
   archi_nt_regcldef_attributes nt_regcldef ;
   archi_nt_instrdef_attributes nt_instrdef ;
+  archi_nt_matchdef_attributes nt_matchdef ;
   archi_nt_bits_attributes nt_bits ;
   archi_nt_code_attributes nt_code ;
   archi_nt_regs_attributes nt_regs ;

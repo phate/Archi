@@ -20,10 +20,9 @@ Reg r7 { Code = 7 } ;
 Reg r8 { Code = 8 } ;
 Reg r9 { Code = 9 } ;
 
-RegClass gpr { Bits = 32, Regs = [r3,r4,r5,r6,r7,r8,r9] } ;
+RegClass gpr { NBits = 32, Regs = [r3,r4,r5,r6,r7,r8,r9] } ;
 
 %%
-
 
 Instr addi{
   Input = [r3 ra, Int si],
@@ -42,6 +41,26 @@ Instr and0{
   Output = [gpr ra],
   Encoding = 31.bstr[0:6] ++ rs.code.bstr[0:5] ++ ra.code.bstr[0:5] ++ rb.code.bstr[0:5] ++ 28.bstr[0:10] ++ '0'
 } ;
+
+%%
+
+Match m0{
+  Input = [gpr i1, gpr i2],
+  IPattern = [ d, c = constant [JVBitconstant] (t,z,f),
+               k, g = add [JVAdd] (k,l,g) ]
+},
+m1{
+  Input = [gpr i1, gpr i2]
+},
+m2{
+  Input = [gpr i1, gpr i2]
+} ;
+
+Match m3{
+  Input = [gpr i1]
+} ;
+
+
 
 #Instr
 #  ret{

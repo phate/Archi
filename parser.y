@@ -16,7 +16,7 @@ extern char* yytext ;
 extern unsigned int linenr ; 
 
 static archi_ast_node* ast = NULL ;
-static void* buffer[2] ;
+static archi_ast_node* tmp ;
 
 static void archi_children_add( archi_ast_node *p, archi_ast_node *fc )
 {
@@ -44,6 +44,7 @@ archi_ast_node* archi_expression_create( archi_ast_nodetype ntype, archi_ast_nod
 %token T_REGDEF T_CODE 
 %token T_REGCLDEF T_BITS T_REGS
 %token T_INSTRDEF T_INPUT T_OUTPUT T_ENCODING
+%token T_MATCHDEF T_IPATTERN T_OPATTERN
 %token T_ID T_SEP T_NUM TTRUE TFALSE T_BSTR T_DTINT T_DTBOOL T_DTBSTR
 %token TIF TTHEN TELSE TSHIFTL TSHIFTR TLTEQ TGTEQ TLAND TLOR T_DOT T_CONCAT TEQ TNEQ 
 
@@ -52,18 +53,64 @@ ArchDesc			:	Sections												{ archi_ast_node_init( ast, NT_ARCHDEF, NULL, l
 																									archi_children_add( ast, $1 ) ;}
 							;
 Sections			: RegSect T_SEP
-								InstrSect /*TSECTSEP AuxSect*/		{ archi_ast_node *rs, *is, *au ;
-                                                    rs = archi_ast_node_create( ast, NT_REGSECT, NULL, linenr ) ;
-                                                    rs->attr.nt_regsect.nregcls = -1 ; 
-                                                    is = archi_ast_node_create( ast, NT_INSTRSECT, NULL, linenr ) ;
-																									//au = create_node( AUXSECT, NULL, NULL, linenr ) ;
+								InstrSect T_SEP MatchSect		    { archi_ast_node *rs, *is, *au, *ps ;
+                                                  rs = archi_ast_node_create( ast, NT_REGSECT, NULL, linenr ) ;
+                                                  rs->attr.nt_regsect.nregcls = -1 ; 
+                                                  is = archi_ast_node_create( ast, NT_INSTRSECT, NULL, linenr ) ;
+																								  ps = archi_ast_node_create( ast, NT_PATTERNSECT, NULL, linenr ) ;
+                                                    //au = create_node( AUXSECT, NULL, NULL, linenr ) ;
 																									archi_children_add( rs, $1 ) ;
 																									archi_children_add( is, $3 ) ;
+                                                  archi_children_add( ps, $5 ) ;
 																									//add_children( au, $5 ) ;
-																									archi_ast_node_next_sibling_set( rs, is ) ; 
+																									archi_ast_node_next_sibling_set( rs, is ) ;
+                                                  archi_ast_node_next_sibling_set( is, ps ) ; 
 																									//ARE_SIBLINGS( is, au ) ;
 																									$$ = rs ;}
 							;
+MatchSect     : MatchSectDef ';' MatchSect      { archi_ast_node *s ;
+                                                  FOREACH_NEXT_SIBLING( $1, s){
+                                                    if( s->next_sibling == NULL ){
+                                                      archi_ast_node_next_sibling_set( s, $3 ) ;
+                                                      break ;
+                                                    }
+                                                  }}
+              | MatchSectDef ';'                { $$ = $1 ; }
+              ;
+MatchSectDef  : T_MATCHDEF MatchDef             { $$ = $2 ; }
+              ;
+MatchDef      : MatchDefIdent ',' MatchDef      { archi_ast_node_next_sibling_set( $1, $3 ) ; $$ = $1 ; }
+              | MatchDefIdent                   { $$ = $1 ; }
+              ;
+MatchDefIdent : Id '{' MatchBody '}'            { $$ = archi_ast_node_create( ast, NT_MATCHDEF, "Match", $1->linenr ) ;
+                                                  archi_nt_matchdef_attributes_init( &($$->attr.nt_matchdef) ) ;
+                                                  archi_ast_node_next_sibling_set( $1, $3 ) ;
+                                                  archi_children_add( $$, $1 ) ; }
+              ;
+MatchBody     : MatchBody ',' MatchProp         { archi_ast_node_next_sibling_set( $3, $1 ) ; $$ = $3 ; }
+              | MatchProp                       { $$ = $1 ; }
+              ;
+MatchProp     : T_INPUT '=' '[' ETIdList ']'    { $$ = archi_ast_node_create( ast, NT_INPUT, NULL, linenr ) ;
+                                                  archi_nt_input_attributes_init( &($$->attr.nt_input) ) ;
+                                                  archi_children_add( $$, $4 ) ; }
+              | T_OUTPUT '=' '[' ETIdList ']'   { $$ = archi_ast_node_create( ast, NT_OUTPUT, NULL, linenr ) ;
+                                                  $$->attr.nt_output.nregs = -1 ;
+                                                  archi_children_add( $$, $4 ) ; }
+              | T_IPATTERN '=' '[' NodeList ']' { $$ = archi_ast_node_create( ast, NT_IPATTERN, NULL, linenr ) ;
+                                                  archi_children_add( $$, $4 ) ; }
+              | T_OPATTERN '=' '[' NodeList ']' { $$ = archi_ast_node_create( ast, NT_OPATTERN, NULL, linenr ) ;
+                                                  archi_children_add( $$, $4 ) ; }
+              ;
+NodeList      : NodeDef ',' NodeList            { archi_ast_node_next_sibling_set( $1, $3 ) ; $$ = $1 ; }
+              | NodeDef                         { $$ = $1 ; }
+              ;
+NodeDef       : IdList '=' Id '[' T_ID          { tmp = archi_ast_node_create( ast, NT_NODEDEF, yytext, linenr ) ; }
+                ']' '(' EIdList ')'             { archi_ast_node *ip = archi_ast_node_create( ast, NT_INPUT, NULL, $9->linenr ) ;
+                                                  archi_ast_node *op = archi_ast_node_create( ast, NT_OUTPUT, NULL, $1->linenr ) ;
+                                                  archi_children_add( ip, $9 ) ; archi_children_add( op, $1 ) ;
+                                                  archi_ast_node_next_sibling_set( ip, op ) ;
+                                                  archi_children_add( tmp, ip ) ; $$ = tmp ; }
+              ;
 RegSect				: RegSectDef ';' RegSect					{ archi_ast_node *s ;
 																									FOREACH_NEXT_SIBLING( $1, s ){
 																										if( s->next_sibling == NULL ){
@@ -143,16 +190,17 @@ ETIdList			: TIdList														{ $$ = $1 ; }
 TIdList				: TId ',' TIdList										{ archi_ast_node_next_sibling_set($1, $3) ; $$ = $1 ; }
 							| TId																{ $$ = $1 ; }
 							;
-TId						: T_ID														  { buffer[1] = strdup(yytext) ; }
-								T_ID														  { $$ = archi_ast_node_create( ast, NT_TID, buffer[1], linenr ) ;
-                                                    $$->attr.nt_tid.id = talloc_strdup( $$, yytext ) ; }
-                                                    
+TId           : T_ID                              { tmp = archi_ast_node_create( ast, NT_TID, yytext, linenr ) ; }
+                T_ID                              { tmp->attr.nt_tid.id = talloc_strdup( tmp, yytext ) ; $$ = tmp ; }
 							| T_DTINT T_ID										  { $$ = archi_ast_node_create( ast, NT_TID, "Int", linenr ) ;
                                                     $$->attr.nt_tid.id = talloc_strdup( $$, yytext ) ; }
 							| T_DTBOOL T_ID										  { $$ = archi_ast_node_create( ast, NT_TID, "Bool", linenr ) ;
                                                     $$->attr.nt_tid.id = talloc_strdup( $$, yytext ) ; }
 							| T_DTBSTR T_ID									    { $$ = archi_ast_node_create( ast, NT_TID, "Bits", linenr ) ;
 							                                      $$->attr.nt_tid.id = talloc_strdup( $$, yytext ) ; }
+              ;
+EIdList       : IdList                            { $$ = $1 ; }
+              |                                   { $$ = NULL ; }
               ;
 IdList				: Id ',' IdList											{ archi_ast_node_next_sibling_set( $1, $3 ) ; $$ = $1 ; }
 							| Id																{ $$ = $1 ; }

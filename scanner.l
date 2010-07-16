@@ -21,12 +21,15 @@ whitespace [ \t]+
 "Reg" 			{ return T_REGDEF; }
 "Code"			{ return T_CODE; }
 "RegClass"	{ return T_REGCLDEF; }
-"Bits"			{ return T_BITS; }
+"NBits"			{ return T_BITS; }
 "Regs"			{ return T_REGS; }
 "Instr"			{ return T_INSTRDEF; }
 "Input"			{ return T_INPUT; }
 "Output"		{ return T_OUTPUT; }
 "Encoding"	{ return T_ENCODING; }
+"Match"     { return T_MATCHDEF; }
+"IPattern"  { return T_IPATTERN; }
+"OPattern"  { return T_OPATTERN; }
 "if"				{ return TIF; }
 "then"			{ return TTHEN; }
 "else"			{ return TELSE; }

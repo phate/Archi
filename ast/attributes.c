@@ -32,6 +32,15 @@ void archi_nt_instrdef_attributes_init( archi_nt_instrdef_attributes *attr )
   attr->encoding = NULL ;
 }
 
+void archi_nt_matchdef_attributes_init( archi_nt_matchdef_attributes *attr )
+{
+  DEBUG_ASSERT( attr ) ;
+  
+  attr->id = NULL ;
+  attr->input = NULL ;
+  attr->output = NULL ;
+}
+
 void archi_nt_input_attributes_init( archi_nt_input_attributes *attr )
 {
   DEBUG_ASSERT( attr ) ;

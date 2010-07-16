@@ -5,6 +5,7 @@
   X( NT_ARCHDEF ) \
   X( NT_REGSECT ) \
   X( NT_INSTRSECT ) \
+  X( NT_PATTERNSECT ) \
   X( NT_REGDEF ) \
   X( NT_CODE ) \
   X( NT_REGCLDEF ) \
@@ -14,6 +15,10 @@
   X( NT_INPUT ) \
   X( NT_OUTPUT ) \
   X( NT_ENCODING ) \
+  X( NT_MATCHDEF ) \
+  X( NT_OPATTERN ) \
+  X( NT_IPATTERN ) \
+  X( NT_NODEDEF ) \
   X( NT_BSLC ) \
   X( NT_DOT ) \
   X( NT_CONCAT ) \
