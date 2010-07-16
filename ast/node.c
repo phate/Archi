@@ -229,6 +229,8 @@ static void node2string( FILE* f, archi_ast_node *n )
 			sprintf( str, "%d", n->attr.nt_bits.bits ) ; break ;
 		case NT_ID:
 			sprintf( str, "%s", n->attr.nt_id.id ) ; break ;
+    case NT_NODEDEF:
+      sprintf( str, "type: %s", n->data_type ) ; break ;
 		case NT_TID:
 			sprintf( str, "%s %s", n->data_type, n->attr.nt_tid.id ) ; break ;
 /*		case NUMBER:

@@ -10,6 +10,27 @@
 #include <stdio.h>
 #include <assert.h>
 
+static void archi_typecheck_init( archi_symtab *st, archi_ast_node *n )
+{
+  DEBUG_ASSERT( st && n && n->node_type == NT_ARCHDEF ) ;
+
+  archi_ast_node *is = archi_ast_node_create( n, NT_INTERNALSECT, NULL, 0 ) ;
+  archi_ast_node_first_child_set( n, is ) ;
+
+  #define JIVE_PREDEF_INSTR \
+    X( JVBitconstant ) \
+    X( JVAdd )
+  
+  archi_ast_node *tmp ;
+  #define X( jv_instr ) \
+    tmp = archi_ast_node_create( n, NT_INSTRDEF, #jv_instr, 0 ) ; \
+    archi_ast_node_first_child_set( is, tmp ) ;
+
+    JIVE_PREDEF_INSTR
+  #undef X
+  #undef JIVE_PREDEF_INSTR
+}
+
 static void archi_node_insert( archi_symtab *st, const char *key, archi_ast_node *n )
 {
   archi_ast_node *l = archi_symtab_lookup( st, key ) ;
@@ -330,6 +351,8 @@ static void tc_instrsect( symtab stab, node *n )
 void archi_typecheck( archi_symtab *st, archi_ast_node *n )
 {
   DEBUG_ASSERT( st && n && n->node_type == NT_ARCHDEF ) ;
+  
+  archi_typecheck_init( st, n ) ;
 
   archi_ast_trim( n ) ; 
   archi_symtab_toplevel_fill( st, n ) ;
