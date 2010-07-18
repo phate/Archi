@@ -5,6 +5,10 @@
 
 struct archi_ast_node_ ;
 
+#define ARCHI_INSTR_FLAGS \
+  X( NT_OVERWRITEINPUTFLAG, write_input, 1 ) \
+  X( NT_COMMUTATIVEFLAG, commutative, 2 )
+
 typedef struct archi_nt_regdef_attributes_{
   int32_t code ;
   struct archi_ast_node_ *regcl ;
@@ -27,6 +31,7 @@ typedef struct archi_nt_instrdef_attributes_{
   struct archi_ast_node_ *input ;
   struct archi_ast_node_ *output ;
   struct archi_ast_node_ *encoding ;
+  struct archi_ast_node_ *flags ;
 } archi_nt_instrdef_attributes ;
 
 void archi_nt_instrdef_attributes_init( archi_nt_instrdef_attributes *attr ) ;
@@ -51,6 +56,10 @@ typedef struct archi_nt_input_attributes_{
 } archi_nt_input_attributes ;
 
 void archi_nt_input_attributes_init( archi_nt_input_attributes *attr ) ;
+
+typedef struct archi_nt_flags_attributes_{
+  int32_t flags ;
+} archi_nt_flags_attributes ;
 
 typedef struct archi_nt_bstr_attributes_{
   const char* bstr ;
@@ -112,6 +121,7 @@ typedef union node_attributes_{
   archi_nt_bits_attributes nt_bits ;
   archi_nt_code_attributes nt_code ;
   archi_nt_regs_attributes nt_regs ;
+  archi_nt_flags_attributes nt_flags ;
   archi_nt_regsect_attributes nt_regsect ;
   archi_nt_input_attributes nt_input ;
   archi_nt_output_attributes nt_output ;

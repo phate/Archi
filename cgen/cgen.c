@@ -55,6 +55,8 @@ void archi_code_generate( archi_symtab *st, archi_ast_node *n, FILE *hf, FILE *s
     switch( c->node_type ){
       case NT_REGSECT: archi_regsect_generate( st, c, hf, sf ) ; break ;
       case NT_INSTRSECT: archi_instrsect_generate( c, hf, sf ) ; break ;
+      case NT_PATTERNSECT: break ;
+      case NT_INTERNALSECT: break ;
       default: DEBUG_ASSERT(0) ;
     }
   }

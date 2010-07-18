@@ -112,9 +112,32 @@ static void archi_instrdef_encoding_trim( archi_ast_node *n )
   if( n->node_type == NT_BSLC ) archi_bslc_trim( n ) ;  
 }
 
+static void archi_instrdef_flags_trim( archi_ast_node *n )
+{
+  if( !n ) return ;
+  DEBUG_ASSERT( n->node_type == NT_FLAGS ) ;
+        
+  #define X( nt, op, p ) \
+    case nt : n->attr.nt_flags.flags |= p ; break ;
+
+  archi_ast_node *c = n->first_child ;
+  while( c != NULL ){
+    switch( c->node_type ){
+      ARCHI_INSTR_FLAGS
+      default : DEBUG_ASSERT(0) ;
+    }
+    archi_ast_node *ns = c->next_sibling ;
+    TALLOC_FREE( c ) ;
+    c = ns ; 
+  }
+
+  #undef X
+}
+
 static void archi_instrdef_trim( archi_ast_node *n )
 {
-	DEBUG_ASSERT( n && n->node_type == NT_INSTRDEF ) ;
+	if( !n ) return ;
+  DEBUG_ASSERT( n->node_type == NT_INSTRDEF ) ;
 
   uint32_t free_node ;
   archi_ast_node *c = n->first_child ;
@@ -148,6 +171,11 @@ static void archi_instrdef_trim( archi_ast_node *n )
       }
       else EMSG_MULTIPLE_ATTRIBUTE( n, "encoding" ) ;
 		}
+    else if( c->node_type == NT_FLAGS ){
+      if( n->attr.nt_instrdef.flags == NULL ){
+        n->attr.nt_instrdef.flags = c ;
+      }
+    }
     else if( c->node_type == NT_ID ){
 		  n->attr.nt_instrdef.id = talloc_strdup( n, c->attr.nt_id.id ) ;	
 	    free_node = 1 ;
@@ -159,6 +187,7 @@ static void archi_instrdef_trim( archi_ast_node *n )
   }
 
   archi_instrdef_encoding_trim( n->attr.nt_instrdef.encoding ) ;
+  archi_instrdef_flags_trim( n->attr.nt_instrdef.flags ) ;
 }
 
 static void archi_instrsect_trim( archi_ast_node *n )

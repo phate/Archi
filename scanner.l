@@ -18,34 +18,37 @@ newline \n
 whitespace [ \t]+
 
 %%
-"Reg" 			{ return T_REGDEF; }
-"Code"			{ return T_CODE; }
-"RegClass"	{ return T_REGCLDEF; }
-"NBits"			{ return T_BITS; }
-"Regs"			{ return T_REGS; }
-"Instr"			{ return T_INSTRDEF; }
-"Input"			{ return T_INPUT; }
-"Output"		{ return T_OUTPUT; }
-"Encoding"	{ return T_ENCODING; }
-"Match"     { return T_MATCHDEF; }
-"IPattern"  { return T_IPATTERN; }
-"OPattern"  { return T_OPATTERN; }
-"if"				{ return TIF; }
-"then"			{ return TTHEN; }
-"else"			{ return TELSE; }
+"Reg" 			      { return T_REGDEF; }
+"Code"			      { return T_CODE; }
+"RegClass"	      { return T_REGCLDEF; }
+"NBits"			      { return T_BITS; }
+"Regs"			      { return T_REGS; }
+"Instr"			      { return T_INSTRDEF; }
+"Input"			      { return T_INPUT; }
+"Output"		      { return T_OUTPUT; }
+"Encoding"	      { return T_ENCODING; }
+"Flags"           { return T_FLAGS; }
+"Commutative"     { return T_COMMUTATIVE; }
+"OverwriteInput"  { return T_OVERWRITEINPUT; }
+"Match"           { return T_MATCHDEF; }
+"IPattern"        { return T_IPATTERN; }
+"OPattern"        { return T_OPATTERN; }
+"if"				      { return TIF; }
+"then"			      { return TTHEN; }
+"else"			      { return TELSE; }
 
-"Int"				{ return T_DTINT; }
-"Bool"			{ return T_DTBOOL; }
-"Bits"			{ return T_DTBSTR; }
-"true"			{ return TTRUE; }
-"false"			{ return TFALSE; }
+"Int"				      { return T_DTINT; }
+"Bool"			      { return T_DTBOOL; }
+"Bits"			      { return T_DTBSTR; }
+"true"			      { return TTRUE; }
+"false"			      { return TFALSE; }
 
-{bitstr}		{ return T_BSTR; }
-{number}		{ return T_NUM; }
-{identifier}	{ return T_ID; }
-{comment} 	{ linenr++ ; }
-{whitespace}	{ /* skip whitespace */ }
-{newline}	{ linenr++ ;  }
+{bitstr}		      { return T_BSTR; }
+{number}		      { return T_NUM; }
+{identifier}	    { return T_ID; }
+{comment} 	      { linenr++ ; }
+{whitespace}	    { /* skip whitespace */ }
+{newline}	        { linenr++ ;  }
 
 "!="	{ return TNEQ; }
 "=="	{ return TEQ; }

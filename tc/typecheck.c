@@ -358,19 +358,18 @@ void archi_typecheck( archi_symtab *st, archi_ast_node *n )
 {
   DEBUG_ASSERT( st && n && n->node_type == NT_ARCHDEF ) ;
   
-  archi_typecheck_init( st, n ) ;
 
   archi_ast_trim( n ) ; 
+  archi_typecheck_init( st, n ) ;
   archi_symtab_toplevel_fill( st, n ) ;
-
-  archi_view_ast( n ) ;
-  archi_symtab_print( st ) ;
 
 	archi_ast_node *c ;
 	FOREACH_CHILD( n, c ){
 		switch( c->node_type ){
 			case NT_REGSECT:    archi_regsect_typecheck( st, c ) ; break ;
 			case NT_INSTRSECT:  archi_instrsect_typecheck( st, c ) ; break ;
+      case NT_INTERNALSECT: break ;
+      case NT_PATTERNSECT: break ;
 	//		case AUXSECT:		tc_auxsect( stab, c ) ; break ;
 			default: DEBUG_ASSERT( 0 ) ;
 		}

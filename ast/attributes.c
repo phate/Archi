@@ -30,6 +30,7 @@ void archi_nt_instrdef_attributes_init( archi_nt_instrdef_attributes *attr )
   attr->input = NULL ;
   attr->output = NULL ;
   attr->encoding = NULL ;
+  attr->flags = NULL ;
 }
 
 void archi_nt_matchdef_attributes_init( archi_nt_matchdef_attributes *attr )

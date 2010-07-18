@@ -43,8 +43,9 @@ archi_ast_node* archi_expression_create( archi_ast_nodetype ntype, archi_ast_nod
 
 %token T_REGDEF T_CODE 
 %token T_REGCLDEF T_BITS T_REGS
-%token T_INSTRDEF T_INPUT T_OUTPUT T_ENCODING
+%token T_INSTRDEF T_INPUT T_OUTPUT T_ENCODING T_FLAGS
 %token T_MATCHDEF T_IPATTERN T_OPATTERN
+%token T_COMMUTATIVE T_OVERWRITEINPUT
 %token T_ID T_SEP T_NUM TTRUE TFALSE T_BSTR T_DTINT T_DTBOOL T_DTBSTR
 %token TIF TTHEN TELSE TSHIFTL TSHIFTR TLTEQ TGTEQ TLAND TLOR T_DOT T_CONCAT TEQ TNEQ 
 
@@ -182,8 +183,17 @@ InstrProp			: T_INPUT '=' '[' ETIdList ']'	    { $$ = archi_ast_node_create( ast
 //							| TINSTR_IMM '=' '[' ETIdList ']'		{ $$ = create_node( IMMEDIATE, NULL, NULL, linenr ) ;
 //																										add_children( $$, $4 ) ;}
 							|	T_ENCODING '=' Exp8						    { $$ = archi_ast_node_create( ast, NT_ENCODING, NULL, linenr ) ;
-																										archi_children_add( $$, $3 ) ;}	
+																										archi_children_add( $$, $3 ) ; }
+              | T_FLAGS '=' '[' FlagList ']'      { $$ = archi_ast_node_create( ast, NT_FLAGS, NULL, linenr ) ;
+                                                    $$->attr.nt_flags.flags = 0 ;
+                                                    archi_children_add( $$, $4 ) ; }
 							;
+FlagList      : Flag ',' FlagList                 { archi_ast_node_next_sibling_set( $1, $3 ) ; $$ = $1 ; }
+              | Flag                              { $$ = $1 ; }
+              ;
+Flag          : T_OVERWRITEINPUT                  { $$ = archi_ast_node_create( ast, NT_OVERWRITEINPUTFLAG, NULL, linenr ) ; }
+              | T_COMMUTATIVE                     { $$ = archi_ast_node_create( ast, NT_COMMUTATIVEFLAG, NULL, linenr ) ; }
+              ;
 ETIdList			: TIdList														{ $$ = $1 ; }
 							|																		{ $$ = NULL ; }
 							;

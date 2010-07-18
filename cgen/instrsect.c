@@ -139,6 +139,25 @@ static void archi_instr_encoding_generate( archi_ast_node *n, FILE *sf )
   fprintf( sf, "\n\treturn jive_encode_ok ;\n}\n\n" ) ;
 }
 
+static void archi_instr_flags_generate( archi_ast_node *n, FILE *sf )
+{
+  if( !n ){
+    fprintf( sf, "jive_instruction_flags_none,\n" ) ;
+    return ;
+  }
+  DEBUG_ASSERT( n->node_type == NT_FLAGS ) ;
+
+  
+  #define X( nt, op, p ) \
+    if( n->attr.nt_flags.flags & p ) \
+      fprintf( sf, "jive_instruction_flags_%s | ", #op ) ;
+
+  ARCHI_INSTR_FLAGS
+  #undef X
+
+  fprintf( sf, " jive_instruction_flags_none,\n" ) ;
+}
+
 static void archi_instr_code_generate( archi_ast_node *n, FILE *sf )
 {
   fprintf( sf, "const jive_instruction_class jive_arch_instructions[] = {\n" ) ;
@@ -151,7 +170,8 @@ static void archi_instr_code_generate( archi_ast_node *n, FILE *sf )
     fprintf( sf, "\t\t.mnemonic = 0,\n" ) ;
     fprintf( sf, "\t\t.inregs = 0,\n" ) ;
     fprintf( sf, "\t\t.outregs = 0,\n" ) ;
-    fprintf( sf, "\t\t.flags = jive_instruction_flags_none,\n" ) ;
+    fprintf( sf, "\t\t.flags = " ) ;
+    archi_instr_flags_generate( c->attr.nt_instrdef.flags, sf ) ;
     fprintf( sf, "\t\t.ninputs = %d,\n", c->attr.nt_instrdef.input->attr.nt_input.nregs ) ;
     fprintf( sf, "\t\t.noutputs = %d,\n", c->attr.nt_instrdef.output->attr.nt_output.nregs ) ;
     fprintf( sf, "\t\t.nimmediates = %d,\n", c->attr.nt_instrdef.input->attr.nt_input.nints ) ;
