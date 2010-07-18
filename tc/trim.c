@@ -104,12 +104,22 @@ static void archi_bslc_trim( archi_ast_node *n )
   }
 }
 
+static void archi_ifthenelse_trim( archi_ast_node *n )
+{
+  DEBUG_ASSERT( n && n->node_type == NT_IFTHENELSE ) ;
+
+  n->attr.nt_ifthenelse.pred = n->first_child ;
+  n->attr.nt_ifthenelse.cthen = n->first_child->next_sibling ;
+  n->attr.nt_ifthenelse.celse = n->last_child ;
+}
+
 static void archi_instrdef_encoding_trim( archi_ast_node *n )
 {
   archi_ast_node *c ;
   FOREACH_CHILD( n, c ) archi_instrdef_encoding_trim( c ) ;  
 
   if( n->node_type == NT_BSLC ) archi_bslc_trim( n ) ;  
+  if( n->node_type == NT_IFTHENELSE ) archi_ifthenelse_trim( n ) ;
 }
 
 static void archi_instrdef_flags_trim( archi_ast_node *n )

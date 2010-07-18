@@ -358,9 +358,10 @@ void archi_typecheck( archi_symtab *st, archi_ast_node *n )
   DEBUG_ASSERT( st && n && n->node_type == NT_ARCHDEF ) ;
   
   archi_ast_trim( n ) ; 
-  archi_typecheck_init( st, n ) ;
+/*  archi_typecheck_init( st, n ) ;
   archi_symtab_toplevel_fill( st, n ) ;
 
   archi_regsect_typecheck( st, n->attr.nt_archdef.regsect ) ;
   archi_instrsect_typecheck( st, n->attr.nt_archdef.instrsect ) ;
+*/
 }
