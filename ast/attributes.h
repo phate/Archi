@@ -17,6 +17,14 @@ typedef struct archi_nt_regdef_attributes_{
 
 void archi_nt_regdef_attributes_init( archi_nt_regdef_attributes *attr ) ;
 
+typedef struct archi_nt_archdef_attributes_{
+  struct archi_ast_node_ *regsect ;
+  struct archi_ast_node_ *instrsect ;
+  struct archi_ast_node_ *patternsect ;
+} archi_nt_archdef_attributes ;
+
+void archi_nt_archdef_attributes_init( archi_nt_archdef_attributes *attr ) ;
+
 typedef struct archi_nt_regcldef_attributes_{
   int32_t bits ;
   struct archi_ast_node_ *regs ;
@@ -120,6 +128,7 @@ typedef struct archi_nt_num_attributes_{
 } archi_nt_num_attributes ;
 
 typedef union node_attributes_{
+  archi_nt_archdef_attributes nt_archdef ;
   archi_nt_regdef_attributes nt_regdef ;
   archi_nt_regcldef_attributes nt_regcldef ;
   archi_nt_instrdef_attributes nt_instrdef ;

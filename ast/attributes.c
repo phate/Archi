@@ -12,6 +12,15 @@ void archi_nt_regdef_attributes_init( archi_nt_regdef_attributes *attr )
   attr->regcl = NULL ;
 }
 
+void archi_nt_archdef_attributes_init( archi_nt_archdef_attributes *attr )
+{
+  DEBUG_ASSERT( attr ) ;
+
+  attr->regsect = NULL ;
+  attr->instrsect = NULL ;
+  attr->patternsect = NULL ;
+}
+
 void archi_nt_regcldef_attributes_init( archi_nt_regcldef_attributes *attr )
 {
   DEBUG_ASSERT( attr ) ;   

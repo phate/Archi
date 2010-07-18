@@ -52,7 +52,8 @@ archi_ast_node* archi_expression_create( archi_ast_nodetype ntype, archi_ast_nod
 
 %%
 ArchDesc			:	Sections												{ archi_ast_node_init( ast, NT_ARCHDEF, NULL, linenr ) ;
-																									archi_children_add( ast, $1 ) ;}
+																									archi_nt_archdef_attributes_init( &(ast->attr.nt_archdef) ) ;
+                                                  archi_children_add( ast, $1 ) ;}
 							;
 Sections			: RegSect T_SEP
 								InstrSect T_SEP MatchSect		    { archi_ast_node *rs, *is, *au, *ps ;

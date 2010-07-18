@@ -33,9 +33,5 @@ void archi_code_optimize( archi_ast_node *n )
 {
   DEBUG_ASSERT( n && n->node_type == NT_ARCHDEF ) ;
 
-  archi_ast_node *c ;
-  FOREACH_CHILD( n, c ){
-    if( c->node_type == NT_INSTRSECT )
-      archi_instrsect_optimize( c ) ;
-  }
+  archi_instrsect_optimize( n->attr.nt_archdef.regsect ) ;
 }

@@ -50,24 +50,6 @@ void archi_code_generate( archi_symtab *st, archi_ast_node *n, FILE *hf, FILE *s
 {
   DEBUG_ASSERT( n && n->node_type == NT_ARCHDEF ) ;
 
-  archi_ast_node *c ;
-  FOREACH_CHILD( n, c ){
-    switch( c->node_type ){
-      case NT_REGSECT: archi_regsect_generate( st, c, hf, sf ) ; break ;
-      case NT_INSTRSECT: archi_instrsect_generate( c, hf, sf ) ; break ;
-      case NT_PATTERNSECT: break ;
-      case NT_INTERNALSECT: break ;
-      default: DEBUG_ASSERT(0) ;
-    }
-  }
-/*	node *c ;
-	FOREACH_CHILD( n, c ){
-		switch( n->ntype ){
-			case REGSECT: gc_regsect( c, hf, sf ) ; break ;
-			case INSTRSECT: gc_instrsect( c ) ; break ;
-			case AUXSECT: gc_auxsect( c ) ; break ;
-			default: assert(0) ;
-		}
-	}
-*/
+  archi_regsect_generate( st, n->attr.nt_archdef.regsect, hf, sf ) ;
+  archi_instrsect_generate( n->attr.nt_archdef.instrsect, hf, sf ) ;
 }
