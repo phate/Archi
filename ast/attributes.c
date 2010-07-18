@@ -65,3 +65,12 @@ void archi_nt_bslc_attributes_init( archi_nt_bslc_attributes *attr )
   attr->start = -1 ;
   attr->length = -1 ; 
 }
+
+void archi_nt_ifthenelse_attributes_init( archi_nt_ifthenelse_attributes *attr )
+{
+  DEBUG_ASSERT( attr ) ;
+
+  attr->pred = NULL ;
+  attr->cthen = NULL ;
+  attr->celse = NULL ;
+}

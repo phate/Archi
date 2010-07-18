@@ -75,6 +75,14 @@ typedef struct archi_nt_bslc_attributes_{
 
 void archi_nt_bslc_attributes_init( archi_nt_bslc_attributes *attr ) ;
 
+typedef struct archi_nt_ifthenelse_attributes_{
+  struct archi_ast_node_ *pred ;
+  struct archi_ast_node_ *cthen ;
+  struct archi_ast_node_ *celse ;
+} archi_nt_ifthenelse_attributes ;
+
+void archi_nt_ifthenelse_attributes_init( archi_nt_ifthenelse_attributes *attr ) ;
+
 typedef struct archi_nt_bits_attributes_{
   int32_t bits ;
 } archi_nt_bits_attributes ;
@@ -111,7 +119,6 @@ typedef struct archi_nt_num_attributes_{
   int32_t num ;
 } archi_nt_num_attributes ;
 
-
 typedef union node_attributes_{
   archi_nt_regdef_attributes nt_regdef ;
   archi_nt_regcldef_attributes nt_regcldef ;
@@ -125,6 +132,7 @@ typedef union node_attributes_{
   archi_nt_regsect_attributes nt_regsect ;
   archi_nt_input_attributes nt_input ;
   archi_nt_output_attributes nt_output ;
+  archi_nt_ifthenelse_attributes nt_ifthenelse ;
   archi_nt_concat_attributes nt_concat ;
   archi_nt_bslc_attributes nt_bslc ;
   archi_nt_bstr_attributes nt_bstr ;

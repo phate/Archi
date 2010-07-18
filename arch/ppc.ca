@@ -27,37 +27,37 @@ RegClass gpr { NBits = 32, Regs = [r3,r4,r5,r6,r7,r8,r9] } ;
 Instr addi{
   Input = [gpr ra, Int si],
   Output = [gpr rt],
-  Encoding =  14.bstr[0:6] ++ rt.code.bstr[0:5] ++ ra.code.bstr[0:5] ++ si.bstr[0:16]
+  Encoding =  (If True Then '1' Else '0') ++ rt.code.bstr[0:5] ++ ra.code.bstr[0:5] ++ si.bstr[0:16]
 #  Flags = [Commutative, OverwriteInput]
 } ;
 
-Instr ori{
-  Input = [gpr ra, Int ui],
-  Output = [gpr rs],
-  Encoding = 24.bstr[0:6] ++ rs.code.bstr[0:5] ++ ra.code.bstr[0:5] ++ ui.bstr[0:16],
-  Flags = [Commutative]
-} ;
+#Instr ori{
+#  Input = [gpr ra, Int ui],
+#  Output = [gpr rs],
+#  Encoding = 24.bstr[0:6] ++ rs.code.bstr[0:5] ++ ra.code.bstr[0:5] ++ ui.bstr[0:16],
+#  Flags = [Commutative]
+#} ;
 
-Instr and0{
-  Input = [gpr rs, gpr rb],
-  Output = [gpr ra],
-  Encoding = 31.bstr[0:6] ++ rs.code.bstr[0:5] ++ ra.code.bstr[0:5] ++ rb.code.bstr[0:5] ++ 28.bstr[0:10] ++ '0',
-  Flags = [OverwriteInput]
-} ;
+#Instr and0{
+#  Input = [gpr rs, gpr rb],
+#  Output = [gpr ra],
+#  Encoding = 31.bstr[0:6] ++ rs.code.bstr[0:5] ++ ra.code.bstr[0:5] ++ rb.code.bstr[0:5] ++ 28.bstr[0:10] ++ '0',
+#  Flags = [OverwriteInput]
+#} ;
 
 %%
 
-Match m0{
-  Input = [gpr i1, gpr i2],
-  IPattern = [ d, c = constant [JVBitconstant] (t,z,f),
-               k, g = add [JVAdd] (k,l,g) ]
-},
-m1{
-  Input = [gpr i1, gpr i2]
-},
-m2{
-  Input = [gpr i1, gpr i2]
-} ;
+#Match m0{
+#  Input = [gpr i1, gpr i2],
+#  IPattern = [ d, c = constant [JVBitconstant] (t,z,f),
+#               k, g = add [JVAdd] (k,l,g) ]
+#},
+#m1{
+#  Input = [gpr i1, gpr i2]
+#},
+#m2{
+#  Input = [gpr i1, gpr i2]
+#} ;
 
 Match m3{
   Input = [gpr i1]

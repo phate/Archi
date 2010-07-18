@@ -24,11 +24,14 @@
   X( NT_IPATTERN ) \
   X( NT_NODEDEF ) \
   X( NT_JVINSTRDEF ) \
+  X( NT_IFTHENELSE ) \
   X( NT_BSLC ) \
   X( NT_DOT ) \
   X( NT_CONCAT ) \
   X( NT_BSTR ) \
   X( NT_NUM ) \
+  X( NT_TRUE ) \
+  X( NT_FALSE ) \
   X( NT_ID ) \
   X( NT_TID ) \
 

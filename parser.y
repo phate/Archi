@@ -46,8 +46,9 @@ archi_ast_node* archi_expression_create( archi_ast_nodetype ntype, archi_ast_nod
 %token T_INSTRDEF T_INPUT T_OUTPUT T_ENCODING T_FLAGS
 %token T_MATCHDEF T_IPATTERN T_OPATTERN
 %token T_COMMUTATIVE T_OVERWRITEINPUT
-%token T_ID T_SEP T_NUM TTRUE TFALSE T_BSTR T_DTINT T_DTBOOL T_DTBSTR
-%token TIF TTHEN TELSE TSHIFTL TSHIFTR TLTEQ TGTEQ TLAND TLOR T_DOT T_CONCAT TEQ TNEQ 
+%token T_ID T_NUM T_TRUE T_FALSE T_BSTR
+%token T_DTINT T_DTBOOL T_DTBSTR
+%token T_IF T_THEN T_ELSE T_SEP TSHIFTL TSHIFTR TLTEQ TGTEQ TLAND TLOR T_DOT T_CONCAT TEQ TNEQ 
 
 %%
 ArchDesc			:	Sections												{ archi_ast_node_init( ast, NT_ARCHDEF, NULL, linenr ) ;
@@ -182,7 +183,7 @@ InstrProp			: T_INPUT '=' '[' ETIdList ']'	    { $$ = archi_ast_node_create( ast
 																										archi_children_add( $$, $4 ) ;}
 //							| TINSTR_IMM '=' '[' ETIdList ']'		{ $$ = create_node( IMMEDIATE, NULL, NULL, linenr ) ;
 //																										add_children( $$, $4 ) ;}
-							|	T_ENCODING '=' Exp8						    { $$ = archi_ast_node_create( ast, NT_ENCODING, NULL, linenr ) ;
+							|	T_ENCODING '=' Exp						    { $$ = archi_ast_node_create( ast, NT_ENCODING, NULL, linenr ) ;
 																										archi_children_add( $$, $3 ) ; }
               | T_FLAGS '=' '[' FlagList ']'      { $$ = archi_ast_node_create( ast, NT_FLAGS, NULL, linenr ) ;
                                                     $$->attr.nt_flags.flags = 0 ;
@@ -229,11 +230,15 @@ FctDef				: TId Args '=' Exp									{ $$ = create_node( FCTDEF, NULL, create_fc
 Args					: '(' ETIdList ')'									{ $$ = create_node( ARGS, NULL, NULL, linenr ) ;
                                                     add_children( $$, $2 ) ;}
 							;
-Exp						: TIF Exp1 TTHEN Exp TELSE Exp			{ $$ = create_node( IFTHENELSE, NULL, NULL, linenr ) ;
-																										ARE_SIBLINGS( $2, $4 ) ; ARE_SIBLINGS( $4, $6 ) ;
-                                                    add_children( $$, $2 ) ;}
-							| Exp1															{ $$ = $1 ; } 
+*/
+Exp						: T_IF Exp8 T_THEN Exp T_ELSE Exp	  { $$ = archi_ast_node_create( ast, NT_IFTHENELSE, NULL, linenr ) ;
+                                                    archi_nt_ifthenelse_attributes_init( &($$->attr.nt_ifthenelse) ) ;
+																										archi_ast_node_next_sibling_set( $2, $4 ) ;
+                                                    archi_ast_node_next_sibling_set( $4, $6 ) ;
+                                                    archi_children_add( $$, $2 ) ;}
+							| Exp8															{ $$ = $1 ; } 
 							;
+/*
 Exp1					: Exp1 TLOR Exp2										{ $$ = create_expression( LOGICALOR, $1, $3 ) ; }
 							| Exp2															{ $$ = $1 ; }
 							;
@@ -292,11 +297,9 @@ Exp12					: Id																{ $$ = $1 ; }
                                                     archi_nt_bstr_attributes_init( &($$->attr.nt_bstr) ) ;
                                                     $$->attr.nt_bstr.bstr = talloc_strndup( $$, yytext+1, strlen(yytext)-2 ) ;
                                                     $$->attr.nt_bstr.len = strlen(yytext)-2 ;}
-/*							| TTRUE															{ $$ = create_node( BOOLEAN, strdup("Bool"),
-                                                    strdup("true"), linenr ) ; }
-							| TFALSE														{ $$ = create_node( BOOLEAN, strdup("Bool"),
-                                                    strdup("false"), linenr ) ; }
-*/						| '(' Exp8 ')'										  { $$ = $2 ; }
+							| T_TRUE													  { $$ = archi_ast_node_create( ast, NT_TRUE, "Bool", linenr ) ; }
+							| T_FALSE														{ $$ = archi_ast_node_create( ast, NT_FALSE, "Bool", linenr ) ; }
+						  | '(' Exp ')'										    { $$ = $2 ; }
 							;
 /*EExpList			: ExpList														{ $$ = $1 ; }
 							|																		{ $$ = NULL ; }

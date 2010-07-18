@@ -33,15 +33,15 @@ whitespace [ \t]+
 "Match"           { return T_MATCHDEF; }
 "IPattern"        { return T_IPATTERN; }
 "OPattern"        { return T_OPATTERN; }
-"if"				      { return TIF; }
-"then"			      { return TTHEN; }
-"else"			      { return TELSE; }
+"If"				      { return T_IF; }
+"Then"			      { return T_THEN; }
+"Else"			      { return T_ELSE; }
 
 "Int"				      { return T_DTINT; }
 "Bool"			      { return T_DTBOOL; }
 "Bits"			      { return T_DTBSTR; }
-"true"			      { return TTRUE; }
-"false"			      { return TFALSE; }
+"True"			      { return T_TRUE; }
+"False"			      { return T_FALSE; }
 
 {bitstr}		      { return T_BSTR; }
 {number}		      { return T_NUM; }
