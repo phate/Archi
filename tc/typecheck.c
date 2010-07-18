@@ -14,12 +14,11 @@ static void archi_typecheck_init( archi_symtab *st, archi_ast_node *n )
 {
   DEBUG_ASSERT( st && n && n->node_type == NT_ARCHDEF ) ;
 
-  archi_ast_node *is = archi_ast_node_create( n, NT_INTERNALSECT, NULL, 0 ) ;
-  archi_ast_node_first_child_set( n, is ) ;
-
   #define JIVE_PREDEF_INSTR \
     X( JVBitconstant, 0, 1 ) \
-    X( JVAdd, 2, 1 )
+    X( JVAdd, 2, 1 ) \
+    X( JVLoad, 1, 1 ) \
+    X( JVStore, 2, 0 )
   
   archi_ast_node *tmp ;
   #define X( jv_instr, ni, no ) \
@@ -27,7 +26,7 @@ static void archi_typecheck_init( archi_symtab *st, archi_ast_node *n )
     tmp->attr.nt_jvinstrdef.id = talloc_strdup( tmp, #jv_instr ) ; \
     tmp->attr.nt_jvinstrdef.ninputs = ni ; \
     tmp->attr.nt_jvinstrdef.noutputs = no ; \
-    archi_ast_node_first_child_set( is, tmp ) ;
+    archi_ast_node_first_child_set( n->attr.nt_archdef.instrsect, tmp ) ;
 
     JIVE_PREDEF_INSTR
   #undef X

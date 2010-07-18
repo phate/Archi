@@ -3,7 +3,6 @@
 
 #define ARCHI_AST_NODETYPE \
   X( NT_ARCHDEF ) \
-  X( NT_INTERNALSECT ) \
   X( NT_REGSECT ) \
   X( NT_INSTRSECT ) \
   X( NT_PATTERNSECT ) \

@@ -243,7 +243,6 @@ void archi_ast_trim( archi_ast_node *n )
 			case NT_INSTRSECT:
         n->attr.nt_archdef.instrsect = c ;
         archi_instrsect_trim( c ) ; break ;
-      case NT_INTERNALSECT: break ;
       case NT_PATTERNSECT:
         n->attr.nt_archdef.patternsect = c ; break ;
 //			case AUXSECT:		archi_auxsect_trim( c ) ; break ;
