@@ -4,7 +4,8 @@
 #include <string.h>
 #include <math.h>
 
-static void archi_expression_typecheck( archi_symtab *st, archi_ast_node *n, const char* dtype ) ;
+static const char* archi_expression_typecheck( archi_symtab *st, archi_ast_node *n, const char* dtype ) ;
+static const char* archi_binop_typecheck( archi_symtab *st, archi_ast_node *n, const char* dtypes[], uint32_t cnt ) ;
 
 static const char* archi_nt_dot_attribute_typecheck( archi_ast_node *n, const char* ps_type )
 {
@@ -17,6 +18,7 @@ static const char* archi_nt_dot_attribute_typecheck( archi_ast_node *n, const ch
     }
     if( !strcmp(ps_type, "RegClass") ){
       if( !strcmp(n->attr.nt_id.id, "code") ) return "Int" ;
+      if( !strcmp(n->attr.nt_id.id, "reg") ) return "Reg" ;
     } 
   }  
 
@@ -45,7 +47,7 @@ static const char* archi_expression_infer( archi_symtab *st, archi_ast_node *n )
         EMSG_MISSING_ID( n, n->attr.nt_id.id ) ;
         return "Int" ;  //FIXME: write message that it defaults to Int
       }
-      return l->data_type ;}
+      return (n->data_type = l->data_type) ;}
     case NT_NUM:
     case NT_STR:
     case NT_BSTR:
@@ -58,8 +60,12 @@ static const char* archi_expression_infer( archi_symtab *st, archi_ast_node *n )
       archi_expression_typecheck( st, n->attr.nt_ifthenelse.celse, type ) ;
       return type ;}
     case NT_EQUAL:{
-      const char* type = archi_expression_infer( st, n->first_child ) ;
-      archi_expression_typecheck( st, n->last_child, type ) ;
+      const char* type = archi_binop_typecheck( st, n, (const char* [4]){"Int", "Bits", "Bool", "Reg"}, 4 ) ;
+      if( !strcmp(type, "Reg") ){
+        if( n->first_child->node_type == NT_ID && n->first_child->node_type == NT_ID )
+          EMSG_ILLEGAL_OPERATION( n, "comparison" ) ;  
+      }
+      //FIXME: check whether register occurs in register class
       return "Bool" ;}
     case NT_CONCAT:{
       archi_expression_typecheck( st, n->first_child, "Bits" ) ;
@@ -84,13 +90,34 @@ static const char* archi_expression_infer( archi_symtab *st, archi_ast_node *n )
   }
 }
 
-static void archi_expression_typecheck( archi_symtab *st, archi_ast_node *n, const char* dtype )
+static const char* archi_binop_typecheck( archi_symtab *st, archi_ast_node *n, const char* dtypes[], uint32_t cnt )
+{
+  DEBUG_ASSERT( n && dtypes ) ;
+
+  uint32_t i ;
+  const char* type = archi_expression_infer( st, n->first_child ) ;
+  for( i = 0; i < cnt; i++ ){
+    if( !strcmp(type, dtypes[i]) ) break ;
+  }
+
+  if( i == cnt ){
+    EMSG_TYPE_NOT_SUPPORTED( n, n->first_child->data_type ) ;
+    //FIXME: print error message for returning default value
+    return "Int" ;
+  }
+
+  return archi_expression_typecheck( st, n->last_child, dtypes[i] ) ; 
+}
+
+static const char* archi_expression_typecheck( archi_symtab *st, archi_ast_node *n, const char* dtype )
 {
   DEBUG_ASSERT( n && dtype ) ;
  
   const char* type = archi_expression_infer( st, n ) ;
   if( strcmp(type, dtype) )
-    EMSG_TYPE_MISMATCH( n, type, dtype ) ; 
+    EMSG_TYPE_MISMATCH( n, type, dtype ) ;
+
+  return dtype ;
 }
 /*
 static uint32_t archi_paths_encoding_length( archi_ast_node *n, int32_t lengths[], uint32_t cnt, uint32_t tcnt )

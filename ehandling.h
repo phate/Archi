@@ -12,6 +12,12 @@
 #define EMSG_NOT_AN_ATTRIBUTE( node ) \
   archi_add_emsg( node, "expected identifier" ) ;
 
+#define EMSG_TYPE_NOT_SUPPORTED( node, type ) \
+  archi_add_emsg( node, "type %s is not supported for this operator", type )
+
+#define EMSG_ILLEGAL_OPERATION( node, op ) \
+  archi_add_emsg( node, "illegal %s", op )
+
 #define EMSG_MISSING_REGISTER( node, reg ) \
   archi_add_emsg( node, "register '%s' was not defined", reg )
 
