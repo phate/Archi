@@ -21,6 +21,10 @@ static void archi_instr_defs_generate( archi_ast_node *n, FILE *hf )
 static void archi_simple_print( archi_ast_node *n, FILE *sf )
 {
   switch( n->node_type ){
+    case NT_TRUE:
+      fprintf( sf, "1" ) ; break ;
+    case NT_FALSE:
+      fprintf( sf, "0" ) ; break ; 
     case NT_NUM:
       fprintf( sf, "%d", n->attr.nt_num.num ) ; break ;
     case NT_BSTR:
@@ -34,6 +38,16 @@ static void archi_simple_print( archi_ast_node *n, FILE *sf )
 static int32_t archi_instr_encoding_generate_( archi_ast_node *n, FILE *sf, int32_t blen )
 {
   switch( n->node_type ){
+    //assumes that the length of each case is a multiple of eight and that before if is a multiple of eight!!!
+    case NT_IFTHENELSE:{
+      fprintf( sf, "\tif( " ) ;
+      archi_simple_print( n->attr.nt_ifthenelse.pred, sf ) ;
+      fprintf( sf, " ){\n" ) ;
+      archi_instr_encoding_generate_( n->attr.nt_ifthenelse.cthen, sf, blen ) ;
+      fprintf( sf, "\t}else{\n" ) ;
+      archi_instr_encoding_generate_( n->attr.nt_ifthenelse.celse, sf, blen ) ;
+      fprintf( sf, "\t}\n\n" ) ;
+    break ;}
     case NT_BSTR:{
       int32_t bstrlen = n->attr.nt_bstr.len ;
 
@@ -164,6 +178,7 @@ static void archi_instr_code_generate( archi_ast_node *n, FILE *sf )
 
   archi_ast_node *c ;
   FOREACH_CHILD( n, c ){
+    if( c->node_type == NT_JVINSTRDEF ) continue ;
     fprintf( sf, "\t[jive_arch_%s] = {\n", c->attr.nt_instrdef.id ) ;
     fprintf( sf, "\t\t.name = \"%s\",\n", c->attr.nt_instrdef.id ) ;
     fprintf( sf, "\t\t.encode = &jive_arch_%s_generate,\n", c->attr.nt_instrdef.id ) ;
@@ -190,5 +205,8 @@ void archi_instrsect_generate( archi_ast_node *n, FILE *hf, FILE *sf )
   archi_instr_code_generate( n, sf ) ;
 
   archi_ast_node *c ;
-  FOREACH_CHILD( n, c ) archi_instr_encoding_generate( c, sf ) ; 
+  FOREACH_CHILD( n, c ){
+    if( c->node_type == NT_JVINSTRDEF ) continue ;
+    archi_instr_encoding_generate( c, sf ) ;
+  } 
 }

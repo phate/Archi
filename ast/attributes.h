@@ -127,6 +127,10 @@ typedef struct archi_nt_num_attributes_{
   int32_t num ;
 } archi_nt_num_attributes ;
 
+typedef struct archi_nt_encoding_attributes_{
+  int32_t nifthenelse ;
+} archi_nt_encoding_attributes ;
+
 typedef union node_attributes_{
   archi_nt_archdef_attributes nt_archdef ;
   archi_nt_regdef_attributes nt_regdef ;
@@ -140,6 +144,7 @@ typedef union node_attributes_{
   archi_nt_flags_attributes nt_flags ;
   archi_nt_regsect_attributes nt_regsect ;
   archi_nt_input_attributes nt_input ;
+  archi_nt_encoding_attributes nt_encoding ;
   archi_nt_output_attributes nt_output ;
   archi_nt_ifthenelse_attributes nt_ifthenelse ;
   archi_nt_concat_attributes nt_concat ;

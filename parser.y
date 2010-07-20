@@ -185,7 +185,8 @@ InstrProp			: T_INPUT '=' '[' ETIdList ']'	    { $$ = archi_ast_node_create( ast
 //							| TINSTR_IMM '=' '[' ETIdList ']'		{ $$ = create_node( IMMEDIATE, NULL, NULL, linenr ) ;
 //																										add_children( $$, $4 ) ;}
 							|	T_ENCODING '=' Exp						    { $$ = archi_ast_node_create( ast, NT_ENCODING, NULL, linenr ) ;
-																										archi_children_add( $$, $3 ) ; }
+																									  $$->attr.nt_encoding.nifthenelse = -1 ;	
+                                                    archi_children_add( $$, $3 ) ; }
               | T_FLAGS '=' '[' FlagList ']'      { $$ = archi_ast_node_create( ast, NT_FLAGS, NULL, linenr ) ;
                                                     $$->attr.nt_flags.flags = 0 ;
                                                     archi_children_add( $$, $4 ) ; }

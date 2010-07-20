@@ -223,6 +223,8 @@ static void node2string( FILE* f, archi_ast_node *n )
 	DEBUG_ASSERT( name ) ;
 	
 	switch( n->node_type ){
+    case NT_ENCODING:
+      sprintf( str, "nif: %d", n->attr.nt_encoding.nifthenelse ) ; break ;
 		case NT_CODE:
 			sprintf( str, "%d", n->attr.nt_code.code ) ; break ;
 		case NT_REGS:

@@ -2,6 +2,7 @@
 #include "../debug.h"
 
 #include <string.h>
+#include <math.h>
 
 static void archi_expression_typecheck( archi_symtab *st, archi_ast_node *n, const char* dtype ) ;
 
@@ -47,7 +48,14 @@ static const char* archi_expression_infer( archi_symtab *st, archi_ast_node *n )
       return l->data_type ;}
     case NT_NUM:
     case NT_BSTR:
+    case NT_TRUE:
+    case NT_FALSE:
       return n->data_type ;
+    case NT_IFTHENELSE:{
+      archi_expression_typecheck( st, n->attr.nt_ifthenelse.pred, "Bool" ) ;
+      const char *type = archi_expression_infer( st, n->attr.nt_ifthenelse.cthen ) ;
+      archi_expression_typecheck( st, n->attr.nt_ifthenelse.celse, type ) ;
+      return type ;}
     case NT_CONCAT:{
       archi_expression_typecheck( st, n->first_child, "Bits" ) ;
       archi_expression_typecheck( st, n->last_child, "Bits" ) ;
@@ -79,30 +87,61 @@ static void archi_expression_typecheck( archi_symtab *st, archi_ast_node *n, con
   if( strcmp(type, dtype) )
     EMSG_TYPE_MISMATCH( n, type, dtype ) ; 
 }
-
-static int32_t archi_instrdef_encoding_length( archi_ast_node *n )
+/*
+static uint32_t archi_paths_encoding_length( archi_ast_node *n, int32_t lengths[], uint32_t cnt, uint32_t tcnt )
 {
   DEBUG_ASSERT( n ) ;
 
+  int32_t length = 0 ;
   switch( n->node_type ){
     case NT_BSTR:
-      return n->attr.nt_bstr.len ;
+      length = n->attr.nt_bstr.len ; break ;
+    case NT_BSLC:
+      length = n->attr.nt_bslc.length ; break ;
+    case NT_DOT:
+      length = -1 ; break ;
     case NT_CONCAT:{
-      n->attr.nt_concat.len = archi_instrdef_encoding_length( n->first_child ) ;
-      if( n->attr.nt_concat.len != -1 ){
-        int32_t length = n->attr.nt_concat.len ;
-        n->attr.nt_concat.len = archi_instrdef_encoding_length( n->last_child ) ;
-        if( n->attr.nt_concat.len != -1 ) n->attr.nt_concat.len += length ;
-      }
-      return n->attr.nt_concat.len ;}
-    case NT_BSLC:{
-      return n->attr.nt_bslc.length ;}
-    case NT_DOT:{
-      return -1 ;}
-    default: DEBUG_ASSERT(0) ; return -1 ;
+      cnt = archi_paths_encoding_length( n->first_child, lengths, cnt, tcnt ) ;
+      cnt = archi_paths_encoding_length( n->last_child, lengths, cnt, tcnt ) ;
+      break ;}
+    case NT_IFTHENELSE:{
+      memcpy( lengths+(tcnt/2), lengths, cnt*sizeof(int32_t) ) ;
+      return2_t ncnt = archi_paths_encoding_length( n->attr.nt_ifthenelse.cthen, lengths, cnt, tcnt/2 ) ; 
+      ncnt += archi_paths_encoding_length( n->attr.nt_ifthenelse.celse, lengths+cnt, cnt, tcnt/2 ) ;
+      return ncnt ; break ;}
+    default: DEBUG_ASSERT(0) ;
   }
+
+  for( uint32_t i = 0; i < cnt; i++ ){
+    if( length != -1 ) lengths[i] += length ;
+    else lengths[i] = length ;
+  }
+
+  return cnt ;
 }
 
+static void archi_instrdef_encoding_length( archi_ast_node *n )
+{
+  DEBUG_ASSERT( n && n->node_type == NT_ENCODING ) ;
+  
+  uint32_t npaths = pow(2, n->attr.nt_encoding.nifthenelse) ;
+  int32_t lengths[npaths] ;
+  memset( lengths, 0, npaths*sizeof(int32_t) ) ;
+  
+  archi_paths_encoding_length( n->first_child, lengths, 1, npaths ) ;
+
+  printf( "Encoding lengths (cnt:%d):\n", npaths ) ;
+  for( uint32_t i = 0; i < npaths; i++ ){
+    printf( "%d\n", lengths[i] ) ;
+    if( lengths[i] == -1 || lengths[i] % 8 != 0 ){
+      EMSG_ENCODING_LENGTH( n ) ;
+      //break ;
+    }
+  }
+}
+*/
+
+//FIXME: implement the checking for the encoding length again
 //FIXME: check whether bitslices indeces are compile time constants( do that in trim)
 //FIXME: check whether the start+length of the bitslice is smaller than the bitstring it gets in
 static void archi_instrdef_encoding_typecheck( archi_symtab *st, archi_ast_node *n )
@@ -110,10 +149,7 @@ static void archi_instrdef_encoding_typecheck( archi_symtab *st, archi_ast_node 
   DEBUG_ASSERT( n && n->node_type == NT_ENCODING ) ;
 
   archi_expression_typecheck( st, n->first_child, "Bits" ) ; 
-
-  int32_t len = archi_instrdef_encoding_length( n->first_child ) ;
-  if( len == -1 || len % 8 != 0 )
-    EMSG_ENCODING_LENGTH( n ) ;
+  //archi_instrdef_encoding_length( n ) ;
 }
 
 static void archi_instrdef_io_tid_typecheck( archi_symtab *st, archi_ast_node *n )
@@ -223,6 +259,7 @@ void archi_instrsect_typecheck( archi_symtab *st, archi_ast_node *n )
       archi_instrdef_typecheck( st, c ) ;
       archi_symtab_pop_scope( st ) ;
     }
+    else if( c->node_type == NT_JVINSTRDEF ) ;
     else DEBUG_ASSERT(0) ;
   }
 }

@@ -113,13 +113,20 @@ static void archi_ifthenelse_trim( archi_ast_node *n )
   n->attr.nt_ifthenelse.celse = n->last_child ;
 }
 
-static void archi_instrdef_encoding_trim( archi_ast_node *n )
+static uint32_t archi_instrdef_encoding_trim( archi_ast_node *n )
 {
   archi_ast_node *c ;
-  FOREACH_CHILD( n, c ) archi_instrdef_encoding_trim( c ) ;  
+  uint32_t nifthenelse = 0 ;
+  FOREACH_CHILD( n, c )
+    nifthenelse += archi_instrdef_encoding_trim( c ) ;  
 
   if( n->node_type == NT_BSLC ) archi_bslc_trim( n ) ;  
-  if( n->node_type == NT_IFTHENELSE ) archi_ifthenelse_trim( n ) ;
+  if( n->node_type == NT_IFTHENELSE ){
+    nifthenelse++ ;
+    archi_ifthenelse_trim( n ) ;
+  }
+
+  return nifthenelse ;
 }
 
 static void archi_instrdef_flags_trim( archi_ast_node *n )
@@ -196,7 +203,8 @@ static void archi_instrdef_trim( archi_ast_node *n )
     c = nc ;
   }
 
-  archi_instrdef_encoding_trim( n->attr.nt_instrdef.encoding ) ;
+  uint32_t nifthenelse = archi_instrdef_encoding_trim( n->attr.nt_instrdef.encoding ) ;
+  n->attr.nt_instrdef.encoding->attr.nt_encoding.nifthenelse = nifthenelse ; 
   archi_instrdef_flags_trim( n->attr.nt_instrdef.flags ) ;
 }
 
