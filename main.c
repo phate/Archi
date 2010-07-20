@@ -88,8 +88,8 @@ int main( int argc, char* argv[] )
   report_errors( ast ) ;
 
 //  archi_view_ast(ast) ;
-//  archi_code_optimize( ast ) ;
-//  archi_code_generate( symtab, ast, stdout, stdout ) ;
+  archi_code_optimize( ast ) ;
+  archi_code_generate( symtab, ast, stdout, stdout ) ;
 
 /*	
   trim_tree( ast ) ;

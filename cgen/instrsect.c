@@ -31,20 +31,25 @@ static void archi_simple_print( archi_ast_node *n, FILE *sf )
       fprintf( sf, "%lX", strtol(n->attr.nt_bstr.bstr, 0, 2) ) ; break ;
     case NT_ID:
       fprintf( sf, "%s", n->attr.nt_id.id ) ; break ;
+    case NT_EQUAL:{
+      archi_simple_print( n->first_child, sf ) ;
+      fprintf( sf, " == " ) ;
+      archi_simple_print( n->last_child, sf ) ;
+    break ;}
     default: DEBUG_ASSERT(0) ;
   }
 }
 
 static int32_t archi_instr_encoding_generate_( archi_ast_node *n, FILE *sf, int32_t blen )
 {
-  switch( n->node_type ){
+  switch( n->node_type ){ 
     //assumes that the length of each case is a multiple of eight and that before if is a multiple of eight!!!
     case NT_IFTHENELSE:{
       fprintf( sf, "\tif( " ) ;
       archi_simple_print( n->attr.nt_ifthenelse.pred, sf ) ;
       fprintf( sf, " ){\n" ) ;
       archi_instr_encoding_generate_( n->attr.nt_ifthenelse.cthen, sf, blen ) ;
-      fprintf( sf, "\t}else{\n" ) ;
+      fprintf( sf, "\t}\n\telse{\n" ) ;
       archi_instr_encoding_generate_( n->attr.nt_ifthenelse.celse, sf, blen ) ;
       fprintf( sf, "\t}\n\n" ) ;
     break ;}

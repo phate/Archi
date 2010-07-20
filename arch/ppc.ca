@@ -41,7 +41,7 @@ RegClass gpr { NBits = 32, Regs = [r3,r4,r5,r6,r7,r8,r9] } ;
 Instr and0{
   Input = [gpr rs, gpr rb],
   Output = [gpr ra],
-  Encoding = (If 3 == '00' Then '11111111' ++ '00' Else '00000000') ++ '1010', #++  24.bstr[0:6] ++ rs.code.bstr[0:5] ++ ra.code.bstr[0:5] ++ rb.code.bstr[0:5] ++ 28.bstr[0:10] ++ '0',
+  Encoding = (If 3 == 2 Then '11111111' Else '00000000') ++  24.bstr[0:6] ++ rs.code.bstr[0:5] ++ ra.code.bstr[0:5] ++ rb.code.bstr[0:5] ++ 28.bstr[0:10] ++ '0',
   Flags = [OverwriteInput]
 } ;
 
