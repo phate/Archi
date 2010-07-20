@@ -56,6 +56,10 @@ static const char* archi_expression_infer( archi_symtab *st, archi_ast_node *n )
       const char *type = archi_expression_infer( st, n->attr.nt_ifthenelse.cthen ) ;
       archi_expression_typecheck( st, n->attr.nt_ifthenelse.celse, type ) ;
       return type ;}
+    case NT_EQUAL:{
+      const char* type = archi_expression_infer( st, n->first_child ) ;
+      archi_expression_typecheck( st, n->last_child, type ) ;
+      return "Bool" ;}
     case NT_CONCAT:{
       archi_expression_typecheck( st, n->first_child, "Bits" ) ;
       archi_expression_typecheck( st, n->last_child, "Bits" ) ;

@@ -234,7 +234,7 @@ Args					: '(' ETIdList ')'									{ $$ = create_node( ARGS, NULL, NULL, linenr
                                                     add_children( $$, $2 ) ;}
 							;
 */
-Exp						: T_IF Exp8 T_THEN Exp T_ELSE Exp	  { $$ = archi_ast_node_create( ast, NT_IFTHENELSE, NULL, linenr ) ;
+Exp					  : T_IF Exp3 T_THEN Exp T_ELSE Exp   { $$ = archi_ast_node_create( ast, NT_IFTHENELSE, NULL, linenr ) ;
                                                     archi_nt_ifthenelse_attributes_init( &($$->attr.nt_ifthenelse) ) ;
 																										archi_ast_node_next_sibling_set( $2, $4 ) ;
                                                     archi_ast_node_next_sibling_set( $4, $6 ) ;
@@ -274,11 +274,11 @@ Exp7					: Exp7 '*' Exp8											{ $$ = create_expression( TIMES, $1, $3 ) ; }
 							| Exp8															{ $$ = $1 ; }
 							;
 */
-Exp8					: Exp8 T_CONCAT Exp9								{ $$ = archi_expression_create( NT_CONCAT, $1, $3 ) ;
+Exp8				  : Exp8 T_CONCAT Exp9							  { $$ = archi_expression_create( NT_CONCAT, $1, $3 ) ;
                                                     $$->attr.nt_concat.len = -1 ;}
 							| Exp9															{ $$ = $1 ; }
 							;
-Exp9					: Exp10 '[' Exp8 ':' Exp8 ']'		    { $$ = archi_ast_node_create( ast, NT_BSLC, NULL, linenr ) ;
+Exp9					: Exp10 '[' Exp9 ':' Exp9 ']'		    { $$ = archi_ast_node_create( ast, NT_BSLC, NULL, linenr ) ;
                                                     archi_nt_bslc_attributes_init( &($$->attr.nt_bslc) ) ;
                                                     archi_ast_node_next_sibling_set( $1, $3 ) ;
                                                     archi_ast_node_next_sibling_set( $3, $5 ) ;
@@ -305,7 +305,7 @@ Exp12					: Id																{ $$ = $1 ; }
 							| T_TRUE													  { $$ = archi_ast_node_create( ast, NT_TRUE, "Bool", linenr ) ; }
 							| T_FALSE														{ $$ = archi_ast_node_create( ast, NT_FALSE, "Bool", linenr ) ; }
 						  | '(' Exp ')'										    { $$ = $2 ; }
-							;
+              ;
 /*EExpList			: ExpList														{ $$ = $1 ; }
 							|																		{ $$ = NULL ; }
 							;
