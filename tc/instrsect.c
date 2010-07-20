@@ -47,6 +47,7 @@ static const char* archi_expression_infer( archi_symtab *st, archi_ast_node *n )
       }
       return l->data_type ;}
     case NT_NUM:
+    case NT_STR:
     case NT_BSTR:
     case NT_TRUE:
     case NT_FALSE:
