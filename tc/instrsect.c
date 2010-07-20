@@ -62,11 +62,7 @@ static char* archi_expression_infer( archi_symtab *st, archi_ast_node *n )
       archi_ast_node_data_type_set( n, type ) ;
       return type ;}
     case NT_EQUAL:{
-      const char* type = archi_binop_typecheck( st, n, (char* [4]){"Int", "Bits", "Bool", "Reg"}, 4 ) ;
-//      if( !strcmp(type, "Reg") ){
-//        if( n->first_child->node_type == NT_ID && n->first_child->node_type == NT_ID )
-//          EMSG_ILLEGAL_OPERATION( n, "comparison" ) ;  
-//      }
+      archi_binop_typecheck( st, n, (char* [4]){"Int", "Bits", "Bool", "Reg"}, 4 ) ;
       //FIXME: check whether register occurs in register class
       archi_ast_node_data_type_set( n, "Bool" ) ;
       return "Bool" ;}
@@ -81,20 +77,13 @@ static char* archi_expression_infer( archi_symtab *st, archi_ast_node *n )
       return "Bits" ;}
     case NT_DOT:{
       char* type = archi_expression_infer( st, n->first_child ) ;
-      if( !strcmp(type, "Int") || !strcmp(type, "Bits") ){
-        type = archi_nt_dot_attribute_typecheck( n->last_child, type ) ;
-        archi_ast_node_data_type_set( n, type ) ; 
-        return type ;}
-      else{
-        archi_ast_node *l = archi_symtab_lookup( st, type ) ;
-        if( l == NULL ) DEBUG_ASSERT(0) ; //this should never happen
-        if( !strcmp(l->data_type, "RegClass") ){ //FIXME: what if l-data_type is not a RegClass
-          type = archi_nt_dot_attribute_typecheck( n->last_child, "RegClass" ) ;
-          archi_ast_node_data_type_set( n, type ) ;
-          return type ;}
-        else return "Bits" ; //bad fix, do it right
-      }
-      DEBUG_ASSERT(0) ;}
+      if( !strcmp(type, "RegClass") || !strcmp(type, "Reg") ) EMSG_TYPE_NOT_SUPPORTED(n->first_child, type) ;
+      
+      archi_ast_node *l = archi_symtab_lookup( st, type ) ;
+      if( l != NULL ) if( !strcmp( l->data_type, "RegClass") ) type = "RegClass" ;
+      type = archi_nt_dot_attribute_typecheck( n->last_child, type ) ;
+      archi_ast_node_data_type_set( n, type ) ;
+      return type ;}
     default: DEBUG_ASSERT(0) ; break ; 
   }
 }

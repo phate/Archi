@@ -24,12 +24,12 @@ RegClass gpr { NBits = 32, Regs = [r3,r4,r5,r6,r7,r8,r9] } ;
 
 %%
 
-#Instr addi{
-#  Input = [gpr ra, Int si],
-#  Output = [gpr rt],
-#  Encoding = 24.bstr[0:5] ++ rt.code.bstr[0:5] ++ ra.code.bstr[0:5] ++ si.bstr[0:16],
-#  Flags = [Commutative, OverwriteInput]
-#} ;
+Instr addi{
+  Input = [gpr ra, Int si],
+  Output = [gpr rt],
+  Encoding = 24.bstr[0:5] ++ rt.code.bstr[0:5] ++ ra.code.bstr[0:5] ++ si.bstr[0:16],
+  Flags = [Commutative, OverwriteInput]
+} ;
 
 #Instr ori{
 #  Input = [gpr ra, Int ui],
@@ -39,11 +39,9 @@ RegClass gpr { NBits = 32, Regs = [r3,r4,r5,r6,r7,r8,r9] } ;
 #} ;
 
 Instr and0{
-  Input = [],
+  Input = [gpr rs, gpr rb],
   Output = [],
-  Encoding = (If
-    r5 == r4
-    Then '11111111' Else '00000000'), #++ 24.bstr[0:6] ++ rs.code.bstr[0:5] ++ ra.code.bstr[0:5] ++ rb.code.bstr[0:5] ++ 28.bstr[0:10] ++ '0',
+  Encoding = If rs.reg == r3 Then rs.code.bstr[0:8] Else rb.code.bstr[0:8], #++ 24.bstr[0:6] ++ rs.code.bstr[0:5] ++ ra.code.bstr[0:5] ++ rb.code.bstr[0:5] ++ 28.bstr[0:10] ++ '0',
   Flags = [OverwriteInput]
 } ;
 
