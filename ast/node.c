@@ -243,6 +243,8 @@ static void node2string( FILE* f, archi_ast_node *n )
 			sprintf( str, "%s", (const char*)n->data ) ; break ;
 */  case NT_BSTR:
 			sprintf( str, "%s", n->attr.nt_bstr.bstr ) ; break ;
+    case NT_STR:
+      sprintf( str, "%s", n->attr.nt_str.str ) ; break ;
 		default:
 			sprintf( str, "%s", "" ) ; break ;
 

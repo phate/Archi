@@ -29,6 +29,7 @@
   X( NT_DOT ) \
   X( NT_CONCAT ) \
   X( NT_BSTR ) \
+  X( NT_STR ) \
   X( NT_NUM ) \
   X( NT_TRUE ) \
   X( NT_FALSE ) \

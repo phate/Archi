@@ -12,6 +12,7 @@ digit [0-9]+
 number {digit}+
 letter [a-zA-Z]
 
+str \"({letter}|{number}|"_")+\"
 identifier {letter}({letter}|{number}|"_")*
 comment #.*\n
 newline \n
@@ -40,9 +41,11 @@ whitespace [ \t]+
 "Int"				      { return T_DTINT; }
 "Bool"			      { return T_DTBOOL; }
 "Bits"			      { return T_DTBSTR; }
+"String"          { return T_DTSTR; }
 "True"			      { return T_TRUE; }
 "False"			      { return T_FALSE; }
 
+{str}             { return T_STR; }
 {bitstr}		      { return T_BSTR; }
 {number}		      { return T_NUM; }
 {identifier}	    { return T_ID; }

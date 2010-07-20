@@ -46,8 +46,8 @@ archi_ast_node* archi_expression_create( archi_ast_nodetype ntype, archi_ast_nod
 %token T_INSTRDEF T_INPUT T_OUTPUT T_ENCODING T_FLAGS
 %token T_MATCHDEF T_IPATTERN T_OPATTERN
 %token T_COMMUTATIVE T_OVERWRITEINPUT
-%token T_ID T_NUM T_TRUE T_FALSE T_BSTR
-%token T_DTINT T_DTBOOL T_DTBSTR
+%token T_ID T_NUM T_TRUE T_FALSE T_BSTR T_STR
+%token T_DTINT T_DTBOOL T_DTBSTR T_DTSTR
 %token T_IF T_THEN T_ELSE T_SEP TSHIFTL TSHIFTR TLTEQ TGTEQ TLAND TLOR T_DOT T_CONCAT TNEQ 
 %token T_EQUAL
 
@@ -212,6 +212,8 @@ TId           : T_ID                              { tmp = archi_ast_node_create(
                                                     $$->attr.nt_tid.id = talloc_strdup( $$, yytext ) ; }
 							| T_DTBSTR T_ID									    { $$ = archi_ast_node_create( ast, NT_TID, "Bits", linenr ) ;
 							                                      $$->attr.nt_tid.id = talloc_strdup( $$, yytext ) ; }
+              | T_DTSTR T_ID                      { $$ = archi_ast_node_create( ast, NT_TID, "String", linenr) ;
+                                                    $$->attr.nt_tid.id = talloc_strdup( $$, yytext ) ; }
               ;
 EIdList       : IdList                            { $$ = $1 ; }
               |                                   { $$ = NULL ; }
@@ -302,6 +304,10 @@ Exp12					: Id																{ $$ = $1 ; }
                                                     archi_nt_bstr_attributes_init( &($$->attr.nt_bstr) ) ;
                                                     $$->attr.nt_bstr.bstr = talloc_strndup( $$, yytext+1, strlen(yytext)-2 ) ;
                                                     $$->attr.nt_bstr.len = strlen(yytext)-2 ;}
+              | T_STR                             { $$ = archi_ast_node_create( ast, NT_STR, "String", linenr ) ;
+                                                    archi_nt_str_attributes_init( &($$->attr.nt_str) ) ;
+                                                    $$->attr.nt_str.str = talloc_strndup( $$, yytext+1, strlen(yytext)-2 ) ;
+                                                    $$->attr.nt_str.length = strlen(yytext)-2 ;}
 							| T_TRUE													  { $$ = archi_ast_node_create( ast, NT_TRUE, "Bool", linenr ) ; }
 							| T_FALSE														{ $$ = archi_ast_node_create( ast, NT_FALSE, "Bool", linenr ) ; }
 						  | '(' Exp ')'										    { $$ = $2 ; }

@@ -76,6 +76,13 @@ typedef struct archi_nt_bstr_attributes_{
 
 void archi_nt_bstr_attributes_init( archi_nt_bstr_attributes *attr ) ;
 
+typedef struct archi_nt_str_attributes_{
+  const char* str ;
+  int32_t length ;
+} archi_nt_str_attributes ;
+
+void archi_nt_str_attributes_init( archi_nt_str_attributes *attr ) ;
+
 typedef struct archi_nt_bslc_attributes_{
   int32_t start ;
   int32_t length ;
@@ -150,6 +157,7 @@ typedef union node_attributes_{
   archi_nt_concat_attributes nt_concat ;
   archi_nt_bslc_attributes nt_bslc ;
   archi_nt_bstr_attributes nt_bstr ;
+  archi_nt_str_attributes nt_str ;
   archi_nt_num_attributes nt_num ;
   archi_nt_id_attributes nt_id ;
   archi_nt_tid_attributes nt_tid ; 
