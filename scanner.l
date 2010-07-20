@@ -51,7 +51,7 @@ whitespace [ \t]+
 {newline}	        { linenr++ ;  }
 
 "!="	{ return TNEQ; }
-"=="	{ return TEQ; }
+"=="	{ return T_EQUAL; }
 "++"	{ return T_CONCAT; }
 "||"	{ return TLOR; }
 "&&"	{ return TLAND; }

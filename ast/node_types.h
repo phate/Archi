@@ -24,6 +24,7 @@
   X( NT_NODEDEF ) \
   X( NT_JVINSTRDEF ) \
   X( NT_IFTHENELSE ) \
+  X( NT_EQUAL ) \
   X( NT_BSLC ) \
   X( NT_DOT ) \
   X( NT_CONCAT ) \

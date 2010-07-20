@@ -48,7 +48,8 @@ archi_ast_node* archi_expression_create( archi_ast_nodetype ntype, archi_ast_nod
 %token T_COMMUTATIVE T_OVERWRITEINPUT
 %token T_ID T_NUM T_TRUE T_FALSE T_BSTR
 %token T_DTINT T_DTBOOL T_DTBSTR
-%token T_IF T_THEN T_ELSE T_SEP TSHIFTL TSHIFTR TLTEQ TGTEQ TLAND TLOR T_DOT T_CONCAT TEQ TNEQ 
+%token T_IF T_THEN T_ELSE T_SEP TSHIFTL TSHIFTR TLTEQ TGTEQ TLAND TLOR T_DOT T_CONCAT TNEQ 
+%token T_EQUAL
 
 %%
 ArchDesc			:	Sections												{ archi_ast_node_init( ast, NT_ARCHDEF, NULL, linenr ) ;
@@ -238,7 +239,7 @@ Exp						: T_IF Exp8 T_THEN Exp T_ELSE Exp	  { $$ = archi_ast_node_create( ast, 
 																										archi_ast_node_next_sibling_set( $2, $4 ) ;
                                                     archi_ast_node_next_sibling_set( $4, $6 ) ;
                                                     archi_children_add( $$, $2 ) ;}
-							| Exp8															{ $$ = $1 ; } 
+							| Exp3															{ $$ = $1 ; } 
 							;
 /*
 Exp1					: Exp1 TLOR Exp2										{ $$ = create_expression( LOGICALOR, $1, $3 ) ; }
@@ -247,10 +248,12 @@ Exp1					: Exp1 TLOR Exp2										{ $$ = create_expression( LOGICALOR, $1, $3 )
 Exp2					:	Exp2 TLAND Exp3										{ $$ = create_expression( LOGICALAND, $1, $3 ) ; }
 							| Exp3															{ $$ = $1 ; }
 							;
-Exp3					: Exp3 TNEQ Exp4										{ $$ = create_expression( NOTEQUAL, $1, $3 ) ; }
-							| Exp3 TEQ Exp4											{ $$ = create_expression( EQUAL, $1, $3 ) ; }
-							| Exp4															{ $$ = $1 ; }
+*/
+//Exp3					: Exp3 TNEQ Exp4										{ $$ = create_expression( NOTEQUAL, $1, $3 ) ; }
+Exp3				  : Exp3 T_EQUAL Exp8							    { $$ = archi_expression_create( NT_EQUAL, $1, $3 ) ; }
+							| Exp8															{ $$ = $1 ; }
 							;
+/*
 Exp4					: Exp4 '<' Exp5											{ $$ = create_expression( LESSTHAN, $1, $3 ) ; }
 							|	Exp4 '>' Exp5											{ $$ = create_expression( GREATERTHAN, $1, $3 ) ; }
 							| Exp4 TLTEQ Exp5										{ $$ = create_expression( LESSTHANEQUAL, $1, $3 ) ; }
