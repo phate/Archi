@@ -10,6 +10,8 @@ void archi_code_generate( archi_symtab *st, archi_ast_node *n, FILE *hf, FILE *s
 
   archi_code_generate_prepare( n ) ;
 
+  archi_view_ast( n ) ;
+
   archi_regsect_generate( st, n->attr.nt_archdef.regsect, hf, sf ) ;
-  archi_instrsect_generate( n->attr.nt_archdef.instrsect, hf, sf ) ;
+  archi_instrsect_generate( st, n->attr.nt_archdef.instrsect, hf, sf ) ;
 }

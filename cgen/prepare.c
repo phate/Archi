@@ -4,9 +4,12 @@
 static void archi_nt_dot_prepare( archi_ast_node *n )
 {
   archi_ast_node *c ;
-  FOREACH_CHILD( n, c ) archi_nt_dot_prepare( c ) ; 
+  FOREACH_CHILD( n, c ){
+    archi_nt_dot_prepare( c ) ;
+  } 
 
   if( n->node_type == NT_DOT ){
+    archi_ast_node_data_type_set( n->first_child, n->data_type ) ;
     archi_ast_node_dreplace( n, n->first_child ) ; 
   }
 }
@@ -34,4 +37,5 @@ void archi_code_generate_prepare( archi_ast_node *n )
   DEBUG_ASSERT( n && n->node_type == NT_ARCHDEF ) ; 
 
   archi_instrsect_prepare( n->attr.nt_archdef.instrsect ) ; 
+
 }

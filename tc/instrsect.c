@@ -4,10 +4,10 @@
 #include <string.h>
 #include <math.h>
 
-static const char* archi_expression_typecheck( archi_symtab *st, archi_ast_node *n, const char* dtype ) ;
-static const char* archi_binop_typecheck( archi_symtab *st, archi_ast_node *n, const char* dtypes[], uint32_t cnt ) ;
+static char* archi_expression_typecheck( archi_symtab *st, archi_ast_node *n, char* dtype ) ;
+static char* archi_binop_typecheck( archi_symtab *st, archi_ast_node *n, char* dtypes[], uint32_t cnt ) ;
 
-static const char* archi_nt_dot_attribute_typecheck( archi_ast_node *n, const char* ps_type )
+static char* archi_nt_dot_attribute_typecheck( archi_ast_node *n, const char* ps_type )
 {
   if( n->node_type == NT_ID ){
     if( !strcmp(ps_type, "Int") ){
@@ -36,7 +36,7 @@ static const char* archi_nt_dot_attribute_typecheck( archi_ast_node *n, const ch
   return "Int" ;
 }
 
-static const char* archi_expression_infer( archi_symtab *st, archi_ast_node *n )
+static char* archi_expression_infer( archi_symtab *st, archi_ast_node *n )
 {
   DEBUG_ASSERT( n ) ;
 
@@ -47,7 +47,8 @@ static const char* archi_expression_infer( archi_symtab *st, archi_ast_node *n )
         EMSG_MISSING_ID( n, n->attr.nt_id.id ) ;
         return "Int" ;  //FIXME: write message that it defaults to Int
       }
-      return (n->data_type = l->data_type) ;}
+      archi_ast_node_data_type_set( n, l->data_type ) ;
+      return l->data_type ;}
     case NT_NUM:
     case NT_STR:
     case NT_BSTR:
@@ -56,33 +57,41 @@ static const char* archi_expression_infer( archi_symtab *st, archi_ast_node *n )
       return n->data_type ;
     case NT_IFTHENELSE:{
       archi_expression_typecheck( st, n->attr.nt_ifthenelse.pred, "Bool" ) ;
-      const char *type = archi_expression_infer( st, n->attr.nt_ifthenelse.cthen ) ;
+      char *type = archi_expression_infer( st, n->attr.nt_ifthenelse.cthen ) ;
       archi_expression_typecheck( st, n->attr.nt_ifthenelse.celse, type ) ;
+      archi_ast_node_data_type_set( n, type ) ;
       return type ;}
     case NT_EQUAL:{
-      const char* type = archi_binop_typecheck( st, n, (const char* [4]){"Int", "Bits", "Bool", "Reg"}, 4 ) ;
-      if( !strcmp(type, "Reg") ){
-        if( n->first_child->node_type == NT_ID && n->first_child->node_type == NT_ID )
-          EMSG_ILLEGAL_OPERATION( n, "comparison" ) ;  
-      }
+      const char* type = archi_binop_typecheck( st, n, (char* [4]){"Int", "Bits", "Bool", "Reg"}, 4 ) ;
+//      if( !strcmp(type, "Reg") ){
+//        if( n->first_child->node_type == NT_ID && n->first_child->node_type == NT_ID )
+//          EMSG_ILLEGAL_OPERATION( n, "comparison" ) ;  
+//      }
       //FIXME: check whether register occurs in register class
+      archi_ast_node_data_type_set( n, "Bool" ) ;
       return "Bool" ;}
     case NT_CONCAT:{
       archi_expression_typecheck( st, n->first_child, "Bits" ) ;
       archi_expression_typecheck( st, n->last_child, "Bits" ) ;
+      archi_ast_node_data_type_set( n, "Bits" ) ;
       return "Bits" ;}
     case NT_BSLC:{
       archi_expression_typecheck( st, n->first_child, "Bits" ) ;
+      archi_ast_node_data_type_set( n, "Bits" ) ;
       return "Bits" ;}
     case NT_DOT:{
-      const char* type = archi_expression_infer( st, n->first_child ) ;
-      if( !strcmp(type, "Int") || !strcmp(type, "Bits") )
-        return archi_nt_dot_attribute_typecheck( n->last_child, type ) ;
+      char* type = archi_expression_infer( st, n->first_child ) ;
+      if( !strcmp(type, "Int") || !strcmp(type, "Bits") ){
+        type = archi_nt_dot_attribute_typecheck( n->last_child, type ) ;
+        archi_ast_node_data_type_set( n, type ) ; 
+        return type ;}
       else{
         archi_ast_node *l = archi_symtab_lookup( st, type ) ;
         if( l == NULL ) DEBUG_ASSERT(0) ; //this should never happen
-        if( !strcmp(l->data_type, "RegClass") ) //FIXME: what if l-data_type is not a RegClass
-          return archi_nt_dot_attribute_typecheck( n->last_child, "RegClass" ) ;
+        if( !strcmp(l->data_type, "RegClass") ){ //FIXME: what if l-data_type is not a RegClass
+          type = archi_nt_dot_attribute_typecheck( n->last_child, "RegClass" ) ;
+          archi_ast_node_data_type_set( n, type ) ;
+          return type ;}
         else return "Bits" ; //bad fix, do it right
       }
       DEBUG_ASSERT(0) ;}
@@ -90,7 +99,7 @@ static const char* archi_expression_infer( archi_symtab *st, archi_ast_node *n )
   }
 }
 
-static const char* archi_binop_typecheck( archi_symtab *st, archi_ast_node *n, const char* dtypes[], uint32_t cnt )
+static char* archi_binop_typecheck( archi_symtab *st, archi_ast_node *n, char* dtypes[], uint32_t cnt )
 {
   DEBUG_ASSERT( n && dtypes ) ;
 
@@ -109,7 +118,7 @@ static const char* archi_binop_typecheck( archi_symtab *st, archi_ast_node *n, c
   return archi_expression_typecheck( st, n->last_child, dtypes[i] ) ; 
 }
 
-static const char* archi_expression_typecheck( archi_symtab *st, archi_ast_node *n, const char* dtype )
+static char* archi_expression_typecheck( archi_symtab *st, archi_ast_node *n, char* dtype )
 {
   DEBUG_ASSERT( n && dtype ) ;
  
@@ -237,6 +246,7 @@ static void archi_instrdef_input_typecheck( archi_symtab *st, archi_ast_node *n 
   }
 }
 
+//FIXME: not correct anymore, an id could also be used in a comparison for example
 static int32_t archi_instrdef_io_usage_typecheck( const char* id, archi_ast_node *n )
 {
   DEBUG_ASSERT( id && n ) ;

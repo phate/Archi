@@ -199,15 +199,24 @@ void archi_ast_node_replace( archi_ast_node *o, archi_ast_node *n )
   n->parent = p ;
   n->next_sibling = ns ;
   n->prev_sibling = ps ;
-
-  if( ps == NULL ) p->first_child = n ;
-  if( ns == NULL ) p->last_child = n ;
+  
+  if( ns != NULL ) ns->prev_sibling = n ;
+  else p->last_child = n ;
+ 
+  if( ps != NULL ) ps->next_sibling = n ;
+  else p->first_child = n ;
 }
 
 void archi_ast_node_dreplace( archi_ast_node *o, archi_ast_node *n )
 {
   archi_ast_node_disconnect( n ) ;
   archi_ast_node_replace( o, n ) ; 
+}
+
+void archi_ast_node_data_type_set( archi_ast_node *n, char* dtype )
+{
+  TALLOC_FREE( n->data_type ) ;
+  n->data_type = talloc_strdup( n, dtype ) ;
 }
 
 #define X(a) #a,
@@ -232,8 +241,10 @@ static void node2string( FILE* f, archi_ast_node *n )
 		case NT_BITS:
 			sprintf( str, "%d", n->attr.nt_bits.bits ) ; break ;
 		case NT_ID:
-			sprintf( str, "%s", n->attr.nt_id.id ) ; break ;
+			sprintf( str, "%s %s", n->data_type, n->attr.nt_id.id ) ; break ;
     case NT_NODEDEF:
+      sprintf( str, "type: %s", n->data_type ) ; break ;
+    case NT_DOT:
       sprintf( str, "type: %s", n->data_type ) ; break ;
     case NT_FLAGS:
       sprintf( str, "%d", n->attr.nt_flags.flags ) ; break ;

@@ -18,7 +18,7 @@ static void archi_instr_defs_generate( archi_ast_node *n, FILE *hf )
   fprintf( hf, "} jive_arch_instruction_index ;\n\n" ) ;
 }
 
-static void archi_simple_print( archi_ast_node *n, FILE *sf )
+static void archi_simple_print( archi_symtab *st, archi_ast_node *n, FILE *sf )
 {
   switch( n->node_type ){
     case NT_TRUE:
@@ -32,25 +32,53 @@ static void archi_simple_print( archi_ast_node *n, FILE *sf )
     case NT_ID:
       fprintf( sf, "%s", n->attr.nt_id.id ) ; break ;
     case NT_EQUAL:{
-      archi_simple_print( n->first_child, sf ) ;
-      fprintf( sf, " == " ) ;
-      archi_simple_print( n->last_child, sf ) ;
+      if( !strcmp(n->first_child->data_type, "Reg") || !strcmp(n->last_child->data_type, "Reg") ){
+        archi_ast_node *l1 = archi_symtab_lookup( st, n->first_child->attr.nt_id.id ) ;
+        archi_ast_node *l2 = archi_symtab_lookup( st, n->last_child->attr.nt_id.id ) ;
+
+        if( l1 == NULL && l2 == NULL )
+          fprintf( sf, " !strcmp(%s->name, %s->name) ", n->first_child->attr.nt_id.id, n->last_child->attr.nt_id.id ) ;
+        else if( l1 != NULL && l2 != NULL )
+          fprintf( sf, " !strcmp(\"%s\", \"%s\") ", n->first_child->attr.nt_id.id, n->last_child->attr.nt_id.id ) ;
+        else{
+          archi_ast_node *lid, *gid ;
+          if( l1 == NULL ){ lid = n->first_child ; gid = n->last_child ;}
+          else{ lid = n->last_child ; gid = n->first_child ;}
+          fprintf( sf, " !strcmp(%s->name, \"%s\") ", lid->attr.nt_id.id, gid->attr.nt_id.id ) ;   
+        }
+/* 
+        if( l1 == NULL && l2 == NULL ){
+          fprintf( sf, " !strcmp(%s->name, %s->name) ", n->first_child->attr.nt_id.id, n->last_child->attr.nt_id.id ) ;
+        } 
+        else{
+          archi_ast_node *lid, *gid ;
+          if( l1 == NULL ){ lid = n->first_child ; gid = n->last_child ;}
+          else{ lid = n->last_child ; gid = n->first_child ;}
+          fprintf( sf, " !strcmp(%s->name, \"%s\") ", lid->attr.nt_id.id, gid->attr.nt_id.id ) ;   
+        }
+*/  
+      }
+      else{
+        archi_simple_print( st, n->first_child, sf ) ;
+        fprintf( sf, " == " ) ;
+        archi_simple_print( st, n->last_child, sf ) ;
+      }
     break ;}
     default: DEBUG_ASSERT(0) ;
   }
 }
 
-static int32_t archi_instr_encoding_generate_( archi_ast_node *n, FILE *sf, int32_t blen )
+static int32_t archi_instr_encoding_generate_( archi_symtab *st, archi_ast_node *n, FILE *sf, int32_t blen )
 {
   switch( n->node_type ){ 
     //assumes that the length of each case is a multiple of eight and that before if is a multiple of eight!!!
     case NT_IFTHENELSE:{
       fprintf( sf, "\tif( " ) ;
-      archi_simple_print( n->attr.nt_ifthenelse.pred, sf ) ;
+      archi_simple_print( st, n->attr.nt_ifthenelse.pred, sf ) ;
       fprintf( sf, " ){\n" ) ;
-      archi_instr_encoding_generate_( n->attr.nt_ifthenelse.cthen, sf, blen ) ;
+      archi_instr_encoding_generate_( st, n->attr.nt_ifthenelse.cthen, sf, blen ) ;
       fprintf( sf, "\t}\n\telse{\n" ) ;
-      archi_instr_encoding_generate_( n->attr.nt_ifthenelse.celse, sf, blen ) ;
+      archi_instr_encoding_generate_( st, n->attr.nt_ifthenelse.celse, sf, blen ) ;
       fprintf( sf, "\t}\n\n" ) ;
     break ;}
     case NT_BSTR:{
@@ -79,8 +107,8 @@ static int32_t archi_instr_encoding_generate_( archi_ast_node *n, FILE *sf, int3
       }
     break ;}
     case NT_CONCAT:{
-      int32_t l = archi_instr_encoding_generate_( n->first_child, sf, blen ) ; 
-      return archi_instr_encoding_generate_( n->last_child, sf, l ) ;
+      int32_t l = archi_instr_encoding_generate_( st, n->first_child, sf, blen ) ; 
+      return archi_instr_encoding_generate_( st, n->last_child, sf, l ) ;
     break ;}
     case NT_BSLC:{
       int32_t bslclen = n->attr.nt_bslc.length ;
@@ -92,19 +120,22 @@ static int32_t archi_instr_encoding_generate_( archi_ast_node *n, FILE *sf, int3
 
         if( bslclen < bmissing ){
           fprintf( sf, "(((" ) ;
-          archi_simple_print( n->first_child, sf ) ;
+          archi_simple_print( st, n->first_child, sf ) ;
+          if( n->first_child->node_type == NT_ID ) fprintf( sf, "_code" ) ;
           fprintf( sf, ") >> %d) & 0x%lX) << %d | ", n->attr.nt_bslc.start, (long)pow(2, bslclen)-1, bmissing-bslclen ) ;
           return blen+bslclen ;
         }
         if( bslclen == bmissing ){
           fprintf( sf, "(((" ) ;
-          archi_simple_print( n->first_child, sf ) ;
+          archi_simple_print( st, n->first_child, sf ) ;
+          if( n->first_child->node_type == NT_ID ) fprintf( sf, "_code" ) ;
           fprintf( sf, ") >> %d) & 0x%lX) )\n\t\treturn jive_encode_out_of_memory ;\n", n->attr.nt_bslc.start, (long)pow(2, bslclen)-1 ) ;
           return 0 ; 
         }
         if( bslclen > bmissing ){
           fprintf( sf, "(((" ) ;
-          archi_simple_print( n->first_child, sf ) ;
+          archi_simple_print( st, n->first_child, sf ) ;
+          if( n->first_child->node_type == NT_ID ) fprintf( sf, "_code" ) ;
           fprintf( sf, ") >> %d) & 0x%lX) )\n\t\treturn jive_encode_out_of_memory ;\n", n->attr.nt_bslc.start+bslclen-bmissing, (long)pow(2, bmissing)-1 ) ;
           p += bmissing ;
           bslclen -= bmissing ;
@@ -130,19 +161,21 @@ static void archi_instr_io_generate( archi_ast_node *n, FILE *sf )
       if( !strcmp(c->data_type, "Int") )
         fprintf( sf, "\tuint32_t %s = cpu_to_le32(immediates[%d]) ;\n", c->attr.nt_tid.id, nints++ ) ;
       else
-        fprintf( sf, "\tint %s = inputs[%d]->code ;\n", c->attr.nt_tid.id, nregs++ ) ;
+        fprintf( sf, "\tconst jive_cpureg %s = inputs[%d] ;\n", c->attr.nt_tid.id, nregs++ ) ;
+        fprintf( sf, "\tint %s_code = %s->code ;\n\n", c->attr.nt_tid.id, c->attr.nt_tid.id ) ;
     }
     else{
-      fprintf( sf, "\tint %s = outputs[%d]->code ;\n", c->attr.nt_tid.id, nregs++ ) ;
+      fprintf( sf, "\tconst jive_cpureg %s = outputs[%d] ;\n", c->attr.nt_tid.id, nregs++ ) ;
+      fprintf( sf, "\tint %s_code = %s->code ;\n\n", c->attr.nt_tid.id, c->attr.nt_tid.id ) ;
     }
   }
 
   fprintf(sf, "\n" ) ;
 } 
 
-static void archi_instr_encoding_generate( archi_ast_node *n, FILE *sf )
+static void archi_instr_encoding_generate( archi_symtab *st, archi_ast_node *n, FILE *sf )
 {
-  DEBUG_ASSERT( sf && n && n->node_type == NT_INSTRDEF ) ;
+  DEBUG_ASSERT( st && sf && n && n->node_type == NT_INSTRDEF ) ;
 
   fprintf( sf, "jive_encode_result jive_arch_%s_generate(\n", n->attr.nt_instrdef.id ) ;
   fprintf( sf, "\tjive_buffer *target,\n" ) ;
@@ -153,7 +186,7 @@ static void archi_instr_encoding_generate( archi_ast_node *n, FILE *sf )
 
   archi_instr_io_generate( n->attr.nt_instrdef.input, sf ) ;
   archi_instr_io_generate( n->attr.nt_instrdef.output, sf ) ;
-  archi_instr_encoding_generate_( n->attr.nt_instrdef.encoding->first_child, sf, 0 ) ;
+  archi_instr_encoding_generate_( st, n->attr.nt_instrdef.encoding->first_child, sf, 0 ) ;
 
   fprintf( sf, "\n\treturn jive_encode_ok ;\n}\n\n" ) ;
 }
@@ -202,9 +235,9 @@ static void archi_instr_code_generate( archi_ast_node *n, FILE *sf )
   fprintf( sf, "} ;\n\n" ) ;
 }
 
-void archi_instrsect_generate( archi_ast_node *n, FILE *hf, FILE *sf )
+void archi_instrsect_generate( archi_symtab *st, archi_ast_node *n, FILE *hf, FILE *sf )
 {
-  DEBUG_ASSERT( hf && sf && n && n->node_type == NT_INSTRSECT ) ;
+  DEBUG_ASSERT( st && hf && sf && n && n->node_type == NT_INSTRSECT ) ;
 
   archi_instr_defs_generate( n, hf ) ;
   archi_instr_code_generate( n, sf ) ;
@@ -212,6 +245,6 @@ void archi_instrsect_generate( archi_ast_node *n, FILE *hf, FILE *sf )
   archi_ast_node *c ;
   FOREACH_CHILD( n, c ){
     if( c->node_type == NT_JVINSTRDEF ) continue ;
-    archi_instr_encoding_generate( c, sf ) ;
+    archi_instr_encoding_generate( st, c, sf ) ;
   } 
 }
