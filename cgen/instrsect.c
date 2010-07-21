@@ -217,16 +217,22 @@ static void archi_instr_code_generate( archi_ast_node *n, FILE *sf )
   archi_ast_node *c ;
   FOREACH_CHILD( n, c ){
     if( c->node_type == NT_JVINSTRDEF ) continue ;
+    int32_t inregs = c->attr.nt_instrdef.input->attr.nt_input.nregs ;
+    int32_t onregs = c->attr.nt_instrdef.output->attr.nt_output.nregs ;
     fprintf( sf, "\t[jive_arch_%s] = {\n", c->attr.nt_instrdef.id ) ;
     fprintf( sf, "\t\t.name = \"%s\",\n", c->attr.nt_instrdef.id ) ;
     fprintf( sf, "\t\t.encode = &jive_arch_%s_generate,\n", c->attr.nt_instrdef.id ) ;
     fprintf( sf, "\t\t.mnemonic = 0,\n" ) ;
-    fprintf( sf, "\t\t.inregs = 0,\n" ) ;
-    fprintf( sf, "\t\t.outregs = 0,\n" ) ;
+    fprintf( sf, "\t\t.inregs = " ) ;
+    if( inregs != 0) fprintf( sf, "%s_inregs,\n", c->attr.nt_instrdef.id ) ;
+    else fprintf( sf, "0,\n" ) ; 
+    fprintf( sf, "\t\t.outregs = " ) ;
+    if( onregs != 0 ) fprintf( sf, "%s_outregs,\n", c->attr.nt_instrdef.id ) ;
+    else fprintf( sf, "0,\n" ) ; 
     fprintf( sf, "\t\t.flags = " ) ;
     archi_instr_flags_generate( c->attr.nt_instrdef.flags, sf ) ;
-    fprintf( sf, "\t\t.ninputs = %d,\n", c->attr.nt_instrdef.input->attr.nt_input.nregs ) ;
-    fprintf( sf, "\t\t.noutputs = %d,\n", c->attr.nt_instrdef.output->attr.nt_output.nregs ) ;
+    fprintf( sf, "\t\t.ninputs = %d,\n", inregs ) ; 
+    fprintf( sf, "\t\t.noutputs = %d,\n", onregs ) ;
     fprintf( sf, "\t\t.nimmediates = %d,\n", c->attr.nt_instrdef.input->attr.nt_input.nints ) ;
     fprintf( sf, "\t\t.code = 0\n" ) ;
     fprintf( sf, "\t},\n" ) ;
@@ -235,16 +241,47 @@ static void archi_instr_code_generate( archi_ast_node *n, FILE *sf )
   fprintf( sf, "} ;\n\n" ) ;
 }
 
+static void archi_instr_registers_generate_( archi_ast_node *n, FILE *sf, const char *id, const char *io )
+{
+  DEBUG_ASSERT( sf && id && io && (n->node_type == NT_INPUT || n->node_type == NT_OUTPUT) ) ;
+
+  fprintf( sf, "static const jive_cpureg_class * const %s_%s[] = {\n", id, io ) ;
+
+  archi_ast_node *c ;
+  FOREACH_CHILD( n, c ){
+    if( !strcmp( c->data_type, "Int" ) ) continue ;
+    fprintf( sf, "\t&jive_arch_regcls[jive_arch_%s],\n", c->data_type ) ;
+  }
+
+  fprintf( sf, "} ;\n\n" ) ;
+}
+
+static void archi_instr_registers_generate( archi_ast_node *n, FILE *sf )
+{
+  DEBUG_ASSERT( sf && n && n->node_type == NT_INSTRSECT ) ;
+
+  archi_ast_node *c ;
+  FOREACH_CHILD( n, c ){
+    if( c->node_type == NT_JVINSTRDEF ) continue ;
+    if( c->attr.nt_instrdef.input->attr.nt_input.nregs != 0 )
+      archi_instr_registers_generate_( c->attr.nt_instrdef.input, sf, c->attr.nt_instrdef.id, "inregs" ) ;
+    if( c->attr.nt_instrdef.output->attr.nt_output.nregs != 0 )
+      archi_instr_registers_generate_( c->attr.nt_instrdef.output, sf, c->attr.nt_instrdef.id, "outregs" ) ;
+  }
+}
+
 void archi_instrsect_generate( archi_symtab *st, archi_ast_node *n, FILE *hf, FILE *sf )
 {
   DEBUG_ASSERT( st && hf && sf && n && n->node_type == NT_INSTRSECT ) ;
 
   archi_instr_defs_generate( n, hf ) ;
-  archi_instr_code_generate( n, sf ) ;
+  archi_instr_registers_generate( n, sf ) ;
 
   archi_ast_node *c ;
   FOREACH_CHILD( n, c ){
     if( c->node_type == NT_JVINSTRDEF ) continue ;
     archi_instr_encoding_generate( st, c, sf ) ;
   } 
+  
+  archi_instr_code_generate( n, sf ) ;
 }
