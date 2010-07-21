@@ -82,7 +82,25 @@ static int32_t archi_instr_encoding_generate_( archi_symtab *st, archi_ast_node 
       fprintf( sf, "\t}\n\n" ) ;
     break ;}
     case NT_BSTR:{
-      int32_t bstrlen = n->attr.nt_bstr.len ;
+      int32_t p = 0 ;
+      while( p < n->attr.nt_bslc.length ){
+        int32_t bstrlen = n->attr.nt_bstr.len - p ;
+        if( bstrlen > 0 && bstrlen < 8 ){
+          fprintf( sf, "\tif( !jive_buffer_putbits( target, 0x%lX, %d", strtol( n->attr.nt_bstr.bstr, 0, 2), bstrlen ) ;
+          fprintf( sf, ") )\n\t\treturn jive_encode_out_of_memory ;\n" ) ;
+          p += bstrlen ;
+        }
+        else{
+          char buffer[9] ;
+          memset( buffer, 0, sizeof(char)*9 ) ;
+          memcpy( buffer, n->attr.nt_bstr.bstr+p, sizeof(char)*8 ) ;
+          fprintf( sf, "\tif( !jive_buffer_putbyte( target, 0x%lX", strtol(buffer, 0, 2) ) ;
+          fprintf( sf, ") )\n\t\treturn jive_encode_out_of_memory ;\n" ) ;
+          p += 8 ;
+        }
+      }
+    
+/*      int32_t bstrlen = n->attr.nt_bstr.len ;
 
       int32_t p = 0 ;
       while( p < n->attr.nt_bstr.len ){
@@ -104,7 +122,7 @@ static int32_t archi_instr_encoding_generate_( archi_symtab *st, archi_ast_node 
           bstrlen -= bmissing ;
           blen = 0 ;
         }
-      }
+      }*/
     break ;}
     case NT_CONCAT:{
       int32_t l = archi_instr_encoding_generate_( st, n->first_child, sf, blen ) ; 
