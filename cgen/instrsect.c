@@ -74,7 +74,7 @@ static int32_t archi_instr_encoding_generate_( archi_symtab *st, archi_ast_node 
       while( p < n->attr.nt_bslc.length ){
         int32_t bstrlen = n->attr.nt_bstr.len - p ;
         if( bstrlen > 0 && bstrlen < 8 ){
-          fprintf( sf, "\tif( !jive_buffer_putbits( target, 0x%lX, %d", strtol( n->attr.nt_bstr.bstr, 0, 2), bstrlen ) ;
+          fprintf( sf, "\tif( !jive_buffer_putbits( &buffer, 0x%lX, %d", strtol( n->attr.nt_bstr.bstr, 0, 2), bstrlen ) ;
           fprintf( sf, ") )\n\t\treturn jive_encode_out_of_memory ;\n" ) ;
           p += bstrlen ;
         }
@@ -82,7 +82,7 @@ static int32_t archi_instr_encoding_generate_( archi_symtab *st, archi_ast_node 
           char buffer[9] ;
           memset( buffer, 0, sizeof(char)*9 ) ;
           memcpy( buffer, n->attr.nt_bstr.bstr+p, sizeof(char)*8 ) ;
-          fprintf( sf, "\tif( !jive_buffer_putbyte( target, 0x%lX", strtol(buffer, 0, 2) ) ;
+          fprintf( sf, "\tif( !jive_buffer_putbyte( &buffer, 0x%lX", strtol(buffer, 0, 2) ) ;
           fprintf( sf, ") )\n\t\treturn jive_encode_out_of_memory ;\n" ) ;
           p += 8 ;
         }
@@ -97,14 +97,14 @@ static int32_t archi_instr_encoding_generate_( archi_symtab *st, archi_ast_node 
       while( p < n->attr.nt_bslc.length ){
         int32_t bslclen = n->attr.nt_bslc.length - p ;
         if( bslclen > 0 && bslclen < 8 ){
-          fprintf( sf, "\tif( !jive_buffer_putbits( target, ((" ) ;
+          fprintf( sf, "\tif( !jive_buffer_putbits( &buffer, ((" ) ;
           archi_simple_print( st, n->first_child, sf ) ;
           if( n->first_child->node_type == NT_ID ) fprintf( sf, "_code" ) ;
           fprintf( sf, ") >> %d), %d )\n\t\treturn jive_encode_out_of_memory ;\n", n->attr.nt_bslc.start, bslclen ) ;
           p += bslclen ;
         }
         else{
-          fprintf( sf, "\tif( !jive_buffer_putbyte( target, ((" ) ;
+          fprintf( sf, "\tif( !jive_buffer_putbyte( &buffer, ((" ) ;
           archi_simple_print( st, n->first_child, sf ) ;
           if( n->first_child->node_type == NT_ID ) fprintf( sf, "_code" ) ;
           fprintf( sf, ") >> %d) & 0xFF) )\n\t\treturn jive_encode_out_of_memory ;\n", bslclen-8 ) ;
@@ -152,11 +152,14 @@ static void archi_instr_encoding_generate( archi_symtab *st, archi_ast_node *n, 
   fprintf( sf, "\tconst jive_cpureg *inputs[],\n" ) ;
   fprintf( sf, "\tconst jive_cpureg *outputs[],\n" ) ;
   fprintf( sf, "\tconst long immediates[])\n{\n" ) ;
+  fprintf( sf, "\tjive_buffer buffer ;\n\n" ) ;
 
   archi_instr_io_generate( n->attr.nt_instrdef.input, sf ) ;
   archi_instr_io_generate( n->attr.nt_instrdef.output, sf ) ;
   archi_instr_encoding_generate_( st, n->attr.nt_instrdef.encoding->first_child, sf, 0 ) ;
 
+  fprintf( sf, "\n\tif( !jive_buffer_put( target, buffer.data, buffer.size ) ) ;" ) ;
+  fprintf( sf, "\n\t\treturn jive_encode_out_of_memory ;\n" ) ;
   fprintf( sf, "\n\treturn jive_encode_ok ;\n}\n\n" ) ;
 }
 
