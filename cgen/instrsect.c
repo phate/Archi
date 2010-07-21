@@ -28,7 +28,7 @@ static void archi_simple_print( archi_symtab *st, archi_ast_node *n, FILE *sf )
     case NT_NUM:
       fprintf( sf, "%d", n->attr.nt_num.num ) ; break ;
     case NT_BSTR:
-      fprintf( sf, "%lX", strtol(n->attr.nt_bstr.bstr, 0, 2) ) ; break ;
+      fprintf( sf, "0x%lX", strtol(n->attr.nt_bstr.bstr, 0, 2) ) ; break ;
     case NT_ID:
       fprintf( sf, "%s", n->attr.nt_id.id ) ; break ;
     case NT_EQUAL:{
@@ -46,17 +46,6 @@ static void archi_simple_print( archi_symtab *st, archi_ast_node *n, FILE *sf )
           else{ lid = n->last_child ; gid = n->first_child ;}
           fprintf( sf, " !strcmp(%s->name, \"%s\") ", lid->attr.nt_id.id, gid->attr.nt_id.id ) ;   
         }
-/* 
-        if( l1 == NULL && l2 == NULL ){
-          fprintf( sf, " !strcmp(%s->name, %s->name) ", n->first_child->attr.nt_id.id, n->last_child->attr.nt_id.id ) ;
-        } 
-        else{
-          archi_ast_node *lid, *gid ;
-          if( l1 == NULL ){ lid = n->first_child ; gid = n->last_child ;}
-          else{ lid = n->last_child ; gid = n->first_child ;}
-          fprintf( sf, " !strcmp(%s->name, \"%s\") ", lid->attr.nt_id.id, gid->attr.nt_id.id ) ;   
-        }
-*/  
       }
       else{
         archi_simple_print( st, n->first_child, sf ) ;
@@ -71,7 +60,6 @@ static void archi_simple_print( archi_symtab *st, archi_ast_node *n, FILE *sf )
 static int32_t archi_instr_encoding_generate_( archi_symtab *st, archi_ast_node *n, FILE *sf, int32_t blen )
 {
   switch( n->node_type ){ 
-    //assumes that the length of each case is a multiple of eight and that before if is a multiple of eight!!!
     case NT_IFTHENELSE:{
       fprintf( sf, "\tif( " ) ;
       archi_simple_print( st, n->attr.nt_ifthenelse.pred, sf ) ;
@@ -99,30 +87,6 @@ static int32_t archi_instr_encoding_generate_( archi_symtab *st, archi_ast_node 
           p += 8 ;
         }
       }
-    
-/*      int32_t bstrlen = n->attr.nt_bstr.len ;
-
-      int32_t p = 0 ;
-      while( p < n->attr.nt_bstr.len ){
-        int32_t bmissing = 8 - blen ;
-        if( bmissing == 8 ) fprintf( sf, "\tif( !jive_buffer_putbyte( target, " ) ;
-
-        if( bstrlen < bmissing ){
-          fprintf( sf, "0x%lX << %d | ", strtol(n->attr.nt_bstr.bstr+p, 0, 2), 8-bstrlen-blen ) ;
-          return blen+bstrlen ; 
-        }
-        if( bstrlen == bmissing ){
-          fprintf( sf, "0x%lX ) )\n\t\treturn jive_encode_out_of_memory ;\n", strtol(n->attr.nt_bstr.bstr+p, 0, 2) ) ;
-          return 0 ;
-        }
-        if( bstrlen > bmissing ){
-          const char *bstr = talloc_strndup( n, n->attr.nt_bstr.bstr+p, bmissing ) ;
-          fprintf( sf, "0x%lX ) )\n\t\treturn jive_encode_out_of_memory ;\n", strtol(bstr, 0, 2) ) ;
-          p += bmissing ;
-          bstrlen -= bmissing ;
-          blen = 0 ;
-        }
-      }*/
     break ;}
     case NT_CONCAT:{
       int32_t l = archi_instr_encoding_generate_( st, n->first_child, sf, blen ) ; 
@@ -147,38 +111,6 @@ static int32_t archi_instr_encoding_generate_( archi_symtab *st, archi_ast_node 
           p += 8 ; 
         }
       }
-
-/*      int32_t bslclen = n->attr.nt_bslc.length ;
-    
-      int32_t p = 0 ;
-      while( p < n->attr.nt_bslc.length ){
-        int32_t bmissing = 8 - blen ;
-        if( bmissing == 8 ) fprintf( sf, "\tif( !jive_buffer_putbyte( target, " ) ;
-
-        if( bslclen < bmissing ){
-          fprintf( sf, "(((" ) ;
-          archi_simple_print( st, n->first_child, sf ) ;
-          if( n->first_child->node_type == NT_ID ) fprintf( sf, "_code" ) ;
-          fprintf( sf, ") >> %d) & 0x%lX) << %d | ", n->attr.nt_bslc.start, (long)pow(2, bslclen)-1, bmissing-bslclen ) ;
-          return blen+bslclen ;
-        }
-        if( bslclen == bmissing ){
-          fprintf( sf, "(((" ) ;
-          archi_simple_print( st, n->first_child, sf ) ;
-          if( n->first_child->node_type == NT_ID ) fprintf( sf, "_code" ) ;
-          fprintf( sf, ") >> %d) & 0x%lX) )\n\t\treturn jive_encode_out_of_memory ;\n", n->attr.nt_bslc.start, (long)pow(2, bslclen)-1 ) ;
-          return 0 ; 
-        }
-        if( bslclen > bmissing ){
-          fprintf( sf, "(((" ) ;
-          archi_simple_print( st, n->first_child, sf ) ;
-          if( n->first_child->node_type == NT_ID ) fprintf( sf, "_code" ) ;
-          fprintf( sf, ") >> %d) & 0x%lX) )\n\t\treturn jive_encode_out_of_memory ;\n", n->attr.nt_bslc.start+bslclen-bmissing, (long)pow(2, bmissing)-1 ) ;
-          p += bmissing ;
-          bslclen -= bmissing ;
-          blen = 0 ;
-        }
-      }*/
     break ;}
     default: DEBUG_ASSERT(0) ; return 0 ;
   }
