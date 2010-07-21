@@ -38,12 +38,12 @@ Instr addi{
 #  Flags = [Commutative]
 #} ;
 
-Instr and0{
-  Input = [],
-  Output = [],
-  Encoding = If 3 == 3 Then If 2 == 2 Then '' Else '11110000' Else '00001111', #++ 24.bstr[0:6] ++ rs.code.bstr[0:5] ++ ra.code.bstr[0:5] ++ rb.code.bstr[0:5] ++ 28.bstr[0:10] ++ '0',
-  Flags = [OverwriteInput]
-} ;
+#Instr and0{
+#  Input = [],
+#  Output = [],
+#  Encoding = If 3 == 3 Then If 2 == 2 Then '' Else '11110000' Else '00001111', #++ 24.bstr[0:6] ++ rs.code.bstr[0:5] ++ ra.code.bstr[0:5] ++ rb.code.bstr[0:5] ++ 28.bstr[0:10] ++ '0',
+#  Flags = [OverwriteInput]
+#} ;
 
 %%
 

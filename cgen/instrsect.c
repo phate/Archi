@@ -111,7 +111,26 @@ static int32_t archi_instr_encoding_generate_( archi_symtab *st, archi_ast_node 
       return archi_instr_encoding_generate_( st, n->last_child, sf, l ) ;
     break ;}
     case NT_BSLC:{
-      int32_t bslclen = n->attr.nt_bslc.length ;
+      int32_t p = 0 ;
+      while( p < n->attr.nt_bslc.length ){
+        int32_t bslclen = n->attr.nt_bslc.length - p ;
+        if( bslclen > 0 && bslclen < 8 ){
+          fprintf( sf, "\tif( !jive_buffer_putbits( target, ((" ) ;
+          archi_simple_print( st, n->first_child, sf ) ;
+          if( n->first_child->node_type == NT_ID ) fprintf( sf, "_code" ) ;
+          fprintf( sf, ") >> %d), %d )\n\t\treturn jive_encode_out_of_memory ;\n", n->attr.nt_bslc.start, bslclen ) ;
+          p += bslclen ;
+        }
+        else{
+          fprintf( sf, "\tif( !jive_buffer_putbyte( target, ((" ) ;
+          archi_simple_print( st, n->first_child, sf ) ;
+          if( n->first_child->node_type == NT_ID ) fprintf( sf, "_code" ) ;
+          fprintf( sf, ") >> %d) & 0xFF) )\n\t\treturn jive_encode_out_of_memory ;\n", bslclen-8 ) ;
+          p += 8 ; 
+        }
+      }
+
+/*      int32_t bslclen = n->attr.nt_bslc.length ;
     
       int32_t p = 0 ;
       while( p < n->attr.nt_bslc.length ){
@@ -141,7 +160,7 @@ static int32_t archi_instr_encoding_generate_( archi_symtab *st, archi_ast_node 
           bslclen -= bmissing ;
           blen = 0 ;
         }
-      }
+      }*/
     break ;}
     default: DEBUG_ASSERT(0) ; return 0 ;
   }
