@@ -129,9 +129,10 @@ static void archi_instr_io_generate( archi_ast_node *n, FILE *sf )
     if( n->node_type == NT_INPUT ){
       if( !strcmp(c->data_type, "Int") )
         fprintf( sf, "\tuint32_t %s = cpu_to_le32(immediates[%d]) ;\n", c->attr.nt_tid.id, nints++ ) ;
-      else
+      else{
         fprintf( sf, "\tconst jive_cpureg %s = inputs[%d] ;\n", c->attr.nt_tid.id, nregs++ ) ;
         fprintf( sf, "\tint %s_code = %s->code ;\n\n", c->attr.nt_tid.id, c->attr.nt_tid.id ) ;
+      }
     }
     else{
       fprintf( sf, "\tconst jive_cpureg %s = outputs[%d] ;\n", c->attr.nt_tid.id, nregs++ ) ;

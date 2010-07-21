@@ -273,10 +273,12 @@ static void archi_instrdef_typecheck( archi_symtab *st, archi_ast_node *n )
       EMSG_ID_NOT_USED( c, c->attr.nt_tid.id ) ;
   }
 
+/* this check for output is not correct (e.g. flag register)
   FOREACH_CHILD( n->attr.nt_instrdef.output, c ){
     if( !archi_instrdef_io_usage_typecheck( c->attr.nt_tid.id, n->attr.nt_instrdef.encoding ) )
       EMSG_ID_NOT_USED( c, c->attr.nt_tid.id ) ;
-  }      
+  }
+*/      
 }
 
 void archi_instrsect_typecheck( archi_symtab *st, archi_ast_node *n )
