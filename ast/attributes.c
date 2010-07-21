@@ -64,7 +64,7 @@ void archi_nt_bstr_attributes_init( archi_nt_bstr_attributes *attr )
   DEBUG_ASSERT( attr ) ;
 
   attr->bstr = NULL ;
-  attr->len = -1 ;
+  attr->len = 0 ;
 }
 
 void archi_nt_str_attributes_init( archi_nt_str_attributes *attr )

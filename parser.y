@@ -306,8 +306,10 @@ Exp12					: Id																{ $$ = $1 ; }
                                                     $$->attr.nt_bstr.len = strlen(yytext)-2 ;}
               | T_STR                             { $$ = archi_ast_node_create( ast, NT_STR, "String", linenr ) ;
                                                     archi_nt_str_attributes_init( &($$->attr.nt_str) ) ;
-                                                    $$->attr.nt_str.str = talloc_strndup( $$, yytext+1, strlen(yytext)-2 ) ;
-                                                    $$->attr.nt_str.length = strlen(yytext)-2 ;}
+                                                    if( strlen(yytext) > 2 ){
+                                                      $$->attr.nt_str.str = talloc_strndup( $$, yytext+1, strlen(yytext)-2 ) ;
+                                                      $$->attr.nt_str.length = strlen(yytext)-2 ;
+                                                    }}
 							| T_TRUE													  { $$ = archi_ast_node_create( ast, NT_TRUE, "Bool", linenr ) ; }
 							| T_FALSE														{ $$ = archi_ast_node_create( ast, NT_FALSE, "Bool", linenr ) ; }
 						  | '(' Exp ')'										    { $$ = $2 ; }

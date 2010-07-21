@@ -24,12 +24,12 @@ RegClass gpr { NBits = 32, Regs = [r3,r4,r5,r6,r7,r8,r9] } ;
 
 %%
 
-Instr addi{
-  Input = [gpr ra, Int si],
-  Output = [gpr rt],
-  Encoding = 24.bstr[0:5] ++ rt.code.bstr[0:5] ++ ra.code.bstr[0:5] ++ si.bstr[0:16],
-  Flags = [Commutative, OverwriteInput]
-} ;
+#Instr addi{
+#  Input = [gpr ra, Int si],
+#  Output = [gpr rt],
+#  Encoding = 24.bstr[0:5] ++ rt.code.bstr[0:5] ++ ra.code.bstr[0:5] ++ si.bstr[0:16],
+#  Flags = [Commutative, OverwriteInput]
+#} ;
 
 #Instr ori{
 #  Input = [gpr ra, Int ui],
@@ -41,7 +41,7 @@ Instr addi{
 Instr and0{
   Input = [gpr rs, gpr rb],
   Output = [],
-  Encoding = If rs.reg == r3 Then rs.code.bstr[0:8] Else rb.code.bstr[0:8], #++ 24.bstr[0:6] ++ rs.code.bstr[0:5] ++ ra.code.bstr[0:5] ++ rb.code.bstr[0:5] ++ 28.bstr[0:10] ++ '0',
+  Encoding = '', #++ 24.bstr[0:6] ++ rs.code.bstr[0:5] ++ ra.code.bstr[0:5] ++ rb.code.bstr[0:5] ++ 28.bstr[0:10] ++ '0',
   Flags = [OverwriteInput]
 } ;
 
@@ -62,28 +62,3 @@ Instr and0{
 Match m3{
   Input = [gpr i1]
 } ;
-
-
-
-#Instr
-#  ret{
-#    Input = [gpr k],
-#    Output = [],
-#    Encoding = k.code.bstr[0:5] ++ '010'
-#  },
-#  load_imm{
-#    Input = [Int i],
-#    Output = [gpr r],
-#    Encoding = '01010101'
-#  },
-#  load32_disp{
-#    Input = [gpr base, Int offset],
-#    Output = [gpr r],
-#    Encoding = '10101111'
-#  },
-#  int_add{
-#    Input = [gpr x, gpr y],
-#    Output = [gpr r, flags f],
-#    Encoding = '01010111'
-#} ;
-
