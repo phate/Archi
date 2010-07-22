@@ -20,7 +20,7 @@ void archi_tidlist_typecheck( archi_symtab *st, archi_ast_node *n, archi_symtab_
     DEBUG_ASSERT( c && c->node_type == NT_TID ) ; 
     archi_symtab_idlist *l = type_list ;
     while( l ){
-      if( !strcmp(c->data_type, l->id) ){
+      if( !strcmp(c->data_type, archi_symtab_idlist_id(l)) ){
         archi_ast_node *l = archi_symtab_lookup( st, c->attr.nt_tid.id ) ; 
         if( l != NULL ){
           EMSG_REDECLARATION( c, c->attr.nt_tid.id ) ; 
@@ -29,7 +29,7 @@ void archi_tidlist_typecheck( archi_symtab *st, archi_ast_node *n, archi_symtab_
         }   
         else{ archi_symtab_insert( st, c->attr.nt_tid.id, c ) ; break ;} 
       }
-      l = l->next ;   
+      l = archi_symtab_idlist_next( l ) ;   
     }   
 
     if( !l ) EMSG_WRONG_TYPE( c, c->attr.nt_tid.id, " " ) ; 
