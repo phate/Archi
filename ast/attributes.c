@@ -49,6 +49,8 @@ void archi_nt_matchdef_attributes_init( archi_nt_matchdef_attributes *attr )
   attr->id = NULL ;
   attr->input = NULL ;
   attr->output = NULL ;
+  attr->ipattern = NULL ;
+  attr->opattern = NULL ; 
 }
 
 void archi_nt_input_attributes_init( archi_nt_input_attributes *attr )

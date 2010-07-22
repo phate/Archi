@@ -49,7 +49,7 @@ static void process_input( int argc, char* argv[] )
 		exit( EXIT_FAILURE ) ;
 	}
 */
-	ad = archi_file_open( "arch/i386.ca"/*argv[1]*/, "r" ) ;
+	ad = archi_file_open( "arch/ppc.ca"/*argv[1]*/, "r" ) ;
 //	hf = open_file( argv[2], "w" ) ;
 //	sf = open_file( argv[3], "w" ) ;	
 } 
@@ -89,7 +89,7 @@ int main( int argc, char* argv[] )
 
 //  archi_view_ast(ast) ;
 //  archi_code_optimize( ast ) ;
-  archi_code_generate( symtab, ast, stdout, stdout ) ;
+//  archi_code_generate( symtab, ast, stdout, stdout ) ;
 
 /*	
   trim_tree( ast ) ;

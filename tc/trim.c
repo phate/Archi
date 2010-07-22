@@ -2,6 +2,7 @@
 #include "../ehandling.h"
 #include "../debug.h"
 
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
@@ -153,8 +154,7 @@ static void archi_instrdef_flags_trim( archi_ast_node *n )
 
 static void archi_instrdef_trim( archi_ast_node *n )
 {
-	if( !n ) return ;
-  DEBUG_ASSERT( n->node_type == NT_INSTRDEF ) ;
+  DEBUG_ASSERT( n && n->node_type == NT_INSTRDEF ) ;
 
   uint32_t free_node ;
   archi_ast_node *c = n->first_child ;
@@ -192,6 +192,7 @@ static void archi_instrdef_trim( archi_ast_node *n )
       if( n->attr.nt_instrdef.flags == NULL ){
         n->attr.nt_instrdef.flags = c ;
       }
+      else EMSG_MULTIPLE_ATTRIBUTE( n, "flags" ) ;
     }
     else if( c->node_type == NT_ID ){
 		  n->attr.nt_instrdef.id = talloc_strdup( n, c->attr.nt_id.id ) ;	
@@ -218,36 +219,71 @@ static void archi_instrsect_trim( archi_ast_node *n )
 		else DEBUG_ASSERT(0) ;
 	}
 }
-/*
-static void archi_fctdef_trim( archi_ast_node *n )
+
+static void archi_matchdef_trim( archi_ast_node *n )
 {
-  assert(0) ;
-	assert( n->node_type == FCTDEF ) ;
+  DEBUG_ASSERT( n && n->node_type == NT_MATCHDEF ) ;
 
-	archi_ast_node *c ;
-	fctprop *p = (fctprop*)n->data ;
-	FOREACH_CHILD( n, c ){
-		if( c->ntype == ARGS )
-			p->args = c->first_child ;
-		else if( c->ntype == TID )
-			p->name = (const char*)c->data ;
-		else p->body = c ;
-	}
-
+  bool free_node ;
+  archi_ast_node *c = n->first_child ;
+  while( c != NULL ){
+    free_node = false ;
+    if( c->node_type == NT_INPUT ){
+      if( n->attr.nt_matchdef.input == NULL ){
+        int32_t nints = 0 ;
+        int32_t nregs = 0 ;
+        archi_ast_node *cc ;
+        FOREACH_CHILD( c, cc ){ !strcmp(cc->data_type, "Int") ? nints++ : nregs++  ;}
+        c->attr.nt_input.nints = nints ;
+        c->attr.nt_input.nregs = nregs ;
+        n->attr.nt_matchdef.input = c ;
+      }
+      else EMSG_MULTIPLE_ATTRIBUTE( n, "input" ) ;       
+    }
+    else if( c->node_type == NT_OUTPUT ){
+			if( n->attr.nt_matchdef.output == NULL ){
+        int32_t nregs = 0 ;
+        archi_ast_node *cc ;
+        FOREACH_CHILD( c, cc ){ nregs++ ;}
+        c->attr.nt_output.nregs = nregs ;
+        n->attr.nt_matchdef.output = c ;
+      }
+      else EMSG_MULTIPLE_ATTRIBUTE( n, "output" ) ;
+    }
+    else if( c->node_type == NT_IPATTERN ){
+      if( n->attr.nt_matchdef.ipattern == NULL ){
+        n->attr.nt_matchdef.ipattern = c ;
+      }
+      else EMSG_MULTIPLE_ATTRIBUTE( n, "ipattern" ) ;
+    }
+    else if( c->node_type == NT_OPATTERN ){
+      if( n->attr.nt_matchdef.opattern == NULL ){
+        n->attr.nt_matchdef.opattern = c ;
+      }
+      else EMSG_MULTIPLE_ATTRIBUTE( n, "opattern" ) ;
+    }
+    else if( c->node_type == NT_ID ){
+      n->attr.nt_matchdef.id = talloc_strdup( n, c->attr.nt_id.id ) ;
+      free_node = true ;
+    }
+  
+    archi_ast_node *nc = c->next_sibling ;
+    if( free_node ) TALLOC_FREE( c ) ;
+    c = nc ;
+  }
 }
-*/
-/*
-static void archi_auxsect_trim( archi_ast_node *n )
+
+static void archi_patternsect_trim( archi_ast_node *n )
 {
-	assert( n->node_type == AUXSECT ) ;
+  DEBUG_ASSERT( n && n->node_type == NT_PATTERNSECT ) ;
 
-	archi_ast_node *c ;
-	FOREACH_CHILD( n, c ){
-		if( c->node_type == FCTDEF ) archi_fctdef_trim( c ) ;
-		else assert(0) ;
-	}
+  archi_ast_node *c ;
+  FOREACH_CHILD(n, c){
+    if( c->node_type == NT_MATCHDEF ) archi_matchdef_trim( c ) ;
+    else DEBUG_ASSERT(0) ;
+  }
 }
-*/
+
 void archi_ast_trim( archi_ast_node *n )
 {
 	DEBUG_ASSERT( n && n->node_type == NT_ARCHDEF ) ;
@@ -262,7 +298,8 @@ void archi_ast_trim( archi_ast_node *n )
         n->attr.nt_archdef.instrsect = c ;
         archi_instrsect_trim( c ) ; break ;
       case NT_PATTERNSECT:
-        n->attr.nt_archdef.patternsect = c ; break ;
+        n->attr.nt_archdef.patternsect = c ;
+        archi_patternsect_trim( c ) ; break ;
 //			case AUXSECT:		archi_auxsect_trim( c ) ; break ;
 			default: DEBUG_ASSERT(0) ;
 		}	

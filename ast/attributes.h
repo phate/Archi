@@ -48,6 +48,8 @@ typedef struct archi_nt_matchdef_attributes_{
   const char* id ;
   struct archi_ast_node_ *input ;
   struct archi_ast_node_ *output ;
+  struct archi_ast_node_ *ipattern ;
+  struct archi_ast_node_ *opattern ;
 } archi_nt_matchdef_attributes ;
 
 void archi_nt_matchdef_attributes_init( archi_nt_matchdef_attributes *attr ) ;
