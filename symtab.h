@@ -34,4 +34,12 @@ void archi_symtab_pop_scope( archi_symtab *st ) ;
 
 void archi_symtab_print( archi_symtab *st ) ;
 
+typedef struct archi_symtab_idlist_{
+  struct archi_symtab_idlist_* next ;
+  char* id ;
+} archi_symtab_idlist ;
+
+archi_symtab_idlist* archi_symtab_idlist_add( archi_symtab_idlist *idl, char* cl[], uint32_t cnt ) ;
+archi_symtab_idlist* archi_symtab_idlist_fill( archi_symtab *st, archi_ast_nodetype node_type ) ; 
+
 #endif

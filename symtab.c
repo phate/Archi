@@ -1,4 +1,5 @@
 #include "symtab.h"
+#include "debug.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -151,4 +152,57 @@ void archi_symtab_print( archi_symtab *st )
     sc = sc->prev_scope ;
   }
 }
+
+static int archi_symtab_idlist_destroy( archi_symtab_idlist *l )
+{
+  while( l->next ) TALLOC_FREE( l->next ) ;
+
+  TALLOC_FREE( l->id ) ;
+  TALLOC_FREE( l ) ;
+
+  return 0 ;
+}
+
+static archi_symtab_idlist* archi_symtab_idlist_create( TALLOC_CTX *ctx )
+{
+  archi_symtab_idlist *l = talloc( ctx, archi_symtab_idlist ) ;
+  talloc_set_destructor( l, archi_symtab_idlist_destroy ) ;
+
+  return l ;
+}
+
+archi_symtab_idlist* archi_symtab_idlist_add( archi_symtab_idlist *idl, char* cl[], uint32_t cnt )
+{
+  DEBUG_ASSERT( cl && cnt > 0 ) ;
+
+  archi_symtab_idlist *tmp = idl ;
+  for( uint32_t i = 0; i < cnt; i++ ){
+    tmp = archi_symtab_idlist_create( idl ) ;
+    tmp->id = talloc_strdup( tmp, cl[i] ) ; 
+  }
+
+  return tmp ;
+} 
+
+archi_symtab_idlist* archi_symtab_idlist_fill( archi_symtab *st, archi_ast_nodetype node_type )
+{
+  archi_symtab_idlist *idl  = NULL ;
+  archi_symtab_scope *sc = st->innermost_scope ;
+  while( sc ){
+    for( uint32_t i = 0; i < ARCHI_ENTRY_CNT; i++ ){
+      archi_symtab_entry *e = sc->entry[i] ;
+      while( e != 0 ){
+        if( e->node->node_type == node_type ){
+          idl = archi_symtab_idlist_add( idl, (char* [1]){e->key}, 1 ) ; 
+        }
+        e = e->next ;
+      }
+    }
+    sc = sc->prev_scope ;
+  }
+
+  return idl ;
+}
+
+
 
