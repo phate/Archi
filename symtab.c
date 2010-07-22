@@ -153,6 +153,12 @@ void archi_symtab_print( archi_symtab *st )
   }
 }
 
+struct archi_symtab_idlist_{
+  struct archi_symtab_idlist_* next ;
+  char* id ;
+} ; 
+
+
 static int archi_symtab_idlist_destroy( archi_symtab_idlist *l )
 {
   while( l->next ) TALLOC_FREE( l->next ) ;
