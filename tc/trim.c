@@ -17,6 +17,15 @@ static bool archi_attribute_node_assign( archi_ast_node *emsgnode, archi_ast_nod
   return r ;
 }
 
+static bool archi_attribute_int_assign( archi_ast_node *emsgnode, int32_t *target, int32_t attr, int32_t defval, const char* attrname )
+{
+  bool r = false ;
+  if( *target == defval ){ *target = attr ; r = true ;}
+  else EMSG_MULTIPLE_ATTRIBUTE( emsgnode, attrname ) ;
+
+  return r ;
+}
+
 static void archi_regdef_trim( archi_ast_node* n )
 {
   DEBUG_ASSERT( n && n->node_type == NT_REGDEF ) ;
@@ -47,30 +56,29 @@ static void archi_regcldef_trim( archi_ast_node *n )
 {
 	DEBUG_ASSERT( n && n->node_type == NT_REGCLDEF ) ;
 
-  uint32_t free_node ;
+  bool free_node ;
 	archi_ast_node *c = n->first_child ;
 	while( c != NULL ){
-    free_node = 0 ;
-		if( c->node_type == NT_BITS ){
-			if( n->attr.nt_regcldef.bits == -1 ){
-        n->attr.nt_regcldef.bits = c->attr.nt_bits.bits ;
-        free_node = 1 ;
-      }
-			else EMSG_MULTIPLE_ATTRIBUTE( n, "bits" ) ;
-		}
-		else if( c->node_type == NT_REGS ){
-			if( n->attr.nt_regcldef.regs == NULL ){
-        n->attr.nt_regcldef.regs = c ;
-			  int32_t i = 0 ;
+    free_node = false ;
+    switch( c->node_type ){
+    case NT_BITS:{
+      archi_attribute_int_assign( n, &n->attr.nt_regcldef.bits, c->attr.nt_bits.bits, -1, "bits" ) ;
+      free_node = true ;
+      break ;}
+    case NT_REGS:{
+      bool r = archi_attribute_node_assign( n, &n->attr.nt_regcldef.regs, c, NULL, "regs" ) ;
+      if( r ){
+			  int32_t nregs = 0 ;
 			  archi_ast_node *cc ;
-			  FOREACH_CHILD( n->attr.nt_regcldef.regs, cc ) i++ ;
-			  c->attr.nt_regs.nregs = i ;
+			  FOREACH_CHILD( n->attr.nt_regcldef.regs, cc ) nregs++ ;
+			  c->attr.nt_regs.nregs = nregs ;
       }
-		  else EMSG_MULTIPLE_ATTRIBUTE( n, "regs" ) ;
-    }
-		else if( c->node_type == NT_ID ){
-			n->attr.nt_regcldef.id = talloc_strdup( n, c->attr.nt_id.id ) ;
-      free_node = 1 ;
+      break ;}
+    case NT_ID:{
+      n->attr.nt_regcldef.id = talloc_strdup( n, c->attr.nt_id.id ) ;
+      free_node = true ;
+      break ;}
+    default: DEBUG_ASSERT(0) ;
     }
     
     archi_ast_node *nc = c->next_sibling ;
