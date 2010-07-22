@@ -1,4 +1,5 @@
 #include "instrsect.h"
+#include "typecheck.h"
 #include "../debug.h"
 
 #include <string.h>
@@ -255,9 +256,15 @@ static void archi_instrdef_typecheck( archi_symtab *st, archi_ast_node *n )
 {
   DEBUG_ASSERT( st && n && n->node_type == NT_INSTRDEF ) ;
 
-  if( n->attr.nt_instrdef.input == NULL )
-    EMSG_MISSING_ATTRIBUTE( n, "input" ) ;
-  else archi_instrdef_input_typecheck( st, n->attr.nt_instrdef.input ) ;
+  if( n->attr.nt_instrdef.input != NULL ){
+    archi_symtab_idlist *l = archi_symtab_idlist_create( NULL ) ;
+    l = archi_symtab_idlist_fill( l, st, NT_REGCLDEF ) ; 
+    l = archi_symtab_idlist_add( l, (char*[1]){"Int"}, 1 ) ; 
+    archi_tidlist_typecheck( st, n->attr.nt_instrdef.input->first_child, l ) ; 
+    TALLOC_FREE( l ) ;
+  }
+  else EMSG_MISSING_ATTRIBUTE( n, "input" ) ;
+  
 
   if( n->attr.nt_instrdef.output == NULL )
     EMSG_MISSING_ATTRIBUTE( n, "output" ) ;
