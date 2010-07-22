@@ -11,6 +11,30 @@
 #include <stdio.h>
 #include <assert.h>
 
+void archi_tidlist_typecheck( archi_symtab *st, archi_ast_node *n, archi_symtab_idlist *type_list )
+{
+  DEBUG_ASSERT( st && type_list && n && n->node_type == NT_TID ) ; 
+
+  archi_ast_node *c ;
+  FOREACH_NEXT_SIBLING( n, c ){
+    DEBUG_ASSERT( c && c->node_type == NT_TID ) ; 
+    archi_symtab_idlist *l = type_list ;
+    while( l ){
+      if( !strcmp(c->data_type, l->id) ){
+        archi_ast_node *l = archi_symtab_lookup( st, c->attr.nt_tid.id ) ; 
+        if( l != NULL ){
+          EMSG_REDECLARATION( c, c->attr.nt_tid.id ) ; 
+          EMSG_PREVIOUS_DECLARATION( c, c->attr.nt_tid.id, l->linenr ) ; 
+        }   
+        else{ archi_symtab_insert( st, c->attr.nt_tid.id, c ) ; break ;} 
+      }
+      l = l->next ;   
+    }   
+
+    if( !l ) EMSG_WRONG_TYPE( c, c->attr.nt_tid.id, " " ) ; 
+  }
+}
+
 static void archi_typecheck_init( archi_symtab *st, archi_ast_node *n )
 {
   DEBUG_ASSERT( st && n && n->node_type == NT_ARCHDEF ) ;
