@@ -183,59 +183,6 @@ static void archi_instrdef_encoding_typecheck( archi_symtab *st, archi_ast_node 
   //archi_instrdef_encoding_length( n ) ;
 }
 
-static void archi_instrdef_io_tid_typecheck( archi_symtab *st, archi_ast_node *n )
-{
-  DEBUG_ASSERT( st && n && n->node_type == NT_TID ) ;
-
-  archi_ast_node *l = archi_symtab_lookup( st, n->data_type ) ;
-  if( l == NULL ){
-    EMSG_MISSING_REGISTER_CLASS( n, n->data_type ) ;
-    return ;
-  }
-
-  if( strcmp(l->data_type, "RegClass") ){
-    EMSG_WRONG_TYPE( n, n->attr.nt_tid.id, "RegClass" ) ;
-    return ;
-  }
-
-  l = archi_symtab_lookup( st, n->attr.nt_tid.id ) ;
-  if( l != NULL ){
-    EMSG_REDECLARATION( n, n->attr.nt_tid.id ) ;
-    EMSG_PREVIOUS_DECLARATION( n, n->attr.nt_tid.id, l->linenr ) ;   
-  }
-  else archi_symtab_insert( st, n->attr.nt_tid.id, n ) ;
-}
-
-static void archi_instrdef_output_typecheck( archi_symtab *st, archi_ast_node *n )
-{
-  DEBUG_ASSERT( st && n && n->node_type == NT_OUTPUT ) ;
-
-  archi_ast_node *c ;
-  FOREACH_CHILD( n, c ){
-    archi_instrdef_io_tid_typecheck( st, c ) ;
-  }
-}
-
-static void archi_instrdef_input_typecheck( archi_symtab *st, archi_ast_node *n )
-{
-  DEBUG_ASSERT( st && n && n->node_type == NT_INPUT ) ;
-
-  archi_ast_node *c ;
-  FOREACH_CHILD( n, c ){
-    if( !strcmp( c->data_type, "Int" ) ){
-      archi_ast_node *l = archi_symtab_lookup( st, c->attr.nt_tid.id ) ;
-      if( l != NULL ){
-        EMSG_REDECLARATION( c, c->attr.nt_tid.id ) ;
-        EMSG_PREVIOUS_DECLARATION( c, c->attr.nt_tid.id, l->linenr ) ;
-      }
-      else archi_symtab_insert( st, c->attr.nt_tid.id, c ) ;
-    }
-    else{
-      archi_instrdef_io_tid_typecheck( st, c ) ;
-    } 
-  }
-}
-
 //FIXME: not correct anymore, an id could also be used in a comparison for example
 static int32_t archi_instrdef_io_usage_typecheck( const char* id, archi_ast_node *n )
 {
@@ -266,9 +213,13 @@ static void archi_instrdef_typecheck( archi_symtab *st, archi_ast_node *n )
   else EMSG_MISSING_ATTRIBUTE( n, "input" ) ;
   
 
-  if( n->attr.nt_instrdef.output == NULL )
-    EMSG_MISSING_ATTRIBUTE( n, "output" ) ;
-  else archi_instrdef_output_typecheck( st, n->attr.nt_instrdef.output ) ;
+  if( n->attr.nt_instrdef.output != NULL ){
+    archi_symtab_idlist *l = archi_symtab_idlist_create( NULL ) ;
+    l = archi_symtab_idlist_fill( l, st, NT_REGCLDEF ) ;
+    archi_tidlist_typecheck( st, n->attr.nt_instrdef.output->first_child, l ) ;
+    TALLOC_FREE( l ) ;
+  }
+  else EMSG_MISSING_ATTRIBUTE( n, "output" ) ;
 
   if( n->attr.nt_instrdef.encoding == NULL )
     EMSG_MISSING_ATTRIBUTE( n, "encoding" ) ;
