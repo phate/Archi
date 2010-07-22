@@ -30,20 +30,20 @@ static void archi_regdef_trim( archi_ast_node* n )
 {
   DEBUG_ASSERT( n && n->node_type == NT_REGDEF ) ;
 
-  uint32_t free_node ;
+  bool free_node ;
 	archi_ast_node *c = n->first_child ;
 	while( c != NULL ){
-		free_node = 0 ;
-    if( c->node_type == NT_CODE ){
-      if( n->attr.nt_regdef.code == -1 ){
-        n->attr.nt_regdef.code = c->attr.nt_code.code ;
-        free_node = 1 ; 
-      }
-      else EMSG_MULTIPLE_ATTRIBUTE( n, "code" ) ;
-		}
-		else if( c->node_type == NT_ID ){
-			n->attr.nt_regdef.id = talloc_strdup( n, c->attr.nt_id.id ) ;
-      free_node = 1 ;
+		free_node = false ;
+    switch( c->node_type ){
+      case NT_CODE:{
+        archi_attribute_int_assign( n, &n->attr.nt_regdef.code, c->attr.nt_code.code, -1, "code" ) ;
+        free_node = true ;
+        break ;}
+      case NT_ID:{
+        n->attr.nt_regdef.id = talloc_strdup( n, c->attr.nt_id.id ) ;
+        free_node = true ;    
+        break ;}
+      default: DEBUG_ASSERT(0) ;
     }
 
     archi_ast_node *nc = c->next_sibling ;
