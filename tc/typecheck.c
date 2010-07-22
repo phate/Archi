@@ -25,6 +25,7 @@ void archi_tidlist_typecheck( archi_symtab *st, archi_ast_node *n, archi_symtab_
         if( l != NULL ){
           EMSG_REDECLARATION( c, c->attr.nt_tid.id ) ; 
           EMSG_PREVIOUS_DECLARATION( c, c->attr.nt_tid.id, l->linenr ) ; 
+          break ;
         }   
         else{ archi_symtab_insert( st, c->attr.nt_tid.id, c ) ; break ;} 
       }

@@ -86,7 +86,7 @@ int main( int argc, char* argv[] )
   archi_view_ast( ast ) ;
 
 //  archi_symtab_print( symtab ) ;  
-//  report_errors( ast ) ;
+  report_errors( ast ) ;
 
 //  archi_view_ast(ast) ;
 //  archi_code_optimize( ast ) ;
