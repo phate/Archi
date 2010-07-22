@@ -8,10 +8,10 @@
 #include <assert.h>
 
 
-static bool archi_attribute_node_assign( archi_ast_node *emsgnode, archi_ast_node **target, archi_ast_node *attr, void* defval, const char* attrname )
+static bool archi_attribute_node_assign( archi_ast_node *emsgnode, archi_ast_node **target, archi_ast_node *attr, const char* attrname )
 {
   bool r = false ;
-  if( *target == defval ){ *target = attr ; r = true ;}
+  if( *target == NULL ){ *target = attr ; r = true ;}
   else EMSG_MULTIPLE_ATTRIBUTE( emsgnode, attrname ) ;
 
   return r ;
@@ -66,7 +66,7 @@ static void archi_regcldef_trim( archi_ast_node *n )
       free_node = true ;
       break ;}
     case NT_REGS:{
-      bool r = archi_attribute_node_assign( n, &n->attr.nt_regcldef.regs, c, NULL, "regs" ) ;
+      bool r = archi_attribute_node_assign( n, &n->attr.nt_regcldef.regs, c, "regs" ) ;
       if( r ){
 			  int32_t nregs = 0 ;
 			  archi_ast_node *cc ;
@@ -179,7 +179,7 @@ static void archi_instrdef_trim( archi_ast_node *n )
     free_node = 0 ;
     switch( c->node_type ){
     case NT_INPUT:{
-        bool r = archi_attribute_node_assign( n, &n->attr.nt_instrdef.input, c, NULL, "input" ) ;
+        bool r = archi_attribute_node_assign( n, &n->attr.nt_instrdef.input, c, "input" ) ;
         if( r ){
           archi_ast_node *cc ;
           int32_t nints = 0, nregs = 0 ;
@@ -189,7 +189,7 @@ static void archi_instrdef_trim( archi_ast_node *n )
         }    
       break ;}
     case NT_OUTPUT:{
-        bool r = archi_attribute_node_assign( n, &n->attr.nt_instrdef.output, c, NULL, "input" ) ;
+        bool r = archi_attribute_node_assign( n, &n->attr.nt_instrdef.output, c, "input" ) ;
         if( r ){
           int32_t nregs = 0 ;
           archi_ast_node *cc ;
@@ -198,10 +198,10 @@ static void archi_instrdef_trim( archi_ast_node *n )
         }
       break ;}
     case NT_ENCODING:{
-      archi_attribute_node_assign( n, &n->attr.nt_instrdef.encoding, c, NULL, "encoding" ) ;
+      archi_attribute_node_assign( n, &n->attr.nt_instrdef.encoding, c, "encoding" ) ;
       break ;}
     case NT_FLAGS:{
-      archi_attribute_node_assign( n, &n->attr.nt_instrdef.flags, c, NULL, "flags" ) ;
+      archi_attribute_node_assign( n, &n->attr.nt_instrdef.flags, c, "flags" ) ;
       break ;}
     case NT_ID:{
         n->attr.nt_instrdef.id = talloc_strdup( n, c->attr.nt_id.id ) ;
@@ -241,7 +241,7 @@ static void archi_matchdef_trim( archi_ast_node *n )
     free_node = false ;
     switch( c->node_type ){
       case NT_INPUT:{
-        bool r = archi_attribute_node_assign( n, &n->attr.nt_matchdef.input, c, NULL, "input" ) ;
+        bool r = archi_attribute_node_assign( n, &n->attr.nt_matchdef.input, c, "input" ) ;
         if( r ){
           archi_ast_node *cc ;
           int32_t nints = 0, nregs = 0 ;
@@ -251,7 +251,7 @@ static void archi_matchdef_trim( archi_ast_node *n )
         }    
         break ;}
       case NT_OUTPUT:{
-        bool r = archi_attribute_node_assign( n, &n->attr.nt_matchdef.output, c, NULL, "output" ) ;
+        bool r = archi_attribute_node_assign( n, &n->attr.nt_matchdef.output, c, "output" ) ;
         if( r ){
           int32_t nregs = 0 ;
           archi_ast_node *cc ;
@@ -260,10 +260,10 @@ static void archi_matchdef_trim( archi_ast_node *n )
         }
         break ;}
       case NT_IPATTERN:{
-        archi_attribute_node_assign( n, &n->attr.nt_matchdef.ipattern, c, NULL, "ipattern" ) ;
+        archi_attribute_node_assign( n, &n->attr.nt_matchdef.ipattern, c, "ipattern" ) ;
         break ;}
       case NT_OPATTERN:{
-        archi_attribute_node_assign( n, &n->attr.nt_matchdef.opattern, c, NULL, "opattern" ) ;
+        archi_attribute_node_assign( n, &n->attr.nt_matchdef.opattern, c, "opattern" ) ;
         break ;}
       case NT_ID:{
         n->attr.nt_matchdef.id = talloc_strdup( n, c->attr.nt_id.id ) ;
