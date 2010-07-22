@@ -8,6 +8,15 @@
 #include <assert.h>
 
 
+static bool archi_attribute_node_assign( archi_ast_node *emsgnode, archi_ast_node **target, archi_ast_node *attr, void* defval, const char* attrname )
+{
+  bool r = false ;
+  if( *target == defval ){ *target = attr ; r = true ;}
+  else EMSG_MULTIPLE_ATTRIBUTE( emsgnode, attrname ) ;
+
+  return r ;
+}
+
 static void archi_regdef_trim( archi_ast_node* n )
 {
   DEBUG_ASSERT( n && n->node_type == NT_REGDEF ) ;
@@ -228,43 +237,37 @@ static void archi_matchdef_trim( archi_ast_node *n )
   archi_ast_node *c = n->first_child ;
   while( c != NULL ){
     free_node = false ;
-    if( c->node_type == NT_INPUT ){
-      if( n->attr.nt_matchdef.input == NULL ){
-        int32_t nints = 0 ;
-        int32_t nregs = 0 ;
-        archi_ast_node *cc ;
-        FOREACH_CHILD( c, cc ){ !strcmp(cc->data_type, "Int") ? nints++ : nregs++  ;}
-        c->attr.nt_input.nints = nints ;
-        c->attr.nt_input.nregs = nregs ;
-        n->attr.nt_matchdef.input = c ;
-      }
-      else EMSG_MULTIPLE_ATTRIBUTE( n, "input" ) ;       
-    }
-    else if( c->node_type == NT_OUTPUT ){
-			if( n->attr.nt_matchdef.output == NULL ){
-        int32_t nregs = 0 ;
-        archi_ast_node *cc ;
-        FOREACH_CHILD( c, cc ){ nregs++ ;}
-        c->attr.nt_output.nregs = nregs ;
-        n->attr.nt_matchdef.output = c ;
-      }
-      else EMSG_MULTIPLE_ATTRIBUTE( n, "output" ) ;
-    }
-    else if( c->node_type == NT_IPATTERN ){
-      if( n->attr.nt_matchdef.ipattern == NULL ){
-        n->attr.nt_matchdef.ipattern = c ;
-      }
-      else EMSG_MULTIPLE_ATTRIBUTE( n, "ipattern" ) ;
-    }
-    else if( c->node_type == NT_OPATTERN ){
-      if( n->attr.nt_matchdef.opattern == NULL ){
-        n->attr.nt_matchdef.opattern = c ;
-      }
-      else EMSG_MULTIPLE_ATTRIBUTE( n, "opattern" ) ;
-    }
-    else if( c->node_type == NT_ID ){
-      n->attr.nt_matchdef.id = talloc_strdup( n, c->attr.nt_id.id ) ;
-      free_node = true ;
+    switch( c->node_type ){
+      case NT_INPUT:{
+        bool r = archi_attribute_node_assign( n, &n->attr.nt_matchdef.input, c, NULL, "input" ) ;
+        if( r ){
+          archi_ast_node *cc ;
+          int32_t nints = 0, nregs = 0 ;
+          FOREACH_CHILD( c, cc ){ !strcmp(cc->data_type, "Int") ? nints++ : nregs++  ;}
+          n->attr.nt_matchdef.input->attr.nt_input.nints = nints ;
+          n->attr.nt_matchdef.input->attr.nt_input.nregs = nregs ;
+        }    
+        break ;}
+      case NT_OUTPUT:{
+        bool r = archi_attribute_node_assign( n, &n->attr.nt_matchdef.output, c, NULL, "output" ) ;
+        if( r ){
+          int32_t nregs = 0 ;
+          archi_ast_node *cc ;
+          FOREACH_CHILD( c, cc ){ nregs++ ;}
+          n->attr.nt_matchdef.output->attr.nt_output.nregs = nregs ;
+        }
+        break ;}
+      case NT_IPATTERN:{
+        archi_attribute_node_assign( n, &n->attr.nt_matchdef.ipattern, c, NULL, "ipattern" ) ;
+        break ;}
+      case NT_OPATTERN:{
+        archi_attribute_node_assign( n, &n->attr.nt_matchdef.opattern, c, NULL, "opattern" ) ;
+        break ;}
+      case NT_ID:{
+        n->attr.nt_matchdef.id = talloc_strdup( n, c->attr.nt_id.id ) ;
+        free_node = true ;
+        break ;}
+      default: DEBUG_ASSERT(0) ;
     }
   
     archi_ast_node *nc = c->next_sibling ;
