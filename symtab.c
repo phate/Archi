@@ -214,3 +214,9 @@ archi_symtab_idlist* archi_symtab_idlist_next( archi_symtab_idlist *l )
   return l->next ;
 }
 
+archi_symtab_idlist* archi_symtab_idlist_id( archi_symtab_idlist *l )
+{
+  DEBUG_ASSERT( l ) ;
+
+  return l->id ; 
+}

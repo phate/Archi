@@ -39,6 +39,7 @@ typedef struct archi_symtab_idlist_{
   char* id ;
 } archi_symtab_idlist ;
 
+const char* archi_symtab_idlist_id( archi_symtab_idlist *l ) ;
 archi_symtab_idlist* archi_symtab_idlist_next( archi_symtab_idlist *l ) ;
 archi_symtab_idlist* archi_symtab_idlist_create( TALLOC_CTX *ctx ) ;
 archi_symtab_idlist* archi_symtab_idlist_add( archi_symtab_idlist *idl, char* cl[], uint32_t cnt ) ;
