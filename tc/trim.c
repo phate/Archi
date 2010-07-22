@@ -169,43 +169,37 @@ static void archi_instrdef_trim( archi_ast_node *n )
   archi_ast_node *c = n->first_child ;
 	while( c != NULL ){
     free_node = 0 ;
-		if( c->node_type == NT_INPUT ){
-			if( n->attr.nt_instrdef.input == NULL ){
-        int32_t nints = 0 ;
-        int32_t nregs = 0 ;
-        archi_ast_node *cc ;
-        FOREACH_CHILD( c, cc ){ !strcmp(cc->data_type, "Int") ? nints++ : nregs++  ;}
-        c->attr.nt_input.nints = nints ;
-        c->attr.nt_input.nregs = nregs ;
-        n->attr.nt_instrdef.input = c ;
-      }
-      else EMSG_MULTIPLE_ATTRIBUTE( n, "input" ) ;
-    }
-		else if( c->node_type == NT_OUTPUT ){
-			if( n->attr.nt_instrdef.output == NULL ){
-        int32_t i = 0 ;
-        archi_ast_node *cc ;
-        FOREACH_CHILD( c, cc ){ i++ ;}
-        c->attr.nt_output.nregs = i ;
-        n->attr.nt_instrdef.output = c ;
-      }
-      else EMSG_MULTIPLE_ATTRIBUTE( n, "output" ) ;
-    }
-		else if( c->node_type == NT_ENCODING ){
-			if( n->attr.nt_instrdef.encoding == NULL ){
-        n->attr.nt_instrdef.encoding = c ;
-      }
-      else EMSG_MULTIPLE_ATTRIBUTE( n, "encoding" ) ;
-		}
-    else if( c->node_type == NT_FLAGS ){
-      if( n->attr.nt_instrdef.flags == NULL ){
-        n->attr.nt_instrdef.flags = c ;
-      }
-      else EMSG_MULTIPLE_ATTRIBUTE( n, "flags" ) ;
-    }
-    else if( c->node_type == NT_ID ){
-		  n->attr.nt_instrdef.id = talloc_strdup( n, c->attr.nt_id.id ) ;	
-	    free_node = 1 ;
+    switch( c->node_type ){
+    case NT_INPUT:{
+        bool r = archi_attribute_node_assign( n, &n->attr.nt_instrdef.input, c, NULL, "input" ) ;
+        if( r ){
+          archi_ast_node *cc ;
+          int32_t nints = 0, nregs = 0 ;
+          FOREACH_CHILD( c, cc ){ !strcmp(cc->data_type, "Int") ? nints++ : nregs++  ;}
+          n->attr.nt_instrdef.input->attr.nt_input.nints = nints ;
+          n->attr.nt_instrdef.input->attr.nt_input.nregs = nregs ;
+        }    
+      break ;}
+    case NT_OUTPUT:{
+        bool r = archi_attribute_node_assign( n, &n->attr.nt_instrdef.output, c, NULL, "input" ) ;
+        if( r ){
+          int32_t nregs = 0 ;
+          archi_ast_node *cc ;
+          FOREACH_CHILD( c, cc ){ nregs++ ;}
+          n->attr.nt_instrdef.output->attr.nt_output.nregs = nregs ;
+        }
+      break ;}
+    case NT_ENCODING:{
+      archi_attribute_node_assign( n, &n->attr.nt_instrdef.encoding, c, NULL, "encoding" ) ;
+      break ;}
+    case NT_FLAGS:{
+      archi_attribute_node_assign( n, &n->attr.nt_instrdef.flags, c, NULL, "flags" ) ;
+      break ;}
+    case NT_ID:{
+        n->attr.nt_instrdef.id = talloc_strdup( n, c->attr.nt_id.id ) ;
+        free_node = true ;
+      break ;}
+    default: DEBUG_ASSERT(0) ;
     }
 
     archi_ast_node *nc = c->next_sibling ;
