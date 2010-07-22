@@ -3,6 +3,7 @@
 #include "trim.h"
 #include "regsect.h"
 #include "instrsect.h"
+#include "patternsect.h"
 #include "../debug.h"
 
 #include <stdlib.h>
@@ -64,6 +65,8 @@ static void archi_symtab_toplevel_fill( archi_symtab *st, archi_ast_node *n )
     case NT_JVINSTRDEF:
       archi_node_insert( st, n->attr.nt_jvinstrdef.id, n ) ;
       break ;
+    case NT_MATCHDEF:
+      archi_node_insert( st, n->attr.nt_matchdef.id, n ) ;
     default: break ;
   }
 
@@ -363,4 +366,5 @@ void archi_typecheck( archi_symtab *st, archi_ast_node *n )
 
   archi_regsect_typecheck( st, n->attr.nt_archdef.regsect ) ;
   archi_instrsect_typecheck( st, n->attr.nt_archdef.instrsect ) ;
+  archi_patternsect_typecheck( st, n->attr.nt_archdef.patternsect ) ;
 }
