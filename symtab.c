@@ -163,7 +163,7 @@ static int archi_symtab_idlist_destroy( archi_symtab_idlist *l )
   return 0 ;
 }
 
-static archi_symtab_idlist* archi_symtab_idlist_create( TALLOC_CTX *ctx )
+archi_symtab_idlist* archi_symtab_idlist_create( TALLOC_CTX *ctx )
 {
   archi_symtab_idlist *l = talloc( ctx, archi_symtab_idlist ) ;
   talloc_set_destructor( l, archi_symtab_idlist_destroy ) ;
@@ -186,16 +186,17 @@ archi_symtab_idlist* archi_symtab_idlist_add( archi_symtab_idlist *idl, char* cl
   return tmp ;
 } 
 
-archi_symtab_idlist* archi_symtab_idlist_fill( archi_symtab *st, archi_ast_nodetype node_type )
+archi_symtab_idlist* archi_symtab_idlist_fill( archi_symtab_idlist *l, archi_symtab *st, archi_ast_nodetype node_type )
 {
-  archi_symtab_idlist *idl  = NULL ;
+  DEBUG_ASSERT( st ) ;
+  
   archi_symtab_scope *sc = st->innermost_scope ;
   while( sc ){
     for( uint32_t i = 0; i < ARCHI_ENTRY_CNT; i++ ){
       archi_symtab_entry *e = sc->entry[i] ;
       while( e != 0 ){
         if( e->node->node_type == node_type ){
-          idl = archi_symtab_idlist_add( idl, (char* [1]){e->key}, 1 ) ; 
+          l = archi_symtab_idlist_add( l, (char* [1]){e->key}, 1 ) ; 
         }
         e = e->next ;
       }
@@ -203,8 +204,13 @@ archi_symtab_idlist* archi_symtab_idlist_fill( archi_symtab *st, archi_ast_nodet
     sc = sc->prev_scope ;
   }
 
-  return idl ;
+  return l ;
 }
 
+archi_symtab_idlist* archi_symtab_idlist_next( archi_symtab_idlist *l )
+{
+  DEBUG_ASSERT( l ) ;
 
+  return l->next ;
+}
 
