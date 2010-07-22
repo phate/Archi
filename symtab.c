@@ -173,12 +173,14 @@ static archi_symtab_idlist* archi_symtab_idlist_create( TALLOC_CTX *ctx )
 
 archi_symtab_idlist* archi_symtab_idlist_add( archi_symtab_idlist *idl, char* cl[], uint32_t cnt )
 {
-  DEBUG_ASSERT( cl && cnt > 0 ) ;
+  DEBUG_ASSERT( cl ) ;
 
   archi_symtab_idlist *tmp = idl ;
   for( uint32_t i = 0; i < cnt; i++ ){
-    tmp = archi_symtab_idlist_create( idl ) ;
-    tmp->id = talloc_strdup( tmp, cl[i] ) ; 
+    archi_symtab_idlist *l = archi_symtab_idlist_create( tmp ) ;
+    l->id = talloc_strdup( l, cl[i] ) ; 
+    l->next = tmp ;
+    tmp = l ;
   }
 
   return tmp ;
