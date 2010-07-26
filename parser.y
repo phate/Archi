@@ -109,7 +109,7 @@ NodeList      : NodeDef ',' NodeList            { archi_ast_node_next_sibling_se
               | NodeDef                         { $$ = $1 ; }
               ;
 NodeDef       : IdList '=' Id '[' T_ID          { tmp = archi_ast_node_create( ast, NT_NODEDEF, yytext, linenr ) ; }
-                ']' '(' EIdList ')'             { archi_ast_node *ip = archi_ast_node_create( ast, NT_INPUT, NULL, $9->linenr ) ;
+                ']' '(' EExpList ')'            { archi_ast_node *ip = archi_ast_node_create( ast, NT_INPUT, NULL, $9->linenr ) ;
                                                   archi_ast_node *op = archi_ast_node_create( ast, NT_OUTPUT, NULL, $1->linenr ) ;
                                                   archi_children_add( ip, $9 ) ; archi_children_add( op, $1 ) ;
                                                   archi_ast_node_next_sibling_set( ip, op ) ;
@@ -215,9 +215,9 @@ TId           : T_ID                              { tmp = archi_ast_node_create(
               | T_DTSTR T_ID                      { $$ = archi_ast_node_create( ast, NT_TID, "String", linenr) ;
                                                     $$->attr.nt_tid.id = talloc_strdup( $$, yytext ) ; }
               ;
-EIdList       : IdList                            { $$ = $1 ; }
-              |                                   { $$ = NULL ; }
-              ;
+//EIdList       : IdList                            { $$ = $1 ; }
+//              |                                   { $$ = NULL ; }
+//              ;
 IdList				: Id ',' IdList											{ archi_ast_node_next_sibling_set( $1, $3 ) ; $$ = $1 ; }
 							| Id																{ $$ = $1 ; }
 							;
@@ -314,13 +314,13 @@ Exp12					: Id																{ $$ = $1 ; }
 							| T_FALSE														{ $$ = archi_ast_node_create( ast, NT_FALSE, "Bool", linenr ) ; }
 						  | '(' Exp ')'										    { $$ = $2 ; }
               ;
-/*EExpList			: ExpList														{ $$ = $1 ; }
+EExpList			: ExpList														{ $$ = $1 ; }
 							|																		{ $$ = NULL ; }
 							;
-ExpList				: Exp ',' ExpList										{ ARE_SIBLINGS( $1, $3 ) ; $$ = $1 ; }								
+ExpList				: Exp ',' ExpList										{ archi_ast_node_next_sibling_set( $1, $3 ) ; $$ = $1 ; }								
 							| Exp																{ $$ = $1 ; }
 							;
-*/
+
 %%
 
 archi_ast_node* archi_parse()

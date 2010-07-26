@@ -60,5 +60,7 @@ Instr addi{
 #} ;
 
 Match m3{
-  Input = [gpr i1]
+  Input = [Int i1],
+  IPattern = [
+    k = constant[JVBitconstant](i1,4)]
 } ;
