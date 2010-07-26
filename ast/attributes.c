@@ -53,6 +53,15 @@ void archi_nt_matchdef_attributes_init( archi_nt_matchdef_attributes *attr )
   attr->opattern = NULL ; 
 }
 
+void archi_nt_nodedef_attributes_init( archi_nt_nodedef_attributes *attr )
+{
+  DEBUG_ASSERT( attr ) ;
+
+  attr->id = NULL ;
+  attr->input = NULL ;
+  attr->output = NULL ;
+}
+
 void archi_nt_bstr_attributes_init( archi_nt_bstr_attributes *attr )
 {
   DEBUG_ASSERT( attr ) ;

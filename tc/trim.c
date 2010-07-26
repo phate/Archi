@@ -230,6 +230,46 @@ static void archi_instrsect_trim( archi_ast_node *n )
 	}
 }
 
+static void archi_nodedef_trim( archi_ast_node *n )
+{
+  DEBUG_ASSERT( n && n->node_type == NT_NODEDEF ) ;
+
+  bool free_node ;
+  archi_ast_node *c = n->first_child ;
+  while( c != NULL ){
+    free_node = false ;
+    switch( c->node_type ){
+    case NT_INPUT:{
+      bool r = archi_attribute_node_assign( n, &n->attr.nt_nodedef.input, c, "input" ) ;
+      if( r ){
+        archi_ast_node *cc ;
+        int32_t nchildren = 0 ;
+        FOREACH_CHILD( c, cc ){ nchildren++  ;}
+        n->attr.nt_nodedef.input->attr.nt_input.nchildren = nchildren ;
+      }
+      break ;}
+    case NT_OUTPUT:{
+      bool r = archi_attribute_node_assign( n, &n->attr.nt_nodedef.output, c, "output" ) ;
+      if( r ){
+        int32_t nchildren = 0 ;
+        archi_ast_node *cc ;
+        FOREACH_CHILD( c, cc ){ nchildren++ ;}
+        n->attr.nt_nodedef.output->attr.nt_output.nchildren = nchildren ;
+      }
+      break ;}
+    case NT_ID:
+      n->attr.nt_nodedef.id = talloc_strdup( n, c->attr.nt_id.id ) ;
+      free_node = true ;
+      break ;
+    default: DEBUG_ASSERT(0) ;
+    }
+
+    archi_ast_node *nc = c->next_sibling ;
+    if( free_node ) TALLOC_FREE( c ) ;
+    c = nc ; 
+  } 
+}
+
 static void archi_matchdef_trim( archi_ast_node *n )
 {
   DEBUG_ASSERT( n && n->node_type == NT_MATCHDEF ) ;
@@ -259,6 +299,8 @@ static void archi_matchdef_trim( archi_ast_node *n )
         break ;}
       case NT_IPATTERN:{
         archi_attribute_node_assign( n, &n->attr.nt_matchdef.ipattern, c, "ipattern" ) ;
+        archi_ast_node *cc ;
+        FOREACH_CHILD( c, cc ){ archi_nodedef_trim(cc)  ;}
         break ;}
       case NT_OPATTERN:{
         archi_attribute_node_assign( n, &n->attr.nt_matchdef.opattern, c, "opattern" ) ;
