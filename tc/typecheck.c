@@ -13,7 +13,7 @@
 
 void archi_tidlist_typecheck( archi_symtab *st, archi_ast_node *n, archi_symtab_idlist *type_list )
 {
-  DEBUG_ASSERT( st && type_list && n && n->node_type == NT_TID ) ; 
+  DEBUG_ASSERT( st && type_list ) ; 
 
   archi_ast_node *c ;
   FOREACH_NEXT_SIBLING( n, c ){
