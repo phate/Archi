@@ -25,8 +25,7 @@ RegClass gpr { NBits = 32, Regs = [r3,r4,r5,r6,r7,r8,r9] } ;
 %%
 
 Instr addi{
-  Input = [gpr r,
-  gpr r],
+  Input = [gpr r, gpr r],
   Output = [],
   Encoding = '00' #24.bstr[0:5] ++ rt.code.bstr[0:5] ++ ra.code.bstr[0:5] ++ si.bstr[0:16],
   #Flags = [Commutative, OverwriteInput]

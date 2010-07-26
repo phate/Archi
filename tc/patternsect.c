@@ -1,4 +1,5 @@
 #include "patternsect.h"
+#include "typecheck.h"
 #include "../ast/node.h"
 #include "../debug.h"
 
@@ -6,12 +7,22 @@ static void archi_matchdef_typecheck( archi_symtab *st, archi_ast_node *n )
 {
   DEBUG_ASSERT( st && n && n->node_type == NT_MATCHDEF ) ;
 
-  if( n->attr.nt_matchdef.input == NULL )
-    EMSG_MISSING_ATTRIBUTE( n, "input" ) ;
-  //else 
 
-  if( n->attr.nt_matchdef.output == NULL )
-    EMSG_MISSING_ATTRIBUTE( n, "output" ) ;
+  if( n->attr.nt_matchdef.input != NULL ){
+    archi_symtab_idlist *l = archi_symtab_idlist_create( NULL ) ;
+    l = archi_symtab_idlist_fill( l, st, NT_REGCLDEF ) ;
+    archi_tidlist_typecheck( st, n->attr.nt_matchdef.input->first_child, l ) ;
+    TALLOC_FREE( l ) ;
+  }
+  else EMSG_MISSING_ATTRIBUTE( n, "input" ) ;
+
+  if( n->attr.nt_matchdef.output != NULL ){
+    archi_symtab_idlist *l = archi_symtab_idlist_create( NULL ) ;
+    l = archi_symtab_idlist_fill( l, st, NT_REGCLDEF ) ;
+    archi_tidlist_typecheck( st, n->attr.nt_matchdef.output->first_child, l ) ;
+    TALLOC_FREE( l ) ;
+  }
+  else EMSG_MISSING_ATTRIBUTE( n, "output" ) ;
 
   if( n->attr.nt_matchdef.ipattern == NULL )
     EMSG_MISSING_ATTRIBUTE( n, "ipattern" ) ;
