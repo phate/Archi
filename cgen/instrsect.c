@@ -190,8 +190,11 @@ static void archi_instr_code_generate( archi_ast_node *n, FILE *sf )
   archi_ast_node *c ;
   FOREACH_CHILD( n, c ){
     if( c->node_type == NT_JVINSTRDEF ) continue ;
-    int32_t inregs = c->attr.nt_instrdef.input->attr.nt_input.nregs ;
-    int32_t onregs = c->attr.nt_instrdef.output->attr.nt_output.nregs ;
+    archi_ast_node *cc ;
+    int32_t nints = 0 ;
+    int32_t inregs = 0 ; 
+    int32_t onregs = c->attr.nt_instrdef.output->attr.nt_output.nchildren ;
+    FOREACH_CHILD( c->attr.nt_instrdef.input, cc ){ !strcmp(cc->data_type, "Int") ? nints++ : inregs++ ;}
     fprintf( sf, "\t[jive_arch_%s] = {\n", c->attr.nt_instrdef.id ) ;
     fprintf( sf, "\t\t.name = \"%s\",\n", c->attr.nt_instrdef.id ) ;
     fprintf( sf, "\t\t.encode = &jive_arch_%s_generate,\n", c->attr.nt_instrdef.id ) ;
@@ -206,7 +209,7 @@ static void archi_instr_code_generate( archi_ast_node *n, FILE *sf )
     archi_instr_flags_generate( c->attr.nt_instrdef.flags, sf ) ;
     fprintf( sf, "\t\t.ninputs = %d,\n", inregs ) ; 
     fprintf( sf, "\t\t.noutputs = %d,\n", onregs ) ;
-    fprintf( sf, "\t\t.nimmediates = %d,\n", c->attr.nt_instrdef.input->attr.nt_input.nints ) ;
+    fprintf( sf, "\t\t.nimmediates = %d,\n", nints ) ; 
     fprintf( sf, "\t\t.code = 0\n" ) ;
     fprintf( sf, "\t},\n" ) ;
   }
@@ -236,9 +239,12 @@ static void archi_instr_registers_generate( archi_ast_node *n, FILE *sf )
   archi_ast_node *c ;
   FOREACH_CHILD( n, c ){
     if( c->node_type == NT_JVINSTRDEF ) continue ;
-    if( c->attr.nt_instrdef.input->attr.nt_input.nregs != 0 )
+    int32_t nregs = 0 ;
+    archi_ast_node *cc ;
+    FOREACH_CHILD( c->attr.nt_instrdef.input, cc ){ if( strcmp(cc->data_type, "Int") ) nregs++ ;}
+    if( nregs != 0 )
       archi_instr_registers_generate_( c->attr.nt_instrdef.input, sf, c->attr.nt_instrdef.id, "inregs" ) ;
-    if( c->attr.nt_instrdef.output->attr.nt_output.nregs != 0 )
+    if( c->attr.nt_instrdef.output->attr.nt_output.nchildren != 0 )
       archi_instr_registers_generate_( c->attr.nt_instrdef.output, sf, c->attr.nt_instrdef.id, "outregs" ) ;
   }
 }

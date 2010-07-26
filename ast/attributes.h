@@ -61,11 +61,8 @@ typedef struct archi_nt_jvinstrdef_attributes_{
 } archi_nt_jvinstrdef_attributes ;
 
 typedef struct archi_nt_input_attributes_{
-  int32_t nints ;
-  int32_t nregs ;
+  int32_t nchildren ;
 } archi_nt_input_attributes ;
-
-void archi_nt_input_attributes_init( archi_nt_input_attributes *attr ) ;
 
 typedef struct archi_nt_flags_attributes_{
   int32_t flags ;
@@ -117,7 +114,7 @@ typedef struct archi_nt_regsect_attributes_{
 } archi_nt_regsect_attributes ;
 
 typedef struct archi_nt_output_attributes_{
-  int32_t nregs ;
+  int32_t nchildren ;
 } archi_nt_output_attributes ;
 
 typedef struct archi_nt_id_attributes_{

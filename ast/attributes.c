@@ -53,14 +53,6 @@ void archi_nt_matchdef_attributes_init( archi_nt_matchdef_attributes *attr )
   attr->opattern = NULL ; 
 }
 
-void archi_nt_input_attributes_init( archi_nt_input_attributes *attr )
-{
-  DEBUG_ASSERT( attr ) ;
-
-  attr->nints = -1 ;
-  attr->nregs = -1 ; 
-}
-
 void archi_nt_bstr_attributes_init( archi_nt_bstr_attributes *attr )
 {
   DEBUG_ASSERT( attr ) ;

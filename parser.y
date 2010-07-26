@@ -95,10 +95,10 @@ MatchBody     : MatchBody ',' MatchProp         { archi_ast_node_next_sibling_se
               | MatchProp                       { $$ = $1 ; }
               ;
 MatchProp     : T_INPUT '=' '[' ETIdList ']'    { $$ = archi_ast_node_create( ast, NT_INPUT, NULL, linenr ) ;
-                                                  archi_nt_input_attributes_init( &($$->attr.nt_input) ) ;
+                                                  $$->attr.nt_input.nchildren = -1 ;
                                                   archi_children_add( $$, $4 ) ; }
               | T_OUTPUT '=' '[' ETIdList ']'   { $$ = archi_ast_node_create( ast, NT_OUTPUT, NULL, linenr ) ;
-                                                  $$->attr.nt_output.nregs = -1 ;
+                                                  $$->attr.nt_output.nchildren = -1 ;
                                                   archi_children_add( $$, $4 ) ; }
               | T_IPATTERN '=' '[' NodeList ']' { $$ = archi_ast_node_create( ast, NT_IPATTERN, NULL, linenr ) ;
                                                   archi_children_add( $$, $4 ) ; }
@@ -110,7 +110,9 @@ NodeList      : NodeDef ',' NodeList            { archi_ast_node_next_sibling_se
               ;
 NodeDef       : IdList '=' Id '[' T_ID          { tmp = archi_ast_node_create( ast, NT_NODEDEF, yytext, linenr ) ; }
                 ']' '(' EExpList ')'            { archi_ast_node *ip = archi_ast_node_create( ast, NT_INPUT, NULL, $9->linenr ) ;
+                                                  ip->attr.nt_input.nchildren = -1 ;
                                                   archi_ast_node *op = archi_ast_node_create( ast, NT_OUTPUT, NULL, $1->linenr ) ;
+                                                  op->attr.nt_output.nchildren = -1 ;
                                                   archi_children_add( ip, $9 ) ; archi_children_add( op, $1 ) ;
                                                   archi_ast_node_next_sibling_set( $3, ip ) ;
                                                   archi_ast_node_next_sibling_set( ip, op ) ;
@@ -179,10 +181,10 @@ InstrBody			: InstrProp ',' InstrBody						{ archi_ast_node_next_sibling_set( $1
 							| InstrProp													{ $$ = $1 ; }
 							;
 InstrProp			: T_INPUT '=' '[' ETIdList ']'	    { $$ = archi_ast_node_create( ast, NT_INPUT, NULL, linenr ) ;
-                                                    archi_nt_input_attributes_init( &($$->attr.nt_input) ) ;
+                                                    $$->attr.nt_input.nchildren = -1 ;
 																										archi_children_add( $$, $4 ) ;}
 							| T_OUTPUT '=' '[' ETIdList ']'     { $$ = archi_ast_node_create( ast, NT_OUTPUT, NULL, linenr ) ;
-                                                    $$->attr.nt_output.nregs = -1 ;
+                                                    $$->attr.nt_output.nchildren = -1 ;
 																										archi_children_add( $$, $4 ) ;}
 //							| TINSTR_IMM '=' '[' ETIdList ']'		{ $$ = create_node( IMMEDIATE, NULL, NULL, linenr ) ;
 //																										add_children( $$, $4 ) ;}
