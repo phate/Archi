@@ -112,8 +112,9 @@ NodeDef       : IdList '=' Id '[' T_ID          { tmp = archi_ast_node_create( a
                 ']' '(' EExpList ')'            { archi_ast_node *ip = archi_ast_node_create( ast, NT_INPUT, NULL, $9->linenr ) ;
                                                   archi_ast_node *op = archi_ast_node_create( ast, NT_OUTPUT, NULL, $1->linenr ) ;
                                                   archi_children_add( ip, $9 ) ; archi_children_add( op, $1 ) ;
+                                                  archi_ast_node_next_sibling_set( $3, ip ) ;
                                                   archi_ast_node_next_sibling_set( ip, op ) ;
-                                                  archi_children_add( tmp, ip ) ; $$ = tmp ; }
+                                                  archi_children_add( tmp, $3 ) ; $$ = tmp ; }
               ;
 RegSect				: RegSectDef ';' RegSect					{ archi_ast_node *s ;
 																									FOREACH_NEXT_SIBLING( $1, s ){
