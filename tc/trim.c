@@ -26,6 +26,16 @@ static bool archi_attribute_int_assign( archi_ast_node *emsgnode, int32_t *targe
   return r ;
 }
 
+static void archi_children_count( int32_t *target, archi_ast_node *n )
+{
+  DEBUG_ASSERT( target && n ) ;
+
+  archi_ast_node *c ;
+  int32_t nchildren = 0 ;
+  FOREACH_CHILD( n, c ) nchildren++ ;
+  *target = nchildren ;
+}
+
 static void archi_regdef_trim( archi_ast_node* n )
 {
   DEBUG_ASSERT( n && n->node_type == NT_REGDEF ) ;
@@ -179,22 +189,12 @@ static void archi_instrdef_trim( archi_ast_node *n )
     free_node = 0 ;
     switch( c->node_type ){
     case NT_INPUT:{
-        bool r = archi_attribute_node_assign( n, &n->attr.nt_instrdef.input, c, "input" ) ;
-        if( r ){
-          archi_ast_node *cc ;
-          int32_t nchildren = 0 ;
-          FOREACH_CHILD( c, cc ){ nchildren++ ;}
-          n->attr.nt_instrdef.input->attr.nt_input.nchildren = nchildren ;
-        }    
+      bool r = archi_attribute_node_assign( n, &n->attr.nt_instrdef.input, c, "input" ) ;
+      if( r ) archi_children_count( &n->attr.nt_instrdef.input->attr.nt_input.nchildren, c ) ;
       break ;}
     case NT_OUTPUT:{
-        bool r = archi_attribute_node_assign( n, &n->attr.nt_instrdef.output, c, "input" ) ;
-        if( r ){
-          int32_t nchildren = 0 ;
-          archi_ast_node *cc ;
-          FOREACH_CHILD( c, cc ){ nchildren++ ;}
-          n->attr.nt_instrdef.output->attr.nt_output.nchildren = nchildren ;
-        }
+      bool r = archi_attribute_node_assign( n, &n->attr.nt_instrdef.output, c, "input" ) ;
+      if( r ) archi_children_count( &n->attr.nt_instrdef.output->attr.nt_output.nchildren, c ) ;  
       break ;}
     case NT_ENCODING:{
       archi_attribute_node_assign( n, &n->attr.nt_instrdef.encoding, c, "encoding" ) ;
@@ -241,21 +241,11 @@ static void archi_nodedef_trim( archi_ast_node *n )
     switch( c->node_type ){
     case NT_INPUT:{
       bool r = archi_attribute_node_assign( n, &n->attr.nt_nodedef.input, c, "input" ) ;
-      if( r ){
-        archi_ast_node *cc ;
-        int32_t nchildren = 0 ;
-        FOREACH_CHILD( c, cc ){ nchildren++  ;}
-        n->attr.nt_nodedef.input->attr.nt_input.nchildren = nchildren ;
-      }
+      if( r ) archi_children_count( &n->attr.nt_nodedef.input->attr.nt_input.nchildren, c ) ;  
       break ;}
     case NT_OUTPUT:{
       bool r = archi_attribute_node_assign( n, &n->attr.nt_nodedef.output, c, "output" ) ;
-      if( r ){
-        int32_t nchildren = 0 ;
-        archi_ast_node *cc ;
-        FOREACH_CHILD( c, cc ){ nchildren++ ;}
-        n->attr.nt_nodedef.output->attr.nt_output.nchildren = nchildren ;
-      }
+      if( r ) archi_children_count( &n->attr.nt_nodedef.output->attr.nt_output.nchildren, c ) ;      
       break ;}
     case NT_ID:
       n->attr.nt_nodedef.id = talloc_strdup( n, c->attr.nt_id.id ) ;
@@ -281,21 +271,11 @@ static void archi_matchdef_trim( archi_ast_node *n )
     switch( c->node_type ){
       case NT_INPUT:{
         bool r = archi_attribute_node_assign( n, &n->attr.nt_matchdef.input, c, "input" ) ;
-        if( r ){
-          archi_ast_node *cc ;
-          int32_t nchildren = 0 ;
-          FOREACH_CHILD( c, cc ){ nchildren++  ;}
-          n->attr.nt_matchdef.input->attr.nt_input.nchildren = nchildren ;
-        }    
+        if( r ) archi_children_count( &n->attr.nt_matchdef.input->attr.nt_input.nchildren, c ) ;
         break ;}
       case NT_OUTPUT:{
         bool r = archi_attribute_node_assign( n, &n->attr.nt_matchdef.output, c, "output" ) ;
-        if( r ){
-          int32_t nchildren = 0 ;
-          archi_ast_node *cc ;
-          FOREACH_CHILD( c, cc ){ nchildren++ ;}
-          n->attr.nt_matchdef.output->attr.nt_output.nchildren = nchildren ;
-        }
+        if( r ) archi_children_count( &n->attr.nt_matchdef.output->attr.nt_output.nchildren, c ) ;
         break ;}
       case NT_IPATTERN:{
         archi_attribute_node_assign( n, &n->attr.nt_matchdef.ipattern, c, "ipattern" ) ;
