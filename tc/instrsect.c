@@ -204,19 +204,21 @@ static void archi_instrdef_typecheck( archi_symtab *st, archi_ast_node *n )
   DEBUG_ASSERT( st && n && n->node_type == NT_INSTRDEF ) ;
 
   if( n->attr.nt_instrdef.input != NULL ){
-    archi_symtab_idlist *l = archi_symtab_idlist_create( NULL ) ;
-    l = archi_symtab_idlist_fill( l, st, NT_REGCLDEF ) ; 
+    archi_symtab_idlist *l = archi_symtab_idlist_fill( NULL, st, NT_REGCLDEF ) ; 
     l = archi_symtab_idlist_add( l, (char*[1]){"Int"}, 1 ) ; 
-    archi_tidlist_typecheck( st, n->attr.nt_instrdef.input->first_child, l ) ; 
+    archi_ast_node *c ;
+    FOREACH_CHILD( n->attr.nt_instrdef.input, c )
+      archi_variabledef_typecheck( st, c, c->attr.nt_tid.id, l ) ; 
     TALLOC_FREE( l ) ;
   }
   else EMSG_MISSING_ATTRIBUTE( n, "input" ) ;
   
 
   if( n->attr.nt_instrdef.output != NULL ){
-    archi_symtab_idlist *l = archi_symtab_idlist_create( NULL ) ;
-    l = archi_symtab_idlist_fill( l, st, NT_REGCLDEF ) ;
-    archi_tidlist_typecheck( st, n->attr.nt_instrdef.output->first_child, l ) ;
+    archi_symtab_idlist *l = archi_symtab_idlist_fill( NULL, st, NT_REGCLDEF ) ;
+    archi_ast_node *c ; 
+    FOREACH_CHILD( n->attr.nt_instrdef.output, c )
+      archi_variabledef_typecheck( st, c, c->attr.nt_tid.id, l ) ;
     TALLOC_FREE( l ) ;
   }
   else EMSG_MISSING_ATTRIBUTE( n, "output" ) ;

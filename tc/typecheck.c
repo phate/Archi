@@ -11,29 +11,25 @@
 #include <stdio.h>
 #include <assert.h>
 
-void archi_tidlist_typecheck( archi_symtab *st, archi_ast_node *n, archi_symtab_idlist *type_list )
+void archi_variabledef_typecheck( archi_symtab *st, archi_ast_node *n, const char* id, archi_symtab_idlist *type_list )
 {
-  DEBUG_ASSERT( st && type_list ) ; 
+  DEBUG_ASSERT( st && n && id && type_list ) ;
 
-  archi_ast_node *c ;
-  FOREACH_NEXT_SIBLING( n, c ){
-    DEBUG_ASSERT( c && c->node_type == NT_TID ) ; 
-    archi_symtab_idlist *l = type_list ;
-    while( l ){
-      if( !strcmp(c->data_type, archi_symtab_idlist_id(l)) ){
-        archi_ast_node *l = archi_symtab_lookup( st, c->attr.nt_tid.id ) ; 
-        if( l != NULL ){
-          EMSG_REDECLARATION( c, c->attr.nt_tid.id ) ; 
-          EMSG_PREVIOUS_DECLARATION( c, c->attr.nt_tid.id, l->linenr ) ; 
-          break ;
-        }   
-        else{ archi_symtab_insert( st, c->attr.nt_tid.id, c ) ; break ;} 
+  archi_symtab_idlist *list = type_list ;
+  while( list ){
+    if( !strcmp(n->data_type, archi_symtab_idlist_id(list)) ){
+      archi_ast_node *l = archi_symtab_lookup( st, id ) ;
+      if( l != NULL ){  
+        EMSG_REDECLARATION( n, id ) ;
+        EMSG_PREVIOUS_DECLARATION( n, id, l->linenr ) ;
+        break ;
       }
-      l = archi_symtab_idlist_next( l ) ;   
-    }   
-
-    if( !l ) EMSG_WRONG_TYPE( c, c->attr.nt_tid.id, " " ) ; 
+      else{ archi_symtab_insert( st, id, n ) ; break ;}    
+    }
+    list = archi_symtab_idlist_next(list) ;
   }
+
+  if( !list ) EMSG_WRONG_TYPE( n, id, " " ) ;
 }
 
 static void archi_typecheck_init( archi_symtab *st, archi_ast_node *n )
