@@ -169,7 +169,7 @@ static int archi_symtab_idlist_destroy( archi_symtab_idlist *l )
   return 0 ;
 }
 
-archi_symtab_idlist* archi_symtab_idlist_create( TALLOC_CTX *ctx )
+static archi_symtab_idlist* archi_symtab_idlist_create( TALLOC_CTX *ctx )
 {
   archi_symtab_idlist *l = talloc( ctx, archi_symtab_idlist ) ;
   talloc_set_destructor( l, archi_symtab_idlist_destroy ) ;
