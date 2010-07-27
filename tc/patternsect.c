@@ -19,6 +19,7 @@ static void archi_matchdef_typecheck( archi_symtab *st, archi_ast_node *n )
 
   if( n->attr.nt_matchdef.output != NULL ){
     archi_symtab_idlist *l = archi_symtab_idlist_fill( NULL, st, NT_REGCLDEF ) ;
+    archi_ast_node *c ;
     FOREACH_CHILD( n->attr.nt_matchdef.output, c )
       archi_variabledef_typecheck( st, c, c->attr.nt_tid.id, l ) ;
     TALLOC_FREE( l ) ;
