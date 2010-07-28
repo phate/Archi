@@ -11,13 +11,12 @@
 #include <stdio.h>
 #include <assert.h>
 
-void archi_variabledef_typecheck( archi_symtab *st, archi_ast_node *n, const char* id, archi_symtab_idlist *type_list )
+archi_symtab_idlist* archi_variabledef_typecheck( archi_symtab *st, archi_ast_node *n, const char* id, archi_symtab_idlist *type_list )
 {
   DEBUG_ASSERT( st && n && id && type_list ) ;
 
-  archi_symtab_idlist *list = type_list ;
-  while( list ){
-    if( !strcmp(n->data_type, archi_symtab_idlist_id(list)) ){
+  while( type_list ){
+    if( !strcmp(n->data_type, archi_symtab_idlist_id(type_list)) ){
       archi_ast_node *l = archi_symtab_lookup( st, id ) ;
       if( l != NULL ){  
         EMSG_REDECLARATION( n, id ) ;
@@ -26,10 +25,12 @@ void archi_variabledef_typecheck( archi_symtab *st, archi_ast_node *n, const cha
       }
       else{ archi_symtab_insert( st, id, n ) ; break ;}    
     }
-    list = archi_symtab_idlist_next(list) ;
+    type_list = archi_symtab_idlist_next(type_list) ;
   }
 
-  if( !list ) EMSG_WRONG_TYPE( n, id, " " ) ;
+  if( !type_list ) EMSG_WRONG_TYPE( n, id, " " ) ;
+
+  return type_list ;
 }
 
 static void archi_typecheck_init( archi_symtab *st, archi_ast_node *n )
