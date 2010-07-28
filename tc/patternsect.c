@@ -23,12 +23,13 @@ static void archi_ipattern_typecheck( archi_symtab *st, archi_ast_node *n )
       int32_t nig = c->attr.nt_nodedef.input->attr.nt_input.nchildren ;
       int32_t noex = l->attr.nt_jvinstrdef.noutputs ;
       int32_t nog = c->attr.nt_nodedef.output->attr.nt_output.nchildren ;
-      if( niex !=  nig )
-        archi_add_emsg( c, "expected %d inputs, got %d inputs", niex, nig ) ;
-
-      if( noex != nog  ) 
-        archi_add_emsg( c, "expected %d outputs, got %d outputs", noex, nog ) ;
+      if( niex !=  nig ) archi_add_emsg( c, "expected %d inputs, got %d inputs", niex, nig ) ;
+      if( noex != nog  ) archi_add_emsg( c, "expected %d outputs, got %d outputs", noex, nog ) ;
     }
+
+    archi_ast_node *cc ;
+    FOREACH_CHILD( c->attr.nt_nodedef.output, cc )
+      archi_id_def_check( st, cc->attr.nt_id.id, cc ) ;
   } 
 
   TALLOC_FREE( tl ) ;
