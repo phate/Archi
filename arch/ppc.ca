@@ -62,5 +62,6 @@ Instr addi{
 Match m3{
   Input = [Int i1],
   IPattern = [
-    k = constant[JVBitconstant](i1,4)]
+    k = constant[JVBitconstant]()
+  ]
 } ;
