@@ -11,6 +11,23 @@
 #include <stdio.h>
 #include <assert.h>
 
+bool archi_id_def_check( archi_symtab *st, const char *id, archi_ast_node *n )
+{
+  DEBUG_ASSERT( st && n && id ) ;
+ 
+  bool r = true ; 
+  archi_ast_node *l = archi_symtab_lookup( st, id ) ;
+
+  if( l != NULL ){
+    r = false ;
+    EMSG_REDECLARATION( n, id ) ;
+    EMSG_PREVIOUS_DECLARATION( n, id, l->linenr ) ;
+  }
+  else archi_symtab_insert( st, id, n ) ; 
+
+  return r ;
+}
+
 archi_symtab_idlist* archi_variabledef_typecheck( archi_symtab *st, archi_ast_node *n, const char* id, archi_symtab_idlist *type_list )
 {
   DEBUG_ASSERT( st && n && id && type_list ) ;
