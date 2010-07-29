@@ -109,7 +109,7 @@ NodeList      : NodeDef ',' NodeList            { archi_ast_node_next_sibling_se
               | NodeDef                         { $$ = $1 ; }
               ;
 NodeDef       : IdList '=' Id '[' T_ID          { tmp = archi_ast_node_create( ast, NT_NODEDEF, yytext, linenr ) ;
-                                                  archi_nt_nodedef_attributes_init( &($$->attr.nt_nodedef) ) ; }
+                                                  archi_nt_nodedef_attributes_init( &(tmp->attr.nt_nodedef) ) ; }
                 ']' '(' EExpList ')'            { archi_ast_node *ip = archi_ast_node_create( ast, NT_INPUT, NULL, 0 ) ;
                                                   ip->attr.nt_input.nchildren = -1 ;
                                                   archi_ast_node *op = archi_ast_node_create( ast, NT_OUTPUT, NULL, 0 ) ;
