@@ -280,10 +280,12 @@ static void archi_matchdef_trim( archi_ast_node *n )
       case NT_IPATTERN:{
         archi_attribute_node_assign( n, &n->attr.nt_matchdef.ipattern, c, "ipattern" ) ;
         archi_ast_node *cc ;
-        FOREACH_CHILD( c, cc ){ archi_nodedef_trim(cc)  ;}
+        FOREACH_CHILD( c, cc ){ archi_nodedef_trim(cc) ;}
         break ;}
       case NT_OPATTERN:{
         archi_attribute_node_assign( n, &n->attr.nt_matchdef.opattern, c, "opattern" ) ;
+        archi_ast_node *cc ;
+        FOREACH_CHILD( c, cc ){ archi_nodedef_trim(cc) ;}
         break ;}
       case NT_ID:{
         n->attr.nt_matchdef.id = talloc_strdup( n, c->attr.nt_id.id ) ;
