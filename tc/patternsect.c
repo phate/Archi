@@ -156,6 +156,7 @@ static void archi_refnode_typecheck( archi_symtab *st, archi_ast_node *n )
     return ;
   }
 
+  n->attr.nt_refnode.instr = l ;
   l = archi_symtab_lookup( st, l->data_type ) ;
   if( l->node_type != NT_JVINSTRDEF )
     EMSG_TYPE_MISMATCH( n, l->data_type, "JVInstruction" ) ;
@@ -197,6 +198,41 @@ static void archi_matchdef_typecheck( archi_symtab *st, archi_ast_node *n )
   else EMSG_MISSING_ATTRIBUTE( n, "refnode" ) ; 
 }
 
+#include "../symtab.h"
+static void archi_matches_typecheck( archi_symtab *st, archi_ast_node *n )
+{
+  DEBUG_ASSERT( st && n && n->node_type == NT_ANODEDEF ) ;
+
+  archi_ast_node *c ;
+  FOREACH_CHILD( n->attr.nt_anodedef.matches, c ){
+    archi_ast_node *l = archi_symtab_lookup( st, c->attr.nt_id.id ) ;
+    if( l == NULL ){
+      EMSG_MISSING_ID( c, c->attr.nt_id.id ) ;
+      continue ;
+    }
+    
+    if( strcmp( l->data_type, "Match") ){
+      EMSG_TYPE_MISMATCH( c, l->data_type, "Match" ) ;
+      continue ;
+    }
+
+    archi_ast_node *rninstr = l->attr.nt_matchdef.refnode->attr.nt_refnode.instr ;
+    printf("\nHALLO: %s\n", rninstr->data_type ) ;
+    if( rninstr != NULL && strcmp(rninstr->data_type, n->attr.nt_anodedef.id) )
+      archi_add_emsg( c, "reference node of match does not coincide with AbstractNode definition" ) ;
+  }
+}
+
+static void archi_anodedef_typecheck( archi_symtab *st, archi_ast_node *n )
+{
+  DEBUG_ASSERT( st && n && n->node_type == NT_ANODEDEF ) ;
+
+  if( n->attr.nt_anodedef.matches != NULL ){
+    archi_matches_typecheck( st, n ) ;
+  }
+  else EMSG_MISSING_ATTRIBUTE( n, "matches" ) ;
+}
+
 void archi_patternsect_typecheck( archi_symtab *st, archi_ast_node *n )
 {
   DEBUG_ASSERT( st && n && n->node_type == NT_PATTERNSECT ) ;
@@ -208,6 +244,9 @@ void archi_patternsect_typecheck( archi_symtab *st, archi_ast_node *n )
       archi_matchdef_typecheck( st, c ) ;
       archi_symtab_pop_scope( st ) ;
     }
-    else DEBUG_ASSERT(0) ;
   }
+
+  if( n->attr.nt_patternsect.jvload != NULL )
+    archi_anodedef_typecheck( st, n->attr.nt_patternsect.jvload ) ;
+  else archi_add_emsg( n, "Abstract node for JVLoad is missing" ) ;
 }

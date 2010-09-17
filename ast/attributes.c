@@ -3,6 +3,13 @@
 
 #include <stdlib.h>
 
+void archi_nt_patternsect_attributes_init( archi_nt_patternsect_attributes *attr )
+{
+  DEBUG_ASSERT( attr ) ;
+
+  attr->jvload = NULL ;
+}
+
 void archi_nt_regdef_attributes_init( archi_nt_regdef_attributes *attr )
 {
   DEBUG_ASSERT( attr ) ;
@@ -52,6 +59,22 @@ void archi_nt_matchdef_attributes_init( archi_nt_matchdef_attributes *attr )
   attr->ipattern = NULL ;
   attr->opattern = NULL ; 
   attr->refnode = NULL ;
+}
+
+void archi_nt_refnode_attributes_init( archi_nt_refnode_attributes *attr )
+{
+  DEBUG_ASSERT( attr ) ;
+
+  attr->id = NULL ;
+  attr->instr = NULL ;
+}
+
+void archi_nt_anodedef_attributes_init( archi_nt_anodedef_attributes *attr )
+{
+  DEBUG_ASSERT( attr ) ;
+
+  attr->id = NULL ;
+  attr->matches = NULL ;
 }
 
 void archi_nt_nodedef_attributes_init( archi_nt_nodedef_attributes *attr )

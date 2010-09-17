@@ -64,7 +64,7 @@ Match m3{
   Output = [gpr o1],
   IPattern = [
     sum = add0[JVAdd](i1, i2),
-    o1 = add1[JVAdd](i1, sum)
+    o1 = add1[JVLoad](sum,i1)
   ],
   RefNode = add1,
   OPattern = [
@@ -73,6 +73,6 @@ Match m3{
   ]
 } ;
 
-AbstractNode Load{
-  Matches = [m3,m4,m5,m6]
+AbstractNode JVLoa{
+  Matches = [m3]
 } ;

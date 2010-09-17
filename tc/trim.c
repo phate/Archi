@@ -305,6 +305,31 @@ static void archi_matchdef_trim( archi_ast_node *n )
   }
 }
 
+static void archi_anodedef_trim( archi_ast_node *n )
+{
+  DEBUG_ASSERT( n && n->node_type == NT_ANODEDEF ) ;
+
+  bool free_node ;
+  archi_ast_node *c = n->first_child ;
+  while( c != NULL ){
+    free_node = false ;
+    switch( c->node_type ){
+      case NT_MATCHES:{
+        archi_attribute_node_assign( n, &n->attr.nt_anodedef.matches, c, "matches" ) ;
+        break ;}
+      case NT_ID:{
+        n->attr.nt_anodedef.id = talloc_strdup( n, c->attr.nt_id.id ) ;
+        free_node = true ;
+        break ;}
+      default: DEBUG_ASSERT(0) ;
+    }
+
+    archi_ast_node *nc = c->next_sibling ;
+    if( free_node ) TALLOC_FREE( c ) ;
+    c = nc ;
+  }
+}
+
 static void archi_patternsect_trim( archi_ast_node *n )
 {
   DEBUG_ASSERT( n && n->node_type == NT_PATTERNSECT ) ;
@@ -312,6 +337,11 @@ static void archi_patternsect_trim( archi_ast_node *n )
   archi_ast_node *c ;
   FOREACH_CHILD(n, c){
     if( c->node_type == NT_MATCHDEF ) archi_matchdef_trim( c ) ;
+    else if( c->node_type == NT_ANODEDEF ){
+      archi_anodedef_trim( c ) ;
+      if( !strcmp( c->attr.nt_anodedef.id, "JVLoad" ) )
+        n->attr.nt_patternsect.jvload = c ;
+    }
     else DEBUG_ASSERT(0) ;
   }
 }

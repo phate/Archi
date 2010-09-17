@@ -63,6 +63,7 @@ Sections			: RegSect T_SEP
                                                   rs->attr.nt_regsect.nregcls = -1 ; 
                                                   is = archi_ast_node_create( ast, NT_INSTRSECT, NULL, linenr ) ;
 																								  ps = archi_ast_node_create( ast, NT_PATTERNSECT, NULL, linenr ) ;
+                                                  archi_nt_patternsect_attributes_init( &(ps->attr.nt_patternsect) ) ;
                                                     //au = create_node( AUXSECT, NULL, NULL, linenr ) ;
 																									archi_children_add( rs, $1 ) ;
 																									archi_children_add( is, $3 ) ;
@@ -89,7 +90,7 @@ ANodeDef      : ANodeDefIdent ',' ANodeDef      { archi_ast_node_next_sibling_se
               | ANodeDefIdent                   { $$ = $1 ; }
               ;
 ANodeDefIdent : Id '{' ANodeBody '}'            { $$ = archi_ast_node_create( ast, NT_ANODEDEF, "ANode", $1->linenr) ;
-                                                  //$$->attr.nt_anodedef.matches = NULL ;
+                                                  archi_nt_anodedef_attributes_init( &($$->attr.nt_anodedef) ) ;
                                                   archi_ast_node_next_sibling_set( $1, $3 ) ;
                                                   archi_children_add( $$, $1 ) ; }
               ;
@@ -121,6 +122,7 @@ MatchProp     : T_INPUT '=' '[' ETIdList ']'    { $$ = archi_ast_node_create( as
               | T_OPATTERN '=' '[' NodeList ']' { $$ = archi_ast_node_create( ast, NT_OPATTERN, NULL, linenr ) ;
                                                   archi_children_add( $$, $4 ) ; }
               | T_REFNODE '=' Id                { $$ = archi_ast_node_create( ast, NT_REFNODE, NULL, $3->linenr ) ;
+                                                  archi_nt_refnode_attributes_init( &($$->attr.nt_refnode) ) ;
                                                   archi_children_add( $$, $3) ; }
               ;
 NodeList      : NodeDef ',' NodeList            { archi_ast_node_next_sibling_set( $1, $3 ) ; $$ = $1 ; }

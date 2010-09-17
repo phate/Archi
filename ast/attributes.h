@@ -9,6 +9,12 @@ struct archi_ast_node_ ;
   X( NT_OVERWRITEINPUTFLAG, write_input, 1 ) \
   X( NT_COMMUTATIVEFLAG, commutative, 2 )
 
+typedef struct archi_nt_patternsect_attributes_{
+  struct archi_ast_node_ *jvload ;
+} archi_nt_patternsect_attributes ;
+
+void archi_nt_patternsect_attributes_init( archi_nt_patternsect_attributes *attr ) ;
+
 typedef struct archi_nt_regdef_attributes_{
   int32_t code ;
   struct archi_ast_node_ *regcl ;
@@ -70,12 +76,18 @@ typedef struct archi_nt_jvinstrdef_attributes_{
 } archi_nt_jvinstrdef_attributes ;
 
 typedef struct archi_nt_anodedef_attributes_{
+  const char *id ;
   struct archi_ast_node_ *matches ;
 } archi_nt_anodedef_attributes ;
 
+void archi_nt_anodedef_attributes_init( archi_nt_anodedef_attributes *attr ) ;
+
 typedef struct archi_nt_refnode_attributes_{
   const char* id ;
+  struct archi_ast_node_ *instr ;
 } archi_nt_refnode_attributes ;
+
+void archi_nt_refnode_attributes_init( archi_nt_refnode_attributes *attr ) ;
 
 typedef struct archi_nt_input_attributes_{
   int32_t nchildren ;
@@ -156,6 +168,7 @@ typedef struct archi_nt_encoding_attributes_{
 
 typedef union node_attributes_{
   archi_nt_archdef_attributes nt_archdef ;
+  archi_nt_patternsect_attributes nt_patternsect ;
   archi_nt_regdef_attributes nt_regdef ;
   archi_nt_regcldef_attributes nt_regcldef ;
   archi_nt_instrdef_attributes nt_instrdef ;
