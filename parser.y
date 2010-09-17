@@ -45,6 +45,7 @@ archi_ast_node* archi_expression_create( archi_ast_nodetype ntype, archi_ast_nod
 %token T_REGCLDEF T_BITS T_REGS
 %token T_INSTRDEF T_INPUT T_OUTPUT T_ENCODING T_FLAGS
 %token T_MATCHDEF T_IPATTERN T_OPATTERN T_REFNODE
+%token T_ANODEDEF T_MATCHES
 %token T_COMMUTATIVE T_OVERWRITEINPUT
 %token T_ID T_NUM T_TRUE T_FALSE T_BSTR T_STR
 %token T_DTINT T_DTBOOL T_DTBSTR T_DTSTR
@@ -82,6 +83,21 @@ MatchSect     : MatchSectDef ';' MatchSect      { archi_ast_node *s ;
               | MatchSectDef ';'                { $$ = $1 ; }
               ;
 MatchSectDef  : T_MATCHDEF MatchDef             { $$ = $2 ; }
+              | T_ANODEDEF ANodeDef              { $$ = $2 ; }
+              ;
+ANodeDef      : ANodeDefIdent ',' ANodeDef      { archi_ast_node_next_sibling_set( $1, $3 ) ; $$ = $1 ; }
+              | ANodeDefIdent                   { $$ = $1 ; }
+              ;
+ANodeDefIdent : Id '{' ANodeBody '}'            { $$ = archi_ast_node_create( ast, NT_ANODEDEF, "ANode", $1->linenr) ;
+                                                  //$$->attr.nt_anodedef.matches = NULL ;
+                                                  archi_ast_node_next_sibling_set( $1, $3 ) ;
+                                                  archi_children_add( $$, $1 ) ; }
+              ;
+ANodeBody     : ANodeProp ',' ANodeBody         { archi_ast_node_next_sibling_set( $1, $3 ) ; $$ = $1 ; }
+              | ANodeProp                       { $$ = $1 ; }
+              ;
+ANodeProp     : T_MATCHES '=' '[' IdList ']'    { $$ = archi_ast_node_create( ast, NT_MATCHES, NULL, linenr ) ;
+                                                  archi_children_add( $$, $4 ) ; }
               ;
 MatchDef      : MatchDefIdent ',' MatchDef      { archi_ast_node_next_sibling_set( $1, $3 ) ; $$ = $1 ; }
               | MatchDefIdent                   { $$ = $1 ; }

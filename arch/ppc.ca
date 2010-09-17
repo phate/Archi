@@ -72,3 +72,7 @@ Match m3{
     #o1 = add1[addi](i1, sum)
   ]
 } ;
+
+AbstractNode Load{
+  Matches = [m3,m4,m5,m6]
+} ;

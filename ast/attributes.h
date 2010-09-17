@@ -69,6 +69,10 @@ typedef struct archi_nt_jvinstrdef_attributes_{
   int32_t noutputs ;
 } archi_nt_jvinstrdef_attributes ;
 
+typedef struct archi_nt_anodedef_attributes_{
+  struct archi_ast_node_ *matches ;
+} archi_nt_anodedef_attributes ;
+
 typedef struct archi_nt_refnode_attributes_{
   const char* id ;
 } archi_nt_refnode_attributes ;
@@ -157,6 +161,7 @@ typedef union node_attributes_{
   archi_nt_instrdef_attributes nt_instrdef ;
   archi_nt_jvinstrdef_attributes nt_jvinstrdef ;
   archi_nt_matchdef_attributes nt_matchdef ;
+  archi_nt_anodedef_attributes nt_anodedef ;
   archi_nt_refnode_attributes nt_refnode ;
   archi_nt_nodedef_attributes nt_nodedef ;
   archi_nt_bits_attributes nt_bits ;
