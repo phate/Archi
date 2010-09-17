@@ -98,9 +98,9 @@ static void archi_opattern_typecheck( archi_symtab *st, archi_ast_node *n )
         
           archi_ast_node *p = archi_ast_node_parent_get( ll, 1 ) ;
           archi_ast_node *pp = archi_ast_node_parent_get( ll, 2 ) ;
-
-          if( p != NULL && pp != NULL && (p->node_type != NT_INPUT || pp->node_type != NT_MATCHDEF) &&
-              (p->node_type != NT_OUTPUT || pp->node_type != NT_NODEDEF) ){
+          archi_ast_node *ppp = archi_ast_node_parent_get( ll, 3 ) ;
+          if( p != NULL && pp != NULL && ppp != NULL && ((p->node_type != NT_INPUT || pp->node_type != NT_MATCHDEF) &&
+              (p->node_type != NT_OUTPUT || pp->node_type != NT_NODEDEF || ppp->node_type != NT_OPATTERN)) ){
             archi_add_emsg( cc, "%s is not of the right type", cc->attr.nt_id.id ) ;
           }
           else{
@@ -124,7 +124,8 @@ static void archi_opattern_typecheck( archi_symtab *st, archi_ast_node *n )
           if( l != NULL ){
             archi_ast_node *p = archi_ast_node_parent_get( l, 1 ) ;
             archi_ast_node *pp = archi_ast_node_parent_get( l, 2 ) ;
-            if( p != NULL && pp != NULL && (p->node_type != NT_OUTPUT || pp->node_type != NT_MATCHDEF) )
+            archi_ast_node *ppp = archi_ast_node_parent_get( l, 3 ) ;
+            if( p != NULL && pp != NULL && ppp != NULL && (p->node_type != NT_OUTPUT || pp->node_type != NT_MATCHDEF) )
               archi_add_emsg( cc, "%s is not of the right type", cc->attr.nt_id.id ) ;
             else{
               archi_ast_node *ll = archi_symtab_lookup( st, cc->attr.nt_id.id ) ;
