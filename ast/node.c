@@ -219,6 +219,14 @@ void archi_ast_node_data_type_set( archi_ast_node *n, char* dtype )
   n->data_type = talloc_strdup( n, dtype ) ;
 }
 
+archi_ast_node* archi_ast_node_parent_get( archi_ast_node* n, uint32_t i )
+{
+  if( n == NULL ) return NULL ;
+  if( i == 0 ) return n ;
+
+  return archi_ast_node_parent_get( n->parent, --i ) ;
+} 
+
 #define X(a) #a,
 static const char* nodetype_name[] = { ARCHI_AST_NODETYPE } ;
 #undef X

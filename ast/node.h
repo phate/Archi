@@ -254,6 +254,8 @@ void archi_ast_node_dreplace( archi_ast_node *o, archi_ast_node *n ) ;
 
 void archi_ast_node_data_type_set( archi_ast_node *n, char *dtype ) ;
 
+archi_ast_node* archi_ast_node_parent_get( archi_ast_node *n, uint32_t i ) ; 
+
 void archi_view_ast( archi_ast_node *n ) ;
 
 #endif
