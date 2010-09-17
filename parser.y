@@ -44,7 +44,7 @@ archi_ast_node* archi_expression_create( archi_ast_nodetype ntype, archi_ast_nod
 %token T_REGDEF T_CODE 
 %token T_REGCLDEF T_BITS T_REGS
 %token T_INSTRDEF T_INPUT T_OUTPUT T_ENCODING T_FLAGS
-%token T_MATCHDEF T_IPATTERN T_OPATTERN
+%token T_MATCHDEF T_IPATTERN T_OPATTERN T_REFNODE
 %token T_COMMUTATIVE T_OVERWRITEINPUT
 %token T_ID T_NUM T_TRUE T_FALSE T_BSTR T_STR
 %token T_DTINT T_DTBOOL T_DTBSTR T_DTSTR
@@ -104,6 +104,8 @@ MatchProp     : T_INPUT '=' '[' ETIdList ']'    { $$ = archi_ast_node_create( as
                                                   archi_children_add( $$, $4 ) ; }
               | T_OPATTERN '=' '[' NodeList ']' { $$ = archi_ast_node_create( ast, NT_OPATTERN, NULL, linenr ) ;
                                                   archi_children_add( $$, $4 ) ; }
+              | T_REFNODE '=' Id                { $$ = archi_ast_node_create( ast, NT_REFNODE, NULL, $3->linenr ) ;
+                                                  archi_children_add( $$, $3) ; }
               ;
 NodeList      : NodeDef ',' NodeList            { archi_ast_node_next_sibling_set( $1, $3 ) ; $$ = $1 ; }
               | NodeDef                         { $$ = $1 ; }

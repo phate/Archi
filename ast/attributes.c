@@ -51,6 +51,7 @@ void archi_nt_matchdef_attributes_init( archi_nt_matchdef_attributes *attr )
   attr->output = NULL ;
   attr->ipattern = NULL ;
   attr->opattern = NULL ; 
+  attr->refnode = NULL ;
 }
 
 void archi_nt_nodedef_attributes_init( archi_nt_nodedef_attributes *attr )

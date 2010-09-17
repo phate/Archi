@@ -37,9 +37,9 @@ static void archi_ipattern_typecheck( archi_symtab *st, archi_ast_node *n )
 
           archi_ast_node *p = archi_ast_node_parent_get( l, 1 ) ;
           archi_ast_node *pp = archi_ast_node_parent_get( l, 2 ) ;
-
-          if( p != NULL && pp != NULL && (p->node_type != NT_INPUT || pp->node_type != NT_MATCHDEF) &&
-              (p->node_type != NT_OUTPUT || pp->node_type != NT_NODEDEF) ){
+          archi_ast_node *ppp = archi_ast_node_parent_get( l, 3 ) ;
+          if( p != NULL && pp != NULL && ppp != NULL && (p->node_type != NT_INPUT || pp->node_type != NT_MATCHDEF) &&
+              (p->node_type != NT_OUTPUT || pp->node_type != NT_NODEDEF || ppp->node_type != NT_IPATTERN) ){
             archi_add_emsg( cc, "%s is not of the right type", cc->attr.nt_id.id ) ;
           } 
         } 
@@ -146,6 +146,21 @@ static void archi_opattern_typecheck( archi_symtab *st, archi_ast_node *n )
   TALLOC_FREE( tl ) ;
 }
 
+static void archi_refnode_typecheck( archi_symtab *st, archi_ast_node *n )
+{
+  DEBUG_ASSERT( n->node_type == NT_REFNODE ) ;
+
+  archi_ast_node *l = archi_symtab_lookup( st, n->attr.nt_refnode.id ) ;
+  if( l == NULL ){
+    EMSG_MISSING_ID( n, n->attr.nt_refnode.id ) ;
+    return ;
+  }
+
+  l = archi_symtab_lookup( st, l->data_type ) ;
+  if( l->node_type != NT_JVINSTRDEF )
+    EMSG_TYPE_MISMATCH( n, l->data_type, "JVInstruction" ) ;
+}
+
 //FIXME: check whether input/outpt ids have been used
 static void archi_matchdef_typecheck( archi_symtab *st, archi_ast_node *n )
 {
@@ -176,6 +191,10 @@ static void archi_matchdef_typecheck( archi_symtab *st, archi_ast_node *n )
   if( n->attr.nt_matchdef.opattern != NULL )
     archi_opattern_typecheck( st, n->attr.nt_matchdef.opattern ) ;
   else EMSG_MISSING_ATTRIBUTE( n, "opattern" ) ;
+
+  if( n->attr.nt_matchdef.refnode != NULL )
+    archi_refnode_typecheck( st, n->attr.nt_matchdef.refnode ) ;
+  else EMSG_MISSING_ATTRIBUTE( n, "refnode" ) ; 
 }
 
 void archi_patternsect_typecheck( archi_symtab *st, archi_ast_node *n )

@@ -21,6 +21,7 @@
   X( NT_MATCHDEF ) \
   X( NT_OPATTERN ) \
   X( NT_IPATTERN ) \
+  X( NT_REFNODE ) \
   X( NT_NODEDEF ) \
   X( NT_JVINSTRDEF ) \
   X( NT_IFTHENELSE ) \

@@ -25,7 +25,7 @@ RegClass gpr { NBits = 32, Regs = [r3,r4,r5,r6,r7,r8,r9] } ;
 %%
 
 Instr addi{
-  Input = [gpr k, Int r],
+  Input = [gpr k, gpr r],
   Output = [gpr f],
   Encoding = '00' #24.bstr[0:5] ++ rt.code.bstr[0:5] ++ ra.code.bstr[0:5] ++ si.bstr[0:16],
   #Flags = [Commutative, OverwriteInput]
@@ -66,8 +66,9 @@ Match m3{
     sum = add0[JVAdd](i1, i2),
     o1 = add1[JVAdd](i1, sum)
   ],
+  RefNode = add1,
   OPattern = [
-    k = add01[addi](i1, i2),
-    o1 = add11[addi](i1, k)
+    sum0 = add00[addi](i1, i2)
+    #o1 = add1[addi](i1, sum)
   ]
 } ;

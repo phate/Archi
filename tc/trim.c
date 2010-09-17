@@ -287,6 +287,11 @@ static void archi_matchdef_trim( archi_ast_node *n )
         archi_ast_node *cc ;
         FOREACH_CHILD( c, cc ){ archi_nodedef_trim(cc) ;}
         break ;}
+      case NT_REFNODE:{
+        archi_attribute_node_assign( n, &n->attr.nt_matchdef.refnode, c, "refnode" ) ;
+        c->attr.nt_refnode.id = talloc_strdup( c, c->first_child->attr.nt_id.id ) ; 
+        TALLOC_FREE( c->first_child ) ;
+        break ;}
       case NT_ID:{
         n->attr.nt_matchdef.id = talloc_strdup( n, c->attr.nt_id.id ) ;
         free_node = true ;

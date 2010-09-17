@@ -34,6 +34,7 @@ whitespace [ \t]+
 "Match"           { return T_MATCHDEF; }
 "IPattern"        { return T_IPATTERN; }
 "OPattern"        { return T_OPATTERN; }
+"RefNode"         { return T_REFNODE; }
 "If"				      { return T_IF; }
 "Then"			      { return T_THEN; }
 "Else"			      { return T_ELSE; }
