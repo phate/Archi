@@ -39,4 +39,11 @@
   X( NT_ID ) \
   X( NT_TID ) \
 
+//Name, nInpute, nOutput, Jive Node Class
+#define JIVE_PREDEF_INSTR \
+  X( JVBitconstant, 0, 1, JIVE_REGCONSTANT ) \
+  X( JVAdd, 2, 1, JIVE_FIXEDADD ) \
+  X( JVLoad, 1, 1, JIVE_LOAD ) \
+  X( JVStore, 2, 0, JIVE_STORE )
+
 #endif

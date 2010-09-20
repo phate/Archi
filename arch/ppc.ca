@@ -27,7 +27,7 @@ RegClass gpr { NBits = 32, Regs = [r3,r4,r5,r6,r7,r8,r9] } ;
 Instr addi{
   Input = [gpr k, gpr r],
   Output = [gpr f],
-  Encoding = '00' #24.bstr[0:5] ++ rt.code.bstr[0:5] ++ ra.code.bstr[0:5] ++ si.bstr[0:16],
+  Encoding = k.code.bstr[0:8] ++ r.code.bstr[0:8] #24.bstr[0:5] ++ rt.code.bstr[0:5] ++ ra.code.bstr[0:5] #++ si.bstr[0:16],
   #Flags = [Commutative, OverwriteInput]
 } ;
 
@@ -64,7 +64,7 @@ Match m3{
   Output = [gpr o1],
   IPattern = [
     sum = add0[JVAdd](i1, i2),
-    o1 = add1[JVLoad](sum,i1)
+    o1 = add1[JVLoad](sum)
   ],
   RefNode = add1,
   OPattern = [
@@ -73,6 +73,6 @@ Match m3{
   ]
 } ;
 
-AbstractNode JVLoa{
+AbstractNode JVLoad{
   Matches = [m3]
 } ;

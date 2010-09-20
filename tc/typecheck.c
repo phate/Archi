@@ -53,15 +53,9 @@ archi_symtab_idlist* archi_variabledef_typecheck( archi_symtab *st, archi_ast_no
 static void archi_typecheck_init( archi_symtab *st, archi_ast_node *n )
 {
   DEBUG_ASSERT( st && n && n->node_type == NT_ARCHDEF ) ;
-
-  #define JIVE_PREDEF_INSTR \
-    X( JVBitconstant, 0, 1 ) \
-    X( JVAdd, 2, 1 ) \
-    X( JVLoad, 1, 1 ) \
-    X( JVStore, 2, 0 )
   
   archi_ast_node *tmp ;
-  #define X( jv_instr, ni, no ) \
+  #define X( jv_instr, ni, no, jvnodecl ) \
     tmp = archi_ast_node_create( n, NT_JVINSTRDEF, "Instruction", 0 ) ; \
     tmp->attr.nt_jvinstrdef.id = talloc_strdup( tmp, #jv_instr ) ; \
     tmp->attr.nt_jvinstrdef.ninputs = ni ; \
@@ -70,7 +64,6 @@ static void archi_typecheck_init( archi_symtab *st, archi_ast_node *n )
 
     JIVE_PREDEF_INSTR
   #undef X
-  #undef JIVE_PREDEF_INSTR
 }
 
 static void archi_node_insert( archi_symtab *st, const char *key, archi_ast_node *n )
